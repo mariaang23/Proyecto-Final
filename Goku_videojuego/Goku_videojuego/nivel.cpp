@@ -1,4 +1,7 @@
 #include "nivel.h"
+#include "obstaculo.h"
+#include "QRandomGenerator"
+#include <QDebug>
 
 // Recibe un puntero a la escena, la vista y el objeto padre
 nivel::nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent)
@@ -24,4 +27,19 @@ void nivel::cargarFondo(const QString &ruta)
         escena->addItem(_background); // Se agrega a la escena, para que sea visible
     }
 
+    //QList<QGraphicsPixmapItem*> listaNubes;
+    nube = QPixmap(":/images/nube.png");
+    QPixmap nubeEscalada = nube.scaled(500, 400, Qt::KeepAspectRatio, Qt::SmoothTransformation); // se escala la nube
+
+    for (int i = 0; i < 14; i++) {
+        int x = i * 400 + QRandomGenerator::global()->bounded(-60, 50); // Varía el espacio en x
+        int y = QRandomGenerator::global()->bounded(0, 71);             // Varía el espacio en y
+
+        if (x + nubeEscalada.width() <= 1536 * 3){  // Se agrega las nubes escaladas, siempre que no sobrepasen el ancho de la escena
+            QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
+            _nube->setPos(x, y);
+            escena->addItem(_nube);
+            //listaNubes.append(_nube);
+        }
+    }
 }

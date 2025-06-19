@@ -10,9 +10,10 @@ class camaraLogica : public QObject
     Q_OBJECT
 
 public:
-    camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent = nullptr);
+    camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent = nullptr);   
     void iniciarMovimiento();
     void detenerMovimiento();
+    //void setNubes(QList<QGraphicsPixmapItem*> nubes);
 
 private slots:
     void moverVista();
@@ -21,6 +22,7 @@ private:
     QGraphicsView *view;
     QTimer *timer;
     int velocidad;
+    //QList<QGraphicsPixmapItem*> nubes;
 };
 
 #endif // CAMARALOGICA_H

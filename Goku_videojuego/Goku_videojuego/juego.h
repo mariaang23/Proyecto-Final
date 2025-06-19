@@ -19,7 +19,6 @@ class juego : public QMainWindow
 public:
     explicit juego(QWidget *parent = nullptr);
     ~juego();
-
     void iniciarJuego();
     void cambiarNivel(int numero);
     void finalizarJuego();
