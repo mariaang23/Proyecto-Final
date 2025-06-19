@@ -13,6 +13,7 @@ class nivel : public QWidget
     Q_OBJECT
 
 private:
+    QPixmap nube;
     QPixmap background;
     QGraphicsView *vista;
     QGraphicsScene *escena;
@@ -21,9 +22,8 @@ private:
 public:
     explicit nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent = nullptr);
     virtual ~nivel();
+    void extracted();
     void cargarFondo(const QString &ruta);
-    //void generarNubes(int cantidad);
-    //void moverNubes();
 
 protected:
     QTimer *temporizador;

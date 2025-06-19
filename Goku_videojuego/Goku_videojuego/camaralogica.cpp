@@ -1,4 +1,5 @@
 #include "camaralogica.h"
+#include "qgraphicsitem.h"
 
 // Recibe un puntero a la vista (QGraphicsView), la velocidad del movimiento y el objeto padre
 camaraLogica::camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent)
@@ -20,6 +21,10 @@ void camaraLogica::detenerMovimiento()
     timer->stop();
 }
 
+/*void camaraLogica::setNubes(QList<QGraphicsPixmapItem*> nubes){
+    this -> nubes = nubes;
+}*/
+
 void camaraLogica::moverVista()
 {
     // Obtener rectangulo que representa vista actual
@@ -38,3 +43,4 @@ void camaraLogica::moverVista()
         view->setSceneRect(nuevaX, rect.y(), rect.width(), rect.height());
     }
 }
+

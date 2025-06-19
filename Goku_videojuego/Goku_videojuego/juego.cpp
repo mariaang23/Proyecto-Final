@@ -1,5 +1,6 @@
 #include "juego.h"
 #include "ui_juego.h"
+#include "obstaculo.h"
 
 juego::juego(QWidget *parent)
     : QMainWindow(parent)
@@ -38,8 +39,17 @@ void juego::iniciarJuego()
 
     nivel1 = new nivel(scene, view, this);
     nivel1 -> cargarFondo(":/images/background1.png");
-    view -> show(); 
 
+    obstaculo *ave = new obstaculo(scene, obstaculo::Ave, 5, this);
+    ave -> iniciar(2000, 150);
+
+    obstaculo *montania = new obstaculo(scene, obstaculo::Montania, 5, this);
+    montania -> iniciar(3500, 784/2);
+
+    obstaculo *roca = new obstaculo(scene, obstaculo::Roca, 5, this);
+    roca -> iniciar(1500, 784/2);
+
+    view -> show();
 }
 
 void juego::cambiarNivel(int numero)
