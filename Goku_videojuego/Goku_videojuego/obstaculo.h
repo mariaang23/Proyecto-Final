@@ -16,7 +16,7 @@ public:
     ~obstaculo();
 
     void cargarImagenes();
-    void iniciar(int x = -1, int y = -1);
+    virtual void iniciar(int x = -1, int y = -1);
 
 private slots:
     void mover();
@@ -25,8 +25,7 @@ private slots:
 private:
     QVector<QPixmap> frames;  // <- Para almacenar los fotogramas del sprite del ave
 
-    QGraphicsPixmapItem *sprite;
-    QGraphicsScene *scene;
+
     QTimer *timerMovimiento;
     QTimer *timerAnimacion;
     int frameActual;
@@ -36,6 +35,10 @@ private:
     int fotogWidth;
     int fotogHeight;
     Tipo tipo;
+
+protected:
+    QGraphicsPixmapItem *sprite;
+    QGraphicsScene *scene;
 
 };
 

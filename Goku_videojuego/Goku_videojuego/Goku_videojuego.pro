@@ -6,6 +6,7 @@ CONFIG += c++17
 
 SOURCES += \
     camaralogica.cpp \
+    carro.cpp \
     juego.cpp \
     main.cpp \
     nivel.cpp \
@@ -13,6 +14,7 @@ SOURCES += \
 
 HEADERS += \
     camaralogica.h \
+    carro.h \
     juego.h \
     nivel.h \
     obstaculo.h
