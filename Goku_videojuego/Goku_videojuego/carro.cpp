@@ -21,7 +21,6 @@ Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
 void Carro::iniciar(int x, int y)
 {
     sprite->setPos(x, y);
-    scene->addItem(sprite);
 }
 
 void Carro::rotar()

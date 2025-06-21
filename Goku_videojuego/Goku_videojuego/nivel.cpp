@@ -1,6 +1,5 @@
 #include "nivel.h"
 #include "carro.h"
-#include "obstaculo.h"
 #include "QRandomGenerator"
 #include <QDebug>
 
@@ -45,10 +44,54 @@ void nivel::cargarFondoNivel1(const QString &ruta)
     }
 }
 
+
+void nivel::agregarObstaculos()
+{
+    int xActual = 800;  // punto inicial desde donde empiezan a agregarse obstáculos
+    int anchoEscena = escena->width();
+    int contador = 0;
+    int velocidad = 12;
+
+    while (contador < 20) { // se agregan obstaculos hasta que Goku no choque con el carro
+        int tipo = QRandomGenerator::global()->bounded(0, 3); // 0 = Ave, 1 = Montania, 2 = Roca
+        obstaculo *obj = nullptr;
+
+        switch (tipo) {
+        case 0: // Ave
+        {
+            int y = QRandomGenerator::global()->bounded(0, 250);  // posicion aleatoria en y para el ave, segun limites
+            obj = new obstaculo(escena, obstaculo::Ave, velocidad, this);
+            obj->iniciar(xActual, y);
+            xActual += 300 + QRandomGenerator::global()->bounded(0, 100); // posicion x: distancia mínima 300 + distancia aleatoria (entre 0 y 100)
+            break;
+        }
+        case 1: // Montania
+        {
+            int y = QRandomGenerator::global()->bounded(250, 481);
+            obj = new obstaculo(escena, obstaculo::Montania, velocidad, this);
+            obj->iniciar(xActual, y);
+            xActual += 600 + QRandomGenerator::global()->bounded(0, 100); // distancia mínima 600
+            break;
+        }
+        case 2: // Roca
+        {
+            int y = QRandomGenerator::global()->bounded(350, 576);
+            obj = new obstaculo(escena, obstaculo::Roca, velocidad, this);
+            obj->iniciar(xActual, y);
+            xActual += 600 + QRandomGenerator::global()->bounded(0, 100); // distancia mínima 600
+            break;
+        }
+        }
+
+        ++contador;
+    }
+}
+
+
 void nivel::agregarCarroFinal()
 {
-    int x = 4000;  // justo antes del borde
-    int y = 300;   // abajo, pero sin salirse
+    int x = 4230;  // justo antes del borde
+    int y = 530;   // abajo, pero sin salirse
 
     carroFinal = new Carro(escena, 0, this);
     carroFinal->iniciar(x, y);

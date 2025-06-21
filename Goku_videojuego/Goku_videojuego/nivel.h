@@ -30,6 +30,7 @@ public:
     virtual ~nivel();
     void extracted();
     void cargarFondoNivel1(const QString &ruta);
+    void agregarObstaculos();
     void agregarCarroFinal();
 
 protected:

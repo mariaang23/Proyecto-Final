@@ -4,7 +4,7 @@
 #include <QRandomGenerator>
 
 obstaculo::obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *parent)
-    : QObject(parent), scene(scene), velocidad(velocidad), tipo(tipo)
+    : QObject(parent), velocidad(velocidad), tipo(tipo), scene(scene)
 {
     sprite = new QGraphicsPixmapItem();
     scene->addItem(sprite);
@@ -38,18 +38,28 @@ void obstaculo::iniciar(int x, int y)
 }
 
 
-void obstaculo::cargarImagenes(){
+void obstaculo::cargarImagenes() {
     if (tipo == Ave) {
-        fotogWidth = 150;
-        fotogHeight = 400;
+        fotogWidth = 90;
+        fotogHeight = 180;
 
         QPixmap spriteSheet(":/images/pajaro.png");
+
+        if (spriteSheet.isNull()) {
+            qWarning() << "No se pudo cargar pajaro.png";
+            return;
+        }
+
+        frames.clear();  // en caso de múltiples llamadas
 
         for (int i = 0; i < 4; ++i) {
             frames.append(spriteSheet.copy(i * fotogWidth, 0, fotogWidth, fotogHeight));
         }
-        sprite->setPixmap(frames[0]);
 
+        if (!frames.isEmpty()) {
+            sprite->setPixmap(frames[0]);
+            frameActual = 0;
+        }
     }
     else if (tipo == Montania) {
         sprite->setPixmap(QPixmap(":/images/montania.png"));
@@ -60,6 +70,7 @@ void obstaculo::cargarImagenes(){
 }
 
 
+
 obstaculo::~obstaculo(){
     scene -> removeItem(sprite);
     delete sprite;
@@ -67,7 +78,7 @@ obstaculo::~obstaculo(){
 }
 
 void obstaculo::mover(){
-    sprite -> moveBy(-30, 0); // velocidad -x
+    sprite -> moveBy(-velocidad, 0);
     if (sprite -> x() + sprite->pixmap().width() < 0){
         timerMovimiento -> stop();
         if (tipo == Ave){
@@ -78,6 +89,7 @@ void obstaculo::mover(){
 }
 
 void obstaculo::actualizar() {
+    if (frames.isEmpty()) return;
     frameActual = (frameActual + 1) % frames.size();
     sprite->setPixmap(frames[frameActual]);
 }
