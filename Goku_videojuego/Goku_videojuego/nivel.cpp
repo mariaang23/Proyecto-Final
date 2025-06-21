@@ -1,5 +1,6 @@
 #include "nivel.h"
 #include "carro.h"
+#include "goku.h"
 #include "QRandomGenerator"
 #include <QDebug>
 
@@ -7,7 +8,7 @@
 nivel::nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent)
     : QWidget(parent), vista(view), escena(escena)
 {
-    int velocidad = 5;  // velocidad desplazamiento camara
+    int velocidad = 6;  // velocidad desplazamiento camara
     camara = new camaraLogica(vista, velocidad, this); // this: nivel padre de la cámara
     camara->iniciarMovimiento();
 }
@@ -87,6 +88,11 @@ void nivel::agregarObstaculos()
     }
 }
 
+void nivel::agregarGoku(){
+    Goku *goku = nullptr;
+    goku = new Goku(escena, 6, 250, 308, this);
+    goku -> iniciar(0, 476);
+}
 
 void nivel::agregarCarroFinal()
 {

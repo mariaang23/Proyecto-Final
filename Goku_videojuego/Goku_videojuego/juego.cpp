@@ -1,6 +1,5 @@
 #include "juego.h"
 #include "ui_juego.h"
-#include "obstaculo.h"
 
 juego::juego(QWidget *parent)
     : QMainWindow(parent)
@@ -48,6 +47,7 @@ void juego::cambiarNivel(int numero)
         nivel1 -> cargarFondoNivel1(":/images/background1.png");
 
         nivel1->agregarObstaculos();
+        nivel1 -> agregarGoku();
 
         nivel1->agregarCarroFinal();
 

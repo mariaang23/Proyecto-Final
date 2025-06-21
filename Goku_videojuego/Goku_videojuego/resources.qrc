@@ -6,6 +6,7 @@
         <file>roca.png</file>
         <file>montania.png</file>
         <file>carro_rojo.png</file>
+        <file>GokuSpriter.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>
