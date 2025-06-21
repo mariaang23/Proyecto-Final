@@ -1,4 +1,5 @@
 #include "nivel.h"
+#include "carro.h"
 #include "obstaculo.h"
 #include "QRandomGenerator"
 #include <QDebug>
@@ -17,7 +18,7 @@ nivel::~nivel()
     delete escena;
 }
 
-void nivel::cargarFondo(const QString &ruta)
+void nivel::cargarFondoNivel1(const QString &ruta)
 {
     background = QPixmap(ruta);
     // Agregar la misma imagen 3 veces, colocandola una al lado de la otra
@@ -43,3 +44,14 @@ void nivel::cargarFondo(const QString &ruta)
         }
     }
 }
+
+void nivel::agregarCarroFinal()
+{
+    int x = 4000;  // justo antes del borde
+    int y = 300;   // abajo, pero sin salirse
+
+    carroFinal = new Carro(escena, 0, this);
+    carroFinal->iniciar(x, y);
+    carroFinal->rotar();
+}
+
