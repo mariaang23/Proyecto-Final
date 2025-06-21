@@ -47,14 +47,7 @@ void juego::cambiarNivel(int numero)
         nivel1 = new nivel(scene, view, this);
         nivel1 -> cargarFondoNivel1(":/images/background1.png");
 
-        obstaculo *ave = new obstaculo(scene, obstaculo::Ave, 5, this);
-        ave -> iniciar(2000, 150);
-
-        obstaculo *montania = new obstaculo(scene, obstaculo::Montania, 5, this);
-        montania -> iniciar(3500, 784/2);
-
-        obstaculo *roca = new obstaculo(scene, obstaculo::Roca, 5, this);
-        roca -> iniciar(1500, 784/2);
+        nivel1->agregarObstaculos();
 
         nivel1->agregarCarroFinal();
 
