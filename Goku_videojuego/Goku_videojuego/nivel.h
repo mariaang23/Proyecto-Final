@@ -31,6 +31,7 @@ public:
     void extracted();
     void cargarFondoNivel1(const QString &ruta);
     void agregarObstaculos();
+    void agregarGoku();
     void agregarCarroFinal();
 
 protected:

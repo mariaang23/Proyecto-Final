@@ -23,8 +23,7 @@ private slots:
     void actualizar();
 
 private:
-    QVector<QPixmap> frames;  // <- Para almacenar los fotogramas del sprite del ave
-
+    QVector<QPixmap> frames;  // Para almacenar los fotogramas del sprite del ave
 
     QTimer *timerMovimiento;
     QTimer *timerAnimacion;
