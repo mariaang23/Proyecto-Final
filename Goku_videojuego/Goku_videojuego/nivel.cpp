@@ -11,11 +11,15 @@ nivel::nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent)
     int velocidad = 6;  // velocidad desplazamiento camara
     camara = new camaraLogica(vista, velocidad, this); // this: nivel padre de la cámara
     camara->iniciarMovimiento();
+    //camara->seguirAGoku(goku);
 }
 
 nivel::~nivel()
 {
-    delete escena;
+    delete camara;
+    if (carroFinal) {
+        delete carroFinal;
+    }
 }
 
 void nivel::cargarFondoNivel1(const QString &ruta)
@@ -100,16 +104,18 @@ void nivel::agregarObstaculos()
     }
 }
 
-void nivel::agregarGoku(){
-    Goku *goku = nullptr;
-    goku = new Goku(escena, 6, 250, 308, this);
-    goku -> iniciar(0, 476);
+void nivel::agregarGokuNivel1(){
+    // Calcular la posición central en y
+    int posY = 784 / 2; //Alto de escena/2
+
+    goku = new Goku(escena, 6, 250, 308, 1, this);
+    goku -> iniciar(0, posY);
 }
 
 void nivel::agregarCarroFinal()
 {
-    int x = 4230;  // justo antes del borde
-    int y = 530;   // abajo, pero sin salirse
+    int x = 3600;  // justo antes del borde
+    int y = 430;   // abajo, pero sin salirse
 
     carroFinal = new Carro(escena, 0, this);
     carroFinal->iniciar(x, y);

@@ -44,3 +44,10 @@ void camaraLogica::moverVista()
     }
 }
 
+void camaraLogica::seguirAGoku(Goku* goku)
+{
+    connect(timer, &QTimer::timeout, this, [=]() {
+        int xCentro = goku->x() - view->width() / 3;
+        view->centerOn(xCentro, view->scene()->height() / 2);
+    });
+}

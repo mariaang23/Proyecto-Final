@@ -88,6 +88,8 @@ obstaculo::~obstaculo(){
     scene -> removeItem(sprite);
     delete sprite;
     sprite = nullptr;
+    delete timerMovimiento;
+    delete timerAnimacion;
 }
 
 void obstaculo::mover(){

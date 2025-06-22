@@ -4,6 +4,7 @@
 juego::juego(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::juego)
+    , view(nullptr)
     , nivel1(nullptr)
     , nivel2(nullptr)
     , nivelActual(nullptr)
@@ -14,7 +15,10 @@ juego::juego(QWidget *parent)
 
 juego::~juego()
 {
-    //finalizarJuego();
+    delete nivel1;
+    delete nivel2;
+    delete view;
+    delete scene;
     delete ui;
 }
 
@@ -27,6 +31,7 @@ void juego::iniciarJuego()
 void juego::cambiarNivel(int numero)
 {
     if (numero == 1) {
+
         int sceneWidth =  1536 * 3; // Ancho escena
         int sceneHeight = 784;      // Alto escena
 
@@ -43,11 +48,13 @@ void juego::cambiarNivel(int numero)
         view -> setSceneRect(0, 0, widthView, heightView);
         view -> setFixedSize(widthView, heightView);
 
+        view->activateWindow();
+
         nivel1 = new nivel(scene, view, this);
         nivel1 -> cargarFondoNivel1(":/images/background1.png");
 
         nivel1->agregarObstaculos();
-        nivel1 -> agregarGoku();
+        nivel1 -> agregarGokuNivel1();
 
         nivel1->agregarCarroFinal();
 
@@ -60,11 +67,3 @@ void juego::cambiarNivel(int numero)
 }
 
 
-void juego::finalizarJuego()
-{
-    delete nivel1;
-    delete nivel2;
-    nivel1 = nullptr;
-    nivel2 = nullptr;
-    nivelActual = nullptr;
-}
