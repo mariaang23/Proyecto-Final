@@ -62,10 +62,23 @@ void obstaculo::cargarImagenes() {
         }
     }
     else if (tipo == Montania) {
-        sprite->setPixmap(QPixmap(":/images/montania.png"));
+        QPixmap montanaPixmap = QPixmap(":/images/montania.png");
+
+        // Escalar la montaña verticalmente (altura aleatoria entre 150 y 300)
+        int alturaMontana = 150 + QRandomGenerator::global()->bounded(0, 300);
+        QPixmap montanaEscalada = montanaPixmap.scaledToHeight(alturaMontana, Qt::SmoothTransformation);
+
+        sprite->setPixmap(montanaEscalada);
     }
     else if (tipo == Roca) {
-        sprite->setPixmap(QPixmap(":/images/roca.png"));
+        // Cargar la imagen de la roca
+        QPixmap rocaPixmap = QPixmap(":/images/roca.png");
+
+        // Escalar la roca verticalmente (altura aleatoria entre 50 y 150)
+        int alturaRoca = 80 + QRandomGenerator::global()->bounded(0, 200);
+        QPixmap rocaEscalada = rocaPixmap.scaledToHeight(alturaRoca, Qt::SmoothTransformation);
+
+        sprite->setPixmap(rocaEscalada);
     }
 }
 
@@ -94,4 +107,8 @@ void obstaculo::actualizar() {
     sprite->setPixmap(frames[frameActual]);
 }
 
+int obstaculo::getAltura() const
+{
+    return sprite->pixmap().height();
+}
 

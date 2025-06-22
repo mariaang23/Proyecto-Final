@@ -17,6 +17,7 @@ public:
 
     void cargarImagenes();
     virtual void iniciar(int x = -1, int y = -1);
+    int getAltura() const;
 
 private slots:
     void mover();
