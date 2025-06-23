@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QGraphicsView>
 #include <QTimer>
+#include "goku.h"
 
 class camaraLogica : public QObject
 {
@@ -13,6 +14,8 @@ public:
     camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent = nullptr);   
     void iniciarMovimiento();
     void detenerMovimiento();
+    void seguirAGoku(Goku* goku);
+
     //void setNubes(QList<QGraphicsPixmapItem*> nubes);
 
 private slots:

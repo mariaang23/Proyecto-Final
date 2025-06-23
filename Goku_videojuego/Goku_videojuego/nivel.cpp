@@ -11,11 +11,15 @@ nivel::nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent)
     int velocidad = 6;  // velocidad desplazamiento camara
     camara = new camaraLogica(vista, velocidad, this); // this: nivel padre de la cámara
     camara->iniciarMovimiento();
+    //camara->seguirAGoku(goku);
 }
 
 nivel::~nivel()
 {
-    delete escena;
+    delete camara;
+    if (carroFinal) {
+        delete carroFinal;
+    }
 }
 
 void nivel::cargarFondoNivel1(const QString &ruta)
@@ -30,17 +34,26 @@ void nivel::cargarFondoNivel1(const QString &ruta)
 
     //QList<QGraphicsPixmapItem*> listaNubes;
     nube = QPixmap(":/images/nube.png");
-    QPixmap nubeEscalada = nube.scaled(500, 400, Qt::KeepAspectRatio, Qt::SmoothTransformation); // se escala la nube
 
-    for (int i = 0; i < 14; i++) {
-        int x = i * 400 + QRandomGenerator::global()->bounded(-60, 50); // Varía el espacio en x
-        int y = QRandomGenerator::global()->bounded(0, 71);             // Varía el espacio en y
+    for (int i = 0; i < 20; i++) {
+        // Generar un tamaño aleatorio para cada nube
+        for (int j = 3; j > 0; --j) {
+            float escala = j*0.05;
+            int ancho = nube.width() * escala;
+            int alto = nube.height() * escala;
 
-        if (x + nubeEscalada.width() <= 1536 * 3){  // Se agrega las nubes escaladas, siempre que no sobrepasen el ancho de la escena
-            QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
-            _nube->setPos(x, y);
-            escena->addItem(_nube);
-            //listaNubes.append(_nube);
+            // Escalar la nube
+            QPixmap nubeEscalada = nube.scaled(ancho, alto, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+            int x = i * 250 + QRandomGenerator::global()->bounded(-60, 50); // Varía el espacio en x
+            int y = QRandomGenerator::global()->bounded(0, 71);             // Varía el espacio en y
+
+            if (x + nubeEscalada.width() <= 1536 * 3){  // Se agrega las nubes escaladas, siempre que no sobrepasen el ancho de la escena
+                QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
+                _nube->setPos(x, y);
+                escena->addItem(_nube);
+                //listaNubes.append(_nube);
+            }
         }
     }
 }
@@ -53,7 +66,7 @@ void nivel::agregarObstaculos()
     int contador = 0;
     int velocidad = 12;
 
-    while (contador < 20) { // se agregan obstaculos hasta que Goku no choque con el carro
+    while (contador < 18) { // se agregan obstaculos hasta que Goku no choque con el carro
         int tipo = QRandomGenerator::global()->bounded(0, 3); // 0 = Ave, 1 = Montania, 2 = Roca
         obstaculo *obj = nullptr;
 
@@ -68,10 +81,13 @@ void nivel::agregarObstaculos()
         }
         case 1: // Montania
         {
-            int y = QRandomGenerator::global()->bounded(250, 481);
             obj = new obstaculo(escena, obstaculo::Montania, velocidad, this);
+
+            // Posicionar la montaña en el suelo segun la altura de la escena
+            int y = escena->height() - obj->getAltura();
+
             obj->iniciar(xActual, y);
-            xActual += 600 + QRandomGenerator::global()->bounded(0, 100); // distancia mínima 600
+            xActual += 600 + QRandomGenerator::global()->bounded(0, 150);
             break;
         }
         case 2: // Roca
@@ -88,19 +104,21 @@ void nivel::agregarObstaculos()
     }
 }
 
-void nivel::agregarGoku(){
-    Goku *goku = nullptr;
-    goku = new Goku(escena, 6, 250, 308, this);
-    goku -> iniciar(0, 476);
+void nivel::agregarGokuNivel1(){
+    // Calcular la posición central en y
+    int posY = 784 / 2; //Alto de escena/2
+
+    goku = new Goku(escena, 6, 250, 308, 1, this);
+    goku -> iniciar(0, posY);
 }
 
 void nivel::agregarCarroFinal()
 {
-    int x = 4230;  // justo antes del borde
-    int y = 530;   // abajo, pero sin salirse
+    int x = 3600;  // justo antes del borde
+    int y = 430;   // abajo, pero sin salirse
 
     carroFinal = new Carro(escena, 0, this);
     carroFinal->iniciar(x, y);
-    carroFinal->rotar();
+    //carroFinal->rotar();
 }
 

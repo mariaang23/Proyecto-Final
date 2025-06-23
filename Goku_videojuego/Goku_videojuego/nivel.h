@@ -8,6 +8,7 @@
 #include <QGraphicsScene>
 #include "camaralogica.h"
 #include "carro.h"
+#include "goku.h"
 
 class nivel : public QWidget
 {
@@ -21,7 +22,7 @@ private:
     camaraLogica *camara;
     Carro* carroFinal;
     QTimer* timerColision;
-    QGraphicsPixmapItem* goku;
+    Goku* goku;
 
 
 
@@ -31,7 +32,7 @@ public:
     void extracted();
     void cargarFondoNivel1(const QString &ruta);
     void agregarObstaculos();
-    void agregarGoku();
+    void agregarGokuNivel1();
     void agregarCarroFinal();
 
 protected:

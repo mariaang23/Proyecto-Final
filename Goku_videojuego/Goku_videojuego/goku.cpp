@@ -2,19 +2,24 @@
 #include "qgraphicsitem.h"
 #include "qgraphicsscene.h"
 #include "qtimer.h"
+#include <QKeyEvent>
+#include <QMessageBox>
 
-Goku::Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHeight, QObject *parent)
-    : QObject(parent), scene(scene), velocidad(_velocidad), fotogWidth(_fotogWidth), fotogHeight(_fotogHeight)
+Goku::Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHeight, int _nivel, QObject *parent)
+    : QObject(parent), QGraphicsPixmapItem(), scene(scene), velocidad(_velocidad), fotogWidth(_fotogWidth), fotogHeight(_fotogHeight), nivel(_nivel), mvtoArriba(false), mvtoAbajo(false), frameActual(0)
 {
-    sprite = new QGraphicsPixmapItem();
-    scene->addItem(sprite);
+    scene->addItem(this);
     cargarImagen();
+
+    // Asegurar que el sprite pueda recibir eventos de teclado
+    setFlag(QGraphicsItem::ItemIsFocusable);
+    setFocus();
 
     timerMovimiento = new QTimer(this); // Timer para Goku
     connect(timerMovimiento, &QTimer::timeout, this, &Goku::mover);
 }
 
-void Goku::cargarImagen(){
+void Goku::cargarImagen() {
     QPixmap spriteSheet(":/images/GokuSpriter.png");
 
     if (spriteSheet.isNull()) {
@@ -22,27 +27,58 @@ void Goku::cargarImagen(){
         return;
     }
 
-    frames.clear();  // en caso de múltiples llamadas
-
+    frames.clear();
     for (int i = 0; i < 4; ++i) {
         frames.append(spriteSheet.copy(i * fotogWidth, 0, fotogWidth, fotogHeight));
     }
 
     if (!frames.isEmpty()) {
-        sprite->setPixmap(frames[0]); // aca se puede cambiar el spriter de Goku (de 0 a 3)
-        frameActual = 0;
-    }
-
-}
-
-void Goku::iniciar(int x, int y){
-    sprite ->setPos(x, y);
-    timerMovimiento->start(60);
-}
-
-void Goku::mover(){
-    sprite -> moveBy(velocidad, 0);
-    if (sprite -> x() + sprite->pixmap().width() < 0){
-        timerMovimiento -> stop();
+        setPixmap(frames[0]);
     }
 }
+
+void Goku::iniciar(int x, int y) {
+    setPos(x, y);
+    timerMovimiento->start(50);
+}
+
+void Goku::mover() {
+    if (nivel == 1) {
+        int movimientoVertical = 0;
+        if (mvtoArriba) {
+            movimientoVertical = -velocidad;
+        } else if (mvtoAbajo) {
+            movimientoVertical = velocidad;
+        }
+
+        moveBy(velocidad, movimientoVertical);
+
+        QRectF sceneRect = scene->sceneRect();
+        QPointF pos = this->pos();
+        pos.setY(qBound(sceneRect.top(), pos.y(), sceneRect.bottom() - pixmap().height()));
+
+        setPos(pos);
+
+        if (x() + pixmap().width() < 0) {
+            timerMovimiento->stop();
+        }
+    } else if (nivel == 2) {
+        // implementar
+    }
+}
+
+void Goku::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_W)
+        mvtoArriba = true;
+    else if (event->key() == Qt::Key_S)
+        mvtoAbajo = true;
+}
+
+void Goku::keyReleaseEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_W)
+        mvtoArriba = false;
+    else if (event->key() == Qt::Key_S)
+        mvtoAbajo = false;
+}
+
+

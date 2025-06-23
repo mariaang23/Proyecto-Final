@@ -21,7 +21,6 @@ public:
     ~juego();
     void iniciarJuego();
     void cambiarNivel(int numero);
-    void finalizarJuego();
 
 private:
     Ui::juego *ui;
