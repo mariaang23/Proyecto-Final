@@ -1,6 +1,8 @@
 #include "juego.h"
 #include "ui_juego.h"
+#include <QDebug>
 
+// Constructor de la ventana principal del juego
 juego::juego(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::juego)
@@ -9,61 +11,71 @@ juego::juego(QWidget *parent)
     , nivel2(nullptr)
     , nivelActual(nullptr)
 {
-    ui->setupUi(this);
-    iniciarJuego();
+    ui->setupUi(this); // Inicializa interfaz gráfica
+    iniciarJuego();    // Inicia juego automáticamente
 }
 
+// Destructor: libera todos los recursos
 juego::~juego()
 {
-    delete nivel1;
-    delete nivel2;
-    delete view;
+    delete nivel1; // Elimina nivel 1 si existe
+    delete nivel2; // Elimina nivel 2 si existe
+    delete view;   // Esto también destruye scene
     delete scene;
     delete ui;
 }
 
+// Inicia el juego en el nivel 1
 void juego::iniciarJuego()
 {
     cambiarNivel(1);
-
 }
 
+// Cambia entre niveles, manejando la memoria adecuadamente
 void juego::cambiarNivel(int numero)
 {
-    if (numero == 1) {
-
-        int sceneWidth =  1536 * 3; // Ancho escena
-        int sceneHeight = 784;      // Alto escena
-
-        scene = new QGraphicsScene();
-        scene -> setSceneRect(0,0,sceneWidth, sceneHeight);
-
-        // Crear la vista que mostrará la escena
-        view = new QGraphicsView(scene);
-        view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Ocultar barra de navegación vertical
-        view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Ocultar barras de navegación horizontal
-
-        int widthView = sceneWidth / 3; // Ancho vista
-        int heightView = sceneHeight;   // Alto vista
-        view -> setSceneRect(0, 0, widthView, heightView);
-        view -> setFixedSize(widthView, heightView);
-
-        view->activateWindow();
-
-        nivel1 = new nivel(scene, view, this);
-        nivel1 -> cargarFondoNivel1(":/images/background1.png");
-
-        nivel1->agregarObstaculos();
-        nivel1 -> agregarGokuNivel1();
-
-        nivel1->agregarCarroFinal();
-
-        view -> show();
-
-        nivelActual = nivel1;
+    if (nivelActual != nullptr) {
+        delete nivelActual; // Elimina nivel actual
+        nivelActual = nullptr;
     }
 
-    // Nivel 2
+    if (view != nullptr) {
+        delete view; // Esto destruye view y su scene
+        view = nullptr;
+    }
+
+    scene = nullptr; // ya no hay scene activa
+
+    // Crear nuevo nivel
+    if (numero == 1) {
+        int sceneWidth = 1536 * 3;
+        int sceneHeight = 784;
+
+        scene = new QGraphicsScene();
+        scene->setSceneRect(0, 0, sceneWidth, sceneHeight);
+
+        view = new QGraphicsView(scene);
+        view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+        int widthView = sceneWidth / 3;
+        int heightView = sceneHeight;
+
+        view->setSceneRect(0, 0, widthView, heightView);
+        view->setFixedSize(widthView, heightView);
+        view->activateWindow();
+
+        // Crear nivel1 y configurarlo
+        nivel1 = new nivel(scene, view, this);
+        nivelActual = nivel1;
+
+        nivel1->cargarFondoNivel1(":/images/background1.png");
+        nivel1->agregarObstaculos();
+        nivel1->agregarGokuNivel1();
+        nivel1->agregarCarroFinal();
+
+        view->show();
+    } else {
+        // Nivel 2
+    }
 }
-
-

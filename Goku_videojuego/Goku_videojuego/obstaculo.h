@@ -18,6 +18,8 @@ public:
     void cargarImagenes();
     virtual void iniciar(int x = -1, int y = -1);
     int getAltura() const;
+    QGraphicsPixmapItem* getSprite() const { return sprite; }
+
 
 private slots:
     void mover();

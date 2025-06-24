@@ -3,12 +3,15 @@
 
 #include <QWidget>
 #include <QTimer>
-#include <QList>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
+#include <QGraphicsView>
+#include <vector>  // Usamos std::vector
+
 #include "camaralogica.h"
 #include "carro.h"
 #include "goku.h"
+#include "obstaculo.h"
 
 class nivel : public QWidget
 {
@@ -19,27 +22,28 @@ private:
     QPixmap background;
     QGraphicsView *vista;
     QGraphicsScene *escena;
+
     camaraLogica *camara;
-    Carro* carroFinal;
-    QTimer* timerColision;
-    Goku* goku;
+    Carro* carroFinal = nullptr;
+    QTimer* timerColision = nullptr;
+    Goku* goku = nullptr;
 
-
+    std::vector<obstaculo*> listaObstaculos;
+    std::vector<QGraphicsPixmapItem*> listaFondos;
+    std::vector<QGraphicsPixmapItem*> listaNubes;
 
 public:
     explicit nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent = nullptr);
     virtual ~nivel();
-    void extracted();
+
     void cargarFondoNivel1(const QString &ruta);
     void agregarObstaculos();
     void agregarGokuNivel1();
     void agregarCarroFinal();
 
 protected:
-    QTimer *temporizador;
-    int tiempoRestante;
-
-
+    QTimer *temporizador = nullptr;
+    int tiempoRestante = 0;
 };
 
 #endif // NIVEL_H
