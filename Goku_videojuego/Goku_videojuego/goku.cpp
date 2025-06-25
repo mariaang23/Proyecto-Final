@@ -6,7 +6,7 @@
 #include <QMessageBox>
 
 Goku::Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHeight, int _nivel, QObject *parent)
-    : QObject(parent), QGraphicsPixmapItem(), scene(scene), velocidad(_velocidad), fotogWidth(_fotogWidth), fotogHeight(_fotogHeight), nivel(_nivel), mvtoArriba(false), mvtoAbajo(false), frameActual(0)
+    : QObject(parent), QGraphicsPixmapItem(), scene(scene), frameActual(0), velocidad(_velocidad), fotogWidth(_fotogWidth), fotogHeight(_fotogHeight), nivel(_nivel), mvtoArriba(false), mvtoAbajo(false)
 {
     scene->addItem(this);
     cargarImagen();

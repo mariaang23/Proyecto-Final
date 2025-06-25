@@ -2,123 +2,196 @@
 #include "carro.h"
 #include "goku.h"
 #include "QRandomGenerator"
-#include <QDebug>
 
-// Recibe un puntero a la escena, la vista y el objeto padre
-nivel::nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent)
-    : QWidget(parent), vista(view), escena(escena)
+// Constructor del nivel
+nivel::nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero)
+    : QWidget(parent), numeroNivel(numero), vista(view), escena(escena)
 {
-    int velocidad = 6;  // velocidad desplazamiento camara
-    camara = new camaraLogica(vista, velocidad, this); // this: nivel padre de la cámara
-    camara->iniciarMovimiento();
-    //camara->seguirAGoku(goku);
+    if (numeroNivel == 1){
+        int velocidad = 6;  // Velocidad con la que se mueve la cámara
+
+        // Crear la cámara lógica que seguirá a Goku
+        camara = new camaraLogica(vista, velocidad, this);
+        camara->iniciarMovimiento();  // Comienza a mover la cámara
+    }
+    else if (numeroNivel == 2){
+        //Logica
+    }
 }
 
+// Destructor del nivel: liberar memoria de objetos dinámicos
 nivel::~nivel()
 {
     delete camara;
-    if (carroFinal) {
-        delete carroFinal;
-    }
+    delete carroFinal;
+    delete goku;
+
+    // Eliminar todos los obstáculos
+    for (obstaculo* obj : listaObstaculos)
+        delete obj;
+
+    // Eliminar todas las nubes
+    for (auto *item : listaNubes)
+        delete item;
+
+    // Eliminar todos los fondos
+    for (auto *item : listaFondos)
+        delete item;
 }
 
-void nivel::cargarFondoNivel1(const QString &ruta)
+// Cargar el fondo del nivel y generar nubes decorativas
+void nivel::cargarFondoNivel(const QString &ruta)
 {
-    background = QPixmap(ruta);
-    // Agregar la misma imagen 3 veces, colocandola una al lado de la otra
-    for (int i = 0; i <3; i++){
-        QGraphicsPixmapItem *_background = new QGraphicsPixmapItem(background);
-        _background -> setPos(i * background.width(), 0);   // Lo posiciona a la derecha del anterior
-        escena->addItem(_background); // Se agrega a la escena, para que sea visible
-    }
+    if (numeroNivel == 1){
 
-    //QList<QGraphicsPixmapItem*> listaNubes;
-    nube = QPixmap(":/images/nube.png");
+        background = QPixmap(ruta);  // Cargar imagen del fondo
 
-    for (int i = 0; i < 20; i++) {
-        // Generar un tamaño aleatorio para cada nube
-        for (int j = 3; j > 0; --j) {
-            float escala = j*0.05;
-            int ancho = nube.width() * escala;
-            int alto = nube.height() * escala;
+        // Agregar el fondo 3 veces, uno junto al otro
+        for (int i = 0; i < 3; i++) {
+            QGraphicsPixmapItem *_background = new QGraphicsPixmapItem(background);
+            _background->setPos(i * background.width(), 0);
+            escena->addItem(_background);
+            listaFondos.push_back(_background);
+        }
 
-            // Escalar la nube
-            QPixmap nubeEscalada = nube.scaled(ancho, alto, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        nube = QPixmap(":/images/nube.png");
 
-            int x = i * 250 + QRandomGenerator::global()->bounded(-60, 50); // Varía el espacio en x
-            int y = QRandomGenerator::global()->bounded(0, 71);             // Varía el espacio en y
+        for (int i = 0; i < 20; i++) {
+            // Crear nubes de 3 tamaños distintos
+            for (int j = 3; j > 0; --j) {
+                float escala = j * 0.05;  // Tamaño proporcional
+                int ancho = nube.width() * escala;
+                int alto = nube.height() * escala;
 
-            if (x + nubeEscalada.width() <= 1536 * 3){  // Se agrega las nubes escaladas, siempre que no sobrepasen el ancho de la escena
-                QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
-                _nube->setPos(x, y);
-                escena->addItem(_nube);
-                //listaNubes.append(_nube);
+                QPixmap nubeEscalada = nube.scaled(ancho, alto, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+                int x = i * 250 + QRandomGenerator::global()->bounded(-60, 50);  // Posición x aleatoria
+                int y = QRandomGenerator::global()->bounded(0, 71);              // Posición y aleatoria
+
+                // Agregar la nube si está dentro del ancho del nivel
+                if (x + nubeEscalada.width() <= 1536 * 3) {
+                    QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
+                    _nube->setPos(x, y);
+                    escena->addItem(_nube);
+                    listaNubes.push_back(_nube);
+                }
             }
         }
     }
+
+    else {
+
+        background = QPixmap(":/images/background2.png");
+
+        QGraphicsPixmapItem *_background = new QGraphicsPixmapItem(background);
+        _background->setPos(0, 0);
+        escena->addItem(_background);
+        listaFondos.push_back(_background);
+
+        // Nubes (más simples, menos cantidad, pero siguen moviéndose)
+        nube = QPixmap(":/images/nube.png");
+
+        for (int i = 0; i < 50; i++) { // Cambiar 50 segun la logica
+            float escala = 0.1f + QRandomGenerator::global()->bounded(0.1f);
+            int ancho = nube.width() * escala;
+            int alto = nube.height() * escala;
+
+            QPixmap nubeEscalada = nube.scaled(ancho, alto, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+            int x = i * 300 + QRandomGenerator::global()->bounded(-30, 30);
+            int y = QRandomGenerator::global()->bounded(0, 150);
+
+            QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
+            _nube->setPos(x, y);
+            escena->addItem(_nube);
+            listaNubes.push_back(_nube);
+        }
+
+        if (!timerNubes) {
+            timerNubes = new QTimer(this);
+            connect(timerNubes, &QTimer::timeout, this, &nivel::moverNubes);
+            timerNubes->start(45);  // cada 30 ms
+        }
+
+    }
 }
 
+void nivel::moverNubes()
+{
+    int velocidadNube = 2; // velocidad de desplazamiento de las nubes hacia la izquierda
 
+    for (auto *nubeItem : listaNubes) {
+        if (!nubeItem) continue;
+
+        // Mover la nube hacia la izquierda
+        nubeItem->setPos(nubeItem->x() - velocidadNube, nubeItem->y());
+
+        // Si la nube salió de la escena (por la izquierda), reaparecer a la derecha
+        if (nubeItem->x() + nubeItem->pixmap().width() < 0) {
+            int nuevaX = escena->width(); // reaparece al ancho total de la escena
+            int nuevaY = QRandomGenerator::global()->bounded(0, 100);
+            nubeItem->setPos(nuevaX, nuevaY);
+        }
+    }
+}
+
+// Agregar obstáculos aleatorios al nivel
 void nivel::agregarObstaculos()
 {
-    int xActual = 800;  // punto inicial desde donde empiezan a agregarse obstáculos
-    int anchoEscena = escena->width();
+    int xActual = 800;       // Posición inicial de los obstáculos
     int contador = 0;
     int velocidad = 12;
 
-    while (contador < 18) { // se agregan obstaculos hasta que Goku no choque con el carro
-        int tipo = QRandomGenerator::global()->bounded(0, 3); // 0 = Ave, 1 = Montania, 2 = Roca
+    while (contador < 18) {  // Número de obstáculos a generar
+        int tipo = QRandomGenerator::global()->bounded(0, 3);  // Tipo aleatorio
         obstaculo *obj = nullptr;
 
         switch (tipo) {
-        case 0: // Ave
-        {
-            int y = QRandomGenerator::global()->bounded(0, 250);  // posicion aleatoria en y para el ave, segun limites
+        case 0: {  // Ave
+            int y = QRandomGenerator::global()->bounded(0, 250);
             obj = new obstaculo(escena, obstaculo::Ave, velocidad, this);
             obj->iniciar(xActual, y);
-            xActual += 300 + QRandomGenerator::global()->bounded(0, 100); // posicion x: distancia mínima 300 + distancia aleatoria (entre 0 y 100)
+            xActual += 300 + QRandomGenerator::global()->bounded(0, 100);  // Espaciado
             break;
         }
-        case 1: // Montania
-        {
+        case 1: {  // Montaña
             obj = new obstaculo(escena, obstaculo::Montania, velocidad, this);
-
-            // Posicionar la montaña en el suelo segun la altura de la escena
-            int y = escena->height() - obj->getAltura();
-
+            int y = escena->height() - obj->getAltura();  // Posición en el suelo
             obj->iniciar(xActual, y);
             xActual += 600 + QRandomGenerator::global()->bounded(0, 150);
             break;
         }
-        case 2: // Roca
-        {
+        case 2: {  // Roca
             int y = QRandomGenerator::global()->bounded(350, 576);
             obj = new obstaculo(escena, obstaculo::Roca, velocidad, this);
             obj->iniciar(xActual, y);
-            xActual += 600 + QRandomGenerator::global()->bounded(0, 100); // distancia mínima 600
+            xActual += 600 + QRandomGenerator::global()->bounded(0, 100);
             break;
         }
         }
 
+        listaObstaculos.push_back(obj);  // Guardar referencia
         ++contador;
     }
 }
 
-void nivel::agregarGokuNivel1(){
-    // Calcular la posición central en y
-    int posY = 784 / 2; //Alto de escena/2
+// Agrega a Goku al nivel en una posición inicial
+void nivel::agregarGokuNivel1()
+{
+    int posY = 784 / 2;  // Altura media de la escena
 
+    // Crear e iniciar el personaje Goku
     goku = new Goku(escena, 6, 250, 308, 1, this);
-    goku -> iniciar(0, posY);
+    goku->iniciar(0, posY);
+    goku->setFocus();
 }
 
+// Agrega el carro final que Goku debe alcanzar
 void nivel::agregarCarroFinal()
 {
-    int x = 3600;  // justo antes del borde
-    int y = 430;   // abajo, pero sin salirse
+    int x = 3600;
+    int y = 430;
 
     carroFinal = new Carro(escena, 0, this);
     carroFinal->iniciar(x, y);
-    //carroFinal->rotar();
 }
-

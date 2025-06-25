@@ -46,8 +46,11 @@ void camaraLogica::moverVista()
 
 void camaraLogica::seguirAGoku(Goku* goku)
 {
+    disconnect(timer, nullptr, nullptr, nullptr); // desconecta cualquier conexión previa
+
     connect(timer, &QTimer::timeout, this, [=]() {
         int xCentro = goku->x() - view->width() / 3;
         view->centerOn(xCentro, view->scene()->height() / 2);
     });
 }
+
