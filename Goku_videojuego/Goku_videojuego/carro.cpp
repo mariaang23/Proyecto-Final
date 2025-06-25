@@ -14,6 +14,8 @@ Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
     QPixmap cuadro = imagenCarro.copy(cuadroActual * anchoCuadro, 0, anchoCuadro, altoCuadro);
     sprite->setPixmap(cuadro);
 
+    sprite->setData(0, "carro");
+
     // Temporizador para rotación del carro
     timerRotacion = new QTimer(this);
 
@@ -35,17 +37,25 @@ void Carro::rotar()
     }
 }
 
-void Carro::animarRotacion()
-{
-    // Avanza al siguiente cuadro. Al llegar al final (3), regresa al primero (0)
-    cuadroActual = (cuadroActual + 1) % 3;
-
-    // Extrae el nuevo cuadro desde la imagen original
-    QPixmap cuadro = imagenCarro.copy(cuadroActual * anchoCuadro, 0, anchoCuadro, altoCuadro);
-
-    sprite->setPixmap(cuadro);
-}
-
 bool Carro::estaGirando() const {
     return girando;
 }
+
+void Carro::empezarEspiral()
+{
+    if (girando) return;
+    girando = true;
+    anguloActual = 0;
+    timerRotacion->start(40);   // un poco suave
+}
+
+void Carro::animarRotacion()
+{
+    // frame ya existente:
+    cuadroActual = (cuadroActual + 1) % 3;
+    QPixmap cuadro = imagenCarro.copy(cuadroActual * anchoCuadro, 0,
+                                      anchoCuadro, altoCuadro);
+    sprite->setPixmap(cuadro);
+
+}
+

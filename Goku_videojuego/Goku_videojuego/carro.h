@@ -13,6 +13,7 @@ public:
     void iniciar(int x, int y) override;   // Posicionamiento
     void rotar();                          // Rotacion
     bool estaGirando() const;             //Esta girando?
+    void empezarEspiral();     //iniciar espiral(mvto circular)
 
 private slots:
     void animarRotacion();                //implementar
