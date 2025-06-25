@@ -28,7 +28,7 @@ juego::~juego()
 // Inicia el juego en el nivel 1
 void juego::iniciarJuego()
 {
-    cambiarNivel(1);
+    cambiarNivel(2); // Se cambió a nivel 2 para probar fondo y nubes
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente
@@ -66,16 +66,42 @@ void juego::cambiarNivel(int numero)
         view->activateWindow();
 
         // Crear nivel1 y configurarlo
-        nivel1 = new nivel(scene, view, this);
+        nivel1 = new nivel(scene, view, this, 1);
         nivelActual = nivel1;
 
-        nivel1->cargarFondoNivel1(":/images/background1.png");
+        nivel1->cargarFondoNivel(":/images/background1.png");
         nivel1->agregarObstaculos();
         nivel1->agregarGokuNivel1();
         nivel1->agregarCarroFinal();
 
         view->show();
+
+        // Logica para cambiar nivel 2
+        //cambiarNivel(2);
+
     } else {
-        // Nivel 2
+        int sceneWidth = 1536 * 3;
+        int sceneHeight = 784;
+
+        scene = new QGraphicsScene();
+        scene->setSceneRect(0, 0, sceneWidth, sceneHeight);
+
+        view = new QGraphicsView(scene);
+        view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+        int widthView = sceneWidth / 3;
+        int heightView = sceneHeight;
+
+        view->setSceneRect(0, 0, widthView, heightView);
+        view->setFixedSize(widthView, heightView);
+        view->activateWindow();
+
+        // Crear nivel1 y configurarlo
+        nivel2 = new nivel(scene, view, this, 2);
+        nivelActual = nivel2;
+        nivel2->cargarFondoNivel(":/images/background2.png");
+        view->show();
+
     }
 }
