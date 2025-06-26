@@ -58,7 +58,7 @@ void juego::cambiarNivel(int numero)
         view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-        int widthView = sceneWidth / 3;
+        int widthView = sceneWidth / 4;
         int heightView = sceneHeight;
 
         view->setSceneRect(0, 0, widthView, heightView);

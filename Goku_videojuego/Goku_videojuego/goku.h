@@ -6,32 +6,31 @@
 #include <QTimer>
 #include <QKeyEvent>
 #include <QVector>
+#include "vida.h"
 
 class Goku : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
+
 public:
     Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHeight, int _nivel, QObject *parent = nullptr);
-    //void cargarSprite(const QString &ruta);
-    //void moverArriba();
-    //void moverAbajo();
-    //void avanzar();
+    ~Goku();
+
     void cargarImagen();
     void iniciar(int x = -1, int y = -1);
-    void keyPressEvent(QKeyEvent *event) override; //para manejar teclas
+
+    void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
-    void restarVida();
+
+    void setBarraVida(Vida* barra);
+    void recibirDanio(int cantidad);
+
     void actualizarFrame(int indice);
     QString detectarColision() const;
     bool haTocadoCarro() const;
     bool haTocadoObstaculo() const;
 
-protected:
-    //void keyPressEvent(QKeyEvent *event) override;
-    //QGraphicsPixmapItem *sprite;
-
 private slots:
-    //void actualizar();
     void mover();
 
 private:
@@ -43,12 +42,17 @@ private:
     int fotogWidth;
     int fotogHeight;
     int nivel;
-    bool mvtoArriba;  //moviendo hacia arriba
-    bool mvtoAbajo; //moviendo hacia abajo
-    bool tocoCarro;   // para colision
-    bool tocoObstaculo;   //para colision
+
+    bool mvtoArriba;
+    bool mvtoAbajo;
+    bool tocoCarro;
+    bool tocoObstaculo;
+    bool yaRecibioDanio;
+
+
     int vidas;
 
+    Vida* vidaHUD = nullptr; // Nueva: barra de vida en HUD
 };
 
 #endif // GOKU_H

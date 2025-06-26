@@ -29,6 +29,7 @@ private:
     QTimer* timerColision = nullptr;
     QTimer* timerNubes = nullptr;
     Goku* goku = nullptr;
+    Vida* barraVida = nullptr;
 
     std::vector<obstaculo*> listaObstaculos;
     std::vector<QGraphicsPixmapItem*> listaFondos;
