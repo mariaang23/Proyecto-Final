@@ -20,6 +20,11 @@ public:
     void iniciar(int x = -1, int y = -1);
     void keyPressEvent(QKeyEvent *event) override; //para manejar teclas
     void keyReleaseEvent(QKeyEvent *event) override;
+    void restarVida();
+    void actualizarFrame(int indice);
+    QString detectarColision() const;
+    bool haTocadoCarro() const;
+    bool haTocadoObstaculo() const;
 
 protected:
     //void keyPressEvent(QKeyEvent *event) override;
@@ -40,6 +45,10 @@ private:
     int nivel;
     bool mvtoArriba;  //moviendo hacia arriba
     bool mvtoAbajo; //moviendo hacia abajo
+    bool tocoCarro;   // para colision
+    bool tocoObstaculo;   //para colision
+    int vidas;
+
 };
 
 #endif // GOKU_H

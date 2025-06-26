@@ -13,6 +13,7 @@ obstaculo::obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *p
 
     cargarImagenes();  // Cargar la imagen correspondiente según el tipo
 
+    sprite->setData(0, "obstaculo");
     // Crear temporizador para mover el obstáculo y conectar su señal al slot mover()
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout, this, &obstaculo::mover);
@@ -28,13 +29,26 @@ obstaculo::obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *p
 void obstaculo::iniciar(int x, int y)
 {
     // Si no se define x, se genera una posición aleatoria dentro del ancho de la escena
-    if (x == -1)
-        x = QRandomGenerator::global()->bounded(scene->width());
+    /*if (x == -1)
+        x = QRandomGenerator::global()->bounded(scene->width());*/
 
     // Si no se define y, se ajusta según el tipo: aves en el aire, otros en el suelo
-    if (y == -1)
-        y = (tipo == Ave) ? QRandomGenerator::global()->bounded(100, 400)
-                          : scene->height() - sprite->pixmap().height();
+    /*
+    if (y == -1) {
+        switch (tipo) {
+        case Ave:       // pájaro: altura libre (vuela)
+            y = QRandomGenerator::global()->bounded(20, 200);
+            break;
+
+        case Montania:  // montaña: SIEMPRE pegada al suelo
+            y = 600;
+            break;
+
+        case Roca:      // roca: puede o no tocar el suelo
+            y = QRandomGenerator::global()->bounded(350,500);
+            break;
+        }
+    }*/
 
     sprite->setPos(x, y);  // Posicionar el sprite
 
@@ -74,7 +88,7 @@ void obstaculo::cargarImagenes()
         QPixmap montanaPixmap(":/images/montania.png");
 
         // Altura aleatoria para hacer la montaña más variada
-        int alturaMontana = 150 + QRandomGenerator::global()->bounded(0, 300);
+        int alturaMontana =300 + QRandomGenerator::global()->bounded(100, 200);
         QPixmap montanaEscalada = montanaPixmap.scaledToHeight(alturaMontana, Qt::SmoothTransformation);
 
         sprite->setPixmap(montanaEscalada);  // Asignar imagen escalada al sprite
@@ -83,7 +97,7 @@ void obstaculo::cargarImagenes()
         QPixmap rocaPixmap(":/images/roca.png");
 
         // Altura aleatoria para hacer la roca más variada
-        int alturaRoca = 80 + QRandomGenerator::global()->bounded(0, 200);
+        int alturaRoca = QRandomGenerator::global()->bounded(80, 200);
         QPixmap rocaEscalada = rocaPixmap.scaledToHeight(alturaRoca, Qt::SmoothTransformation);
 
         sprite->setPixmap(rocaEscalada);  // Asignar imagen escalada al sprite

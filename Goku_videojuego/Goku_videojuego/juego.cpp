@@ -28,7 +28,7 @@ juego::~juego()
 // Inicia el juego en el nivel 1
 void juego::iniciarJuego()
 {
-    cambiarNivel(2); // Se cambió a nivel 2 para probar fondo y nubes
+    cambiarNivel(1); // Se cambió a nivel 2 para probar fondo y nubes
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente
@@ -48,7 +48,7 @@ void juego::cambiarNivel(int numero)
 
     // Crear nuevo nivel
     if (numero == 1) {
-        int sceneWidth = 1536 * 3;
+        int sceneWidth = 1536 * 4;
         int sceneHeight = 784;
 
         scene = new QGraphicsScene();
@@ -76,11 +76,8 @@ void juego::cambiarNivel(int numero)
 
         view->show();
 
-        // Logica para cambiar nivel 2
-        //cambiarNivel(2);
-
     } else {
-        int sceneWidth = 1536 * 3;
+        int sceneWidth = 1536;
         int sceneHeight = 784;
 
         scene = new QGraphicsScene();
@@ -90,7 +87,7 @@ void juego::cambiarNivel(int numero)
         view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-        int widthView = sceneWidth / 3;
+        int widthView = sceneWidth;
         int heightView = sceneHeight;
 
         view->setSceneRect(0, 0, widthView, heightView);
