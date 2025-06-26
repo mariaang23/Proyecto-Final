@@ -11,7 +11,8 @@ SOURCES += \
     juego.cpp \
     main.cpp \
     nivel.cpp \
-    obstaculo.cpp
+    obstaculo.cpp \
+    vida.cpp
 
 HEADERS += \
     camaralogica.h \
@@ -19,7 +20,8 @@ HEADERS += \
     goku.h \
     juego.h \
     nivel.h \
-    obstaculo.h
+    obstaculo.h \
+    vida.h
 
 FORMS += \
     juego.ui

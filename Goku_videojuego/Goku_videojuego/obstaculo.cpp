@@ -88,7 +88,7 @@ void obstaculo::cargarImagenes()
         QPixmap montanaPixmap(":/images/montania.png");
 
         // Altura aleatoria para hacer la montaña más variada
-        int alturaMontana =300 + QRandomGenerator::global()->bounded(100, 200);
+        int alturaMontana = 200 + QRandomGenerator::global()->bounded(100, 200);
         QPixmap montanaEscalada = montanaPixmap.scaledToHeight(alturaMontana, Qt::SmoothTransformation);
 
         sprite->setPixmap(montanaEscalada);  // Asignar imagen escalada al sprite
