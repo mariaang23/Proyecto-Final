@@ -80,16 +80,24 @@ void Goku::mover() {
         if (mvtoArriba) movimientoVertical = -velocidad;
         else if (mvtoAbajo) movimientoVertical = velocidad;
 
-        // Movimiento hacia la derecha + movimiento vertical
-        moveBy(velocidad, movimientoVertical);
+        // Calcular nueva posición en X
+        qreal nuevaX = x() + velocidad;
+
+        // Limitar X para no pasarse del borde derecho
+        qreal limiteX = scene->width() - pixmap().width() * scale();
+
+        if (nuevaX <= limiteX) {
+            moveBy(velocidad, movimientoVertical);
+        } else {
+            setX(limiteX);
+        }
 
         // Corregir Y para no salirse de la escena
         QPointF posicionActual = this->pos();
         const int altoEscena = scene->height();
         const int altoSprite = pixmap().height() - 80;
 
-        // Asegurar que Y esté entre 0 y límite inferior
-        float nuevaY = qBound(0.0, posicionActual.y(), static_cast<double>(altoEscena - altoSprite));
+        qreal nuevaY = qBound<qreal>(70.0, posicionActual.y(), static_cast<qreal>(altoEscena - altoSprite));
         posicionActual.setY(nuevaY);
         setPos(posicionActual);
 
@@ -97,13 +105,13 @@ void Goku::mover() {
         tocoCarro = false;
         tocoObstaculo = false;
 
-        // Revisar colisiones con otros objetos
+        // Revisar colisiones
         const QList<QGraphicsItem*> &items = collidingItems();
         for (QGraphicsItem *item : items) {
             QString etiqueta = item->data(0).toString();
 
             if (etiqueta == "carro") {
-                tocoCarro = true; // Prioridad a los carros
+                tocoCarro = true;
                 break;
             } else if (etiqueta == "obstaculo") {
                 tocoObstaculo = true;
@@ -118,16 +126,16 @@ void Goku::mover() {
         } else if (tocoObstaculo) {
             if (!yaRecibioDanio) {
                 recibirDanio(20);
-                yaRecibioDanio = true; // Marca que ya recibió daño por este obstáculo
+                yaRecibioDanio = true;
             }
         } else {
-            // Si no hay colisión con nada, resetear el estado
             yaRecibioDanio = false;
         }
     } else if (nivel == 2) {
         // TODO: implementar lógica para nivel 2
     }
 }
+
 
 // Evento al presionar teclas
 void Goku::keyPressEvent(QKeyEvent *event) {
