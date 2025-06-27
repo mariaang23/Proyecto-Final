@@ -15,6 +15,12 @@ nivel::nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int n
         // Crear la cámara lógica que seguirá a Goku
         camara = new camaraLogica(vista, velocidad, this);
         camara->iniciarMovimiento();  // Comienza a mover la cámara
+
+        // timer que mira los eventos del nivel
+        timerNivel = new QTimer(this);
+        connect(timerNivel, &QTimer::timeout, this, &nivel::actualizarNivel);
+        timerNivel->start(20);
+      
         // Timer para actualizar la barra de progreso
         QTimer *timerProgreso = new QTimer(this);
         connect(timerProgreso, &QTimer::timeout, this, [=]() {
@@ -37,7 +43,7 @@ nivel::~nivel()
 {
     delete camara;
     delete goku;
-    delete barraVida;  // Asegúrate de liberar también la memoria de la barra de vida
+    delete barraVida;  //Asegúrate de liberar también la memoria de la barra de vida
 
     // Eliminar todas las nubes
     for (auto *item : listaNubes)
@@ -153,11 +159,11 @@ void nivel::moverNubes()
 // Agregar obstáculos aleatorios al nivel
 void nivel::agregarObstaculos()
 {
-    int xActual = 1000;
+    int xActual = 2000;
     int contador = 0;
     int velocidad = 10;
 
-    while (contador < 30) {
+    while (contador < 15) {
         int tipo = QRandomGenerator::global()->bounded(0, 3);
         obstaculo *obj = nullptr;
 
@@ -232,6 +238,24 @@ void nivel::agregarCarroFinal()
     carroFinal->iniciar(x, y);
 }
 
+void nivel::actualizarNivel()
+{
+    if(numeroNivel==1){
+        if (!goku) return;  //si no se creo goku aun
+
+        //si goku toco el carro
+        if (goku->haTocadoCarro() && carroFinal) {
+            carroFinal->iniciarMovimientoEspiral();
+        }
+
+        //fin de juego por vidas
+        if (goku->getNumeroVidas() <= 0) {
+
+        }
+    }else if(numeroNivel==2){
+        //implementar
+    }
+}
 int nivel::getMargenHUD() const {
     return margenHUD;
 }

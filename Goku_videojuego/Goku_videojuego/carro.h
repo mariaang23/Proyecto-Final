@@ -13,7 +13,9 @@ public:
     void iniciar(int x, int y) override;   // Posicionamiento
     void rotar();                          // Rotacion
     bool estaGirando() const;             //Esta girando?
-    void empezarEspiral();     //iniciar espiral(mvto circular)
+    void iniciarMovimientoEspiral();  // se llama cuando toca Goku
+    void actualizarMovimiento();      // se llama cada 20 ms
+
 
 private slots:
     void animarRotacion();                //implementar
@@ -26,6 +28,21 @@ private:
     QTimer *timerRotacion;         // Temporizador para animacion
     int anguloActual;              // angulo
     bool girando;
+
+    //movimiento espirar del carro
+    int fase = 3;     // empieza en fase 3 = Terminado
+    float tiempo = 0.0f;      // tiempo en segundos
+    QPointF inicio;   // punto de inicio de la fase
+
+    // valores para controlar la forma del movimiento
+    float g      = 500.0f;   // gravedad
+    float vx     = 80.0f;// velocidad horizontal
+    float vy     = 350.0f; // velocidad hacia arriba
+    float radio  = 120.0f;   // radio del giro
+    float tiempoGiro = 2.0f;  // cuanto dura el giro
+    float ySuelo = 500.0f;   // altura del suelo
+    QTimer *timerEspiral;  // timer para mvto
+
 };
 
 #endif // CARRO_H

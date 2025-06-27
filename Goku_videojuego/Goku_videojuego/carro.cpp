@@ -16,11 +16,10 @@ Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
 
     sprite->setData(0, "carro");
 
-    // Temporizador para rotación del carro
-    timerRotacion = new QTimer(this);
+    //conexion para el movimiento
+    timerEspiral = new QTimer(this);
+    connect(timerEspiral, &QTimer::timeout, this, &Carro::actualizarMovimiento);
 
-    // Conecta el temporizador al método animarRotacion
-    connect(timerRotacion, &QTimer::timeout, this, &Carro::animarRotacion);
 }
 
 void Carro::iniciar(int x, int y)
@@ -41,13 +40,59 @@ bool Carro::estaGirando() const {
     return girando;
 }
 
-void Carro::empezarEspiral()
+void Carro::iniciarMovimientoEspiral()
 {
-    if (girando) return;
-    girando = true;
-    anguloActual = 0;
-    timerRotacion->start(40);   // un poco suave
+    if (fase != 3) return;         // si ya estaba girando, no hacer nada
+
+    fase   = 0;                    // comenzamos con la fase de subida
+    tiempo = 0.0f;
+    inicio = sprite->pos();               // guardar posicion actual
+    timerEspiral->start(20);   // llama actualizarMovimiento() cada 20 ms
 }
+
+void Carro::actualizarMovimiento()
+{
+    float dt = 0.020f;  // 20 milisegundos
+    tiempo += dt;
+
+    if (fase == 0)  // Subida
+    {
+        float x = inicio.x() + vx * tiempo;
+        float y = inicio.y() - vy * tiempo + 0.5f * g * tiempo * tiempo;
+        sprite->setPos(x, y);
+
+        if (tiempo >= vy / g) {
+            inicio = sprite->pos();   // guardamos la cima como centro del círculo
+            tiempo = 0.0f;
+            fase = 1;
+        }
+    }
+    else if (fase == 1)  // Círculo
+    {
+        float w = 2.0f * 3.1416f / tiempoGiro;  // velocidad angular
+        float x = inicio.x() + radio * cos(w * tiempo);
+        float y = inicio.y() - radio * sin(w * tiempo);
+        sprite->setPos(x, y);
+
+        if (tiempo >= tiempoGiro) {
+            inicio = sprite->pos();  // guardamos el punto final del círculo
+            tiempo = 0.0f;
+            fase = 2;
+        }
+    }
+    else if (fase == 2)  // Caída
+    {
+        float y = inicio.y() + 0.5f * g * tiempo * tiempo;
+        sprite->setY(y);
+
+        if (y >= ySuelo) {
+            sprite->setY(ySuelo);
+            fase = 3;
+            timerEspiral->stop();  // se acabó la animación
+        }
+    }
+}
+
 
 void Carro::animarRotacion()
 {
