@@ -8,6 +8,7 @@
         <file>carro_rojo.png</file>
         <file>GokuSpriter.png</file>
         <file>background2.png</file>
+        <file>icono_carro.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>
