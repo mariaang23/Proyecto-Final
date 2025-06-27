@@ -2,6 +2,7 @@
 #include "carro.h"
 #include "goku.h"
 #include "vida.h"
+#include "robot.h"
 #include "QRandomGenerator"
 #include <QMessageBox>
 
@@ -163,7 +164,7 @@ void nivel::agregarObstaculos()
     int contador = 0;
     int velocidad = 10;
 
-    while (contador < 15) {
+    while (contador < 13) {
         int tipo = QRandomGenerator::global()->bounded(0, 3);
         obstaculo *obj = nullptr;
 
@@ -220,7 +221,7 @@ void nivel::agregarGokuNivel1()
     barraProgreso->show();  // Añadir a la escena
 
     // creacion de Goku y asociacion con vida
-    goku = new Goku(escena, velocidadGoku, 250, 308, 1, this);
+    goku = new Goku(escena, velocidadGoku, 200, 249, 1, this);
     goku->setBarraVida(barraVida);  // Enlace para que Goku pueda modificar la barra
     goku->iniciar(vista->sceneRect().left() + 10, posY); // Posición de inicio
     goku->setFocus();
@@ -231,7 +232,7 @@ void nivel::agregarGokuNivel1()
 // Agrega el carro final que Goku debe alcanzar
 void nivel::agregarCarroFinal()
 {
-    int x = 4500;
+    int x = 4700;
     int y = 500;
 
     carroFinal = new Carro(escena, 0, this);
@@ -244,18 +245,63 @@ void nivel::actualizarNivel()
         if (!goku) return;  //si no se creo goku aun
 
         //si goku toco el carro
-        if (goku->haTocadoCarro() && carroFinal) {
+        if (goku->haTocadoCarro() && carroFinal && !gokuYaPateo) {
+            gokuYaPateo = true;                       //solo la primera vez
+            goku->patadaGokuNivel1();             // (ahora ella misma se detiene)
             carroFinal->iniciarMovimientoEspiral();
         }
 
-        //fin de juego por vidas
-        if (goku->getNumeroVidas() <= 0) {
-
+        //incluir robots
+        if (carroFinal && carroFinal->espiralHecha  // termino espiral
+            && carroFinal->haLlegadoAlSuelo()){  // toco suelo
+            agregarRobotsNivel1();
         }
+
+        //fin de juego por vidas
+
     }else if(numeroNivel==2){
         //implementar
     }
 }
 int nivel::getMargenHUD() const {
     return margenHUD;
+}
+
+void nivel::agregarRobotsNivel1()
+{
+    //exista carro primero
+    if (!carroFinal || robotsCreados) return;
+    if (!carroFinal->haLlegadoAlSuelo())   return;   // si toca suelo
+    robotsCreados = true;                        // evita duplicar
+
+    const int ySuelo = 400;          // coordenada Y del suelo
+    const int vel    = 6;            // velocidad lateral
+
+    //creacion de los robots
+    Robot *robot1 = new Robot(escena, vel, 1, this);
+    Robot *robot2 = new Robot(escena, vel, 2, this);
+    Robot *robot3 = new Robot(escena, vel, 3, this);
+
+    //SECUENCIAS SEGUN EL SLOT
+    robot1->iniciar(5000, ySuelo, 5000);   // Robot 1: destino 5500
+    robot1->desplegarRobot();                 // frame 0-1-3-2-5-4
+
+
+    QTimer::singleShot(600, this, [=]() {
+        robot2->iniciar(5300, ySuelo, 5300);  // destino 5300
+        robot2->desplegarRobot();
+    });
+
+
+    QTimer::singleShot(1200, this, [=]() {
+        robot3->iniciar(5600, ySuelo, 5600);  // destino 4800
+        robot3->desplegarRobot();
+    });
+
+    //activar modo marcha
+    QTimer::singleShot(1800,this,[=](){
+        robot1->detenerMvtoRobot();
+        robot2->detenerMvtoRobot();
+        robot3->detenerMvtoRobot();
+    });
 }

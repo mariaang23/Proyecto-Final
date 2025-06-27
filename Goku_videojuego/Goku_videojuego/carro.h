@@ -16,6 +16,8 @@ public:
     void iniciarMovimientoEspiral();  // se llama cuando toca Goku
     void actualizarMovimiento();      // se llama cada 20 ms
 
+    bool espiralHecha = false; //determina que ya se realizo la espiral(evitar que se haga mas de una)
+    bool haLlegadoAlSuelo() const; //esta haciendo la espiral?
 
 private slots:
     void animarRotacion();                //implementar

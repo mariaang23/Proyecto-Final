@@ -23,13 +23,18 @@ public:
     void keyReleaseEvent(QKeyEvent *event) override;
 
     void setBarraVida(Vida* barra);
-    int getNumeroVidas();
     void recibirDanio(int cantidad);
 
     void actualizarFrame(int indice);
     QString detectarColision() const;
     bool haTocadoCarro() const;
     bool haTocadoObstaculo() const;
+    void patadaGokuNivel1();
+    void mientrasTocaObstaculo();
+
+    // Detiene por completo el desplazamiento y la entrada de teclas
+    void detener();
+
 
 private slots:
     void mover();
@@ -49,8 +54,6 @@ private:
     bool tocoCarro;
     bool tocoObstaculo;
     bool yaRecibioDanio;
-
-    int vidas;
 
     Vida* vidaHUD = nullptr; // Nueva: barra de vida en HUD
 };
