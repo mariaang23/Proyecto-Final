@@ -29,8 +29,8 @@ public:
     QString detectarColision() const;
     bool haTocadoCarro() const;
     bool haTocadoObstaculo() const;
-
     void patadaGokuNivel1();
+    void mientrasTocaObstaculo();
 
     // Detiene por completo el desplazamiento y la entrada de teclas
     void detener();

@@ -13,7 +13,7 @@ Goku::Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHei
     : QObject(parent),
     QGraphicsPixmapItem(),
     scene(scene),
-    frameActual(0),
+    frameActual(1),
     velocidad(_velocidad),
     fotogWidth(_fotogWidth),
     fotogHeight(_fotogHeight),
@@ -53,14 +53,14 @@ void Goku::cargarImagen() {
 
     // Cortar el sprite en frames individuales (4 en este caso)
     frames.clear();
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 5; ++i) {
         frames.append(spriteSheet.copy(i * fotogWidth, 0, fotogWidth, fotogHeight));
     }
 
     // Mostrar el primer frame
     if (!frames.isEmpty()) {
-        setPixmap(frames[0]);
-        setScale(0.7); // Escalar al 70% del tamaño original
+        setPixmap(frames[1]);
+        setScale(0.8); // Escalar al 80% del tamaño original
     }
 }
 
@@ -127,9 +127,12 @@ void Goku::mover() {
                 recibirDanio(20);
                 yaRecibioDanio = true;
             }
-        } else {
+        } else{
             yaRecibioDanio = false;
         }
+
+        //mantener el frame 0 mientras dure la colision
+        mientrasTocaObstaculo();
     } else if (nivel == 2) {
         // TODO: implementar lógica para nivel 2
     }
@@ -141,10 +144,11 @@ void Goku::keyPressEvent(QKeyEvent *event) {
     switch (event->key()) {
     case Qt::Key_W:
         mvtoArriba = true;
+        actualizarFrame(1); // Regresar al sprite principal
         break;
     case Qt::Key_S:
         mvtoAbajo = true;
-        actualizarFrame(1); // Cambiar sprite a posición descendente
+        actualizarFrame(2); // Cambiar sprite a posición descendente
         break;
     }
 }
@@ -157,7 +161,7 @@ void Goku::keyReleaseEvent(QKeyEvent *event) {
         break;
     case Qt::Key_S:
         mvtoAbajo = false;
-        actualizarFrame(0); // Regresar al sprite principal
+        actualizarFrame(1); // Regresar al sprite principal
         break;
     }
 }
@@ -214,12 +218,12 @@ Goku::~Goku() {
 void Goku::patadaGokuNivel1()
 {
     // Mostrar frame de agacharse
-    actualizarFrame(2);  //frame 2 es agachado
+    actualizarFrame(3);  //frame 3 es agachado
     QCoreApplication::processEvents();
     QThread::msleep(200);  // Esperar para que se vea el frame
 
     // Mostrar frame de patada
-    actualizarFrame(3);  // frame 3 es patada
+    actualizarFrame(4);  // frame 4 es patada
     QCoreApplication::processEvents();
     QThread::msleep(200);  // Esperar para que se vea la patada
 
@@ -236,7 +240,24 @@ void Goku::detener()
     // Reiniciar banderas de desplazamiento vertical
     mvtoArriba = mvtoAbajo = false;
 
-    // Dejarlo en su frame 0
-    actualizarFrame(0);
+    // Dejarlo en su frame 1
+    actualizarFrame(1);
 }
 
+void Goku::mientrasTocaObstaculo()
+{
+    //esta tocando?
+    if (tocoObstaculo) {
+
+        // Si no esta ya en rojo se cambia
+        if (pixmap().cacheKey() != frames[0].cacheKey())
+            actualizarFrame(0);      // frame 0 = modo daño
+        return;
+    }
+
+    // dejo de tocar, volver al frame apropiado segun su estado vertical
+    if (mvtoAbajo)
+        actualizarFrame(2);          // agachado
+    else
+        actualizarFrame(1);          // idle
+}

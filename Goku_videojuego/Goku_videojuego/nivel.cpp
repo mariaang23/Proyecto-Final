@@ -220,7 +220,7 @@ void nivel::agregarGokuNivel1()
     barraProgreso->show();  // Añadir a la escena
 
     // creacion de Goku y asociacion con vida
-    goku = new Goku(escena, velocidadGoku, 250, 308, 1, this);
+    goku = new Goku(escena, velocidadGoku, 200, 249, 1, this);
     goku->setBarraVida(barraVida);  // Enlace para que Goku pueda modificar la barra
     goku->iniciar(vista->sceneRect().left() + 10, posY); // Posición de inicio
     goku->setFocus();
