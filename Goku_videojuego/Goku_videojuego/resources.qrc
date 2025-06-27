@@ -9,6 +9,7 @@
         <file>GokuSpriter.png</file>
         <file>background2.png</file>
         <file>icono_carro.png</file>
+        <file>robots1.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>

@@ -2,6 +2,7 @@
 #include "carro.h"
 #include "goku.h"
 #include "vida.h"
+#include "robot.h"
 #include "QRandomGenerator"
 #include <QMessageBox>
 
@@ -231,7 +232,7 @@ void nivel::agregarGokuNivel1()
 // Agrega el carro final que Goku debe alcanzar
 void nivel::agregarCarroFinal()
 {
-    int x = 4800;
+    int x = 4700;
     int y = 500;
 
     carroFinal = new Carro(escena, 0, this);
@@ -250,6 +251,11 @@ void nivel::actualizarNivel()
             carroFinal->iniciarMovimientoEspiral();
         }
 
+        //incluir robots
+        if (carroFinal && carroFinal->espiralHecha  // termino espiral
+            && carroFinal->haLlegadoAlSuelo()){  // toco suelo
+            agregarRobotsNivel1();
+        }
 
         //fin de juego por vidas
 
@@ -259,4 +265,43 @@ void nivel::actualizarNivel()
 }
 int nivel::getMargenHUD() const {
     return margenHUD;
+}
+
+void nivel::agregarRobotsNivel1()
+{
+    //exista carro primero
+    if (!carroFinal || robotsCreados) return;
+    if (!carroFinal->haLlegadoAlSuelo())   return;   // si toca suelo
+    robotsCreados = true;                        // evita duplicar
+
+    const int ySuelo = 400;          // coordenada Y del suelo
+    const int vel    = 6;            // velocidad lateral
+
+    //creacion de los robots
+    Robot *robot1 = new Robot(escena, vel, 1, this);
+    Robot *robot2 = new Robot(escena, vel, 2, this);
+    Robot *robot3 = new Robot(escena, vel, 3, this);
+
+    //SECUENCIAS SEGUN EL SLOT
+    robot1->iniciar(5000, ySuelo, 5000);   // Robot 1: destino 5500
+    robot1->desplegarRobot();                 // frame 0-1-3-2-5-4
+
+
+    QTimer::singleShot(600, this, [=]() {
+        robot2->iniciar(5300, ySuelo, 5300);  // destino 5300
+        robot2->desplegarRobot();
+    });
+
+
+    QTimer::singleShot(1200, this, [=]() {
+        robot3->iniciar(5600, ySuelo, 5600);  // destino 4800
+        robot3->desplegarRobot();
+    });
+
+    //activar modo marcha
+    QTimer::singleShot(1800,this,[=](){
+        robot1->detenerMvtoRobot();
+        robot2->detenerMvtoRobot();
+        robot3->detenerMvtoRobot();
+    });
 }

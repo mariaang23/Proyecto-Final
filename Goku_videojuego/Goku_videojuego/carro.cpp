@@ -106,3 +106,7 @@ void Carro::animarRotacion()
 
 }
 
+bool Carro::haLlegadoAlSuelo() const
+{
+    return fase == 3 && sprite->y() >= 500; //ha llegado al suelo
+}

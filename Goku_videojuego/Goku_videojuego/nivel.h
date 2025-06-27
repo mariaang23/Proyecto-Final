@@ -40,6 +40,8 @@ private:
     std::vector<QGraphicsPixmapItem*> listaFondos;
     std::vector<QGraphicsPixmapItem*> listaNubes;
 
+    bool robotsCreados = false; //para incluir los robot nivel 1
+
 public:
     explicit nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero);
     virtual ~nivel();
@@ -49,6 +51,7 @@ public:
     void agregarGokuNivel1();
     void agregarCarroFinal();
     int getMargenHUD() const;
+    void agregarRobotsNivel1();
 
 
 
