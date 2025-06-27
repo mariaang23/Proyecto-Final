@@ -23,6 +23,7 @@ private:
     QPixmap background;
     QGraphicsView *vista;
     QGraphicsScene *escena;
+    QTimer *timerNivel = nullptr;
 
     camaraLogica *camara;
     Carro* carroFinal = nullptr;
@@ -30,6 +31,7 @@ private:
     QTimer* timerNubes = nullptr;
     Goku* goku = nullptr;
     Vida* barraVida = nullptr;
+
 
     std::vector<obstaculo*> listaObstaculos;
     std::vector<QGraphicsPixmapItem*> listaFondos;
@@ -46,6 +48,8 @@ public:
 
 private slots:
     void moverNubes();
+    void actualizarNivel();
+
 
 protected:
     QTimer *temporizador = nullptr;

@@ -23,6 +23,7 @@ public:
     void keyReleaseEvent(QKeyEvent *event) override;
 
     void setBarraVida(Vida* barra);
+    int getNumeroVidas();
     void recibirDanio(int cantidad);
 
     void actualizarFrame(int indice);
@@ -48,7 +49,6 @@ private:
     bool tocoCarro;
     bool tocoObstaculo;
     bool yaRecibioDanio;
-
 
     int vidas;
 

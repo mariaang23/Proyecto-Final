@@ -113,6 +113,7 @@ void Goku::mover() {
         // Reacciones a colisiones
         if (tocoCarro) {
             // TODO: lógica de fin de nivel
+
             yaRecibioDanio = false; // Reiniciar para próximas colisiones
         } else if (tocoObstaculo) {
             if (!yaRecibioDanio) {
@@ -201,4 +202,8 @@ void Goku::recibirDanio(int cantidad) {
 // Destructor: no elimina la barra de vida, porque no la creó
 Goku::~Goku() {
     vidaHUD = nullptr;
+}
+
+int Goku::getNumeroVidas(){
+    return vidas;
 }
