@@ -42,8 +42,9 @@ bool Carro::estaGirando() const {
 
 void Carro::iniciarMovimientoEspiral()
 {
-    if (fase != 3) return;         // si ya estaba girando, no hacer nada
+    if (espiralHecha || fase != 3) return;         // si ya estaba girando, no hacer nada
 
+    espiralHecha = true;
     fase   = 0;                    // comenzamos con la fase de subida
     tiempo = 0.0f;
     inicio = sprite->pos();               // guardar posicion actual
@@ -69,6 +70,7 @@ void Carro::actualizarMovimiento()
     }
     else if (fase == 1)  // Círculo
     {
+        this->animarRotacion();
         float w = 2.0f * 3.1416f / tiempoGiro;  // velocidad angular
         float x = inicio.x() + radio * cos(w * tiempo);
         float y = inicio.y() - radio * sin(w * tiempo);

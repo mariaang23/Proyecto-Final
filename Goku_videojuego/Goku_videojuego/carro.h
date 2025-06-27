@@ -16,7 +16,6 @@ public:
     void iniciarMovimientoEspiral();  // se llama cuando toca Goku
     void actualizarMovimiento();      // se llama cada 20 ms
 
-
 private slots:
     void animarRotacion();                //implementar
 
@@ -42,6 +41,7 @@ private:
     float tiempoGiro = 2.0f;  // cuanto dura el giro
     float ySuelo = 500.0f;   // altura del suelo
     QTimer *timerEspiral;  // timer para mvto
+    bool espiralHecha = false; //determina que ya se realizo la espiral(evitar que se haga mas de una)
 
 };
 

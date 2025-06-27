@@ -163,7 +163,7 @@ void nivel::agregarObstaculos()
     int contador = 0;
     int velocidad = 10;
 
-    while (contador < 15) {
+    while (contador < 13) {
         int tipo = QRandomGenerator::global()->bounded(0, 3);
         obstaculo *obj = nullptr;
 
@@ -231,7 +231,7 @@ void nivel::agregarGokuNivel1()
 // Agrega el carro final que Goku debe alcanzar
 void nivel::agregarCarroFinal()
 {
-    int x = 4500;
+    int x = 4800;
     int y = 500;
 
     carroFinal = new Carro(escena, 0, this);
@@ -244,14 +244,15 @@ void nivel::actualizarNivel()
         if (!goku) return;  //si no se creo goku aun
 
         //si goku toco el carro
-        if (goku->haTocadoCarro() && carroFinal) {
+        if (goku->haTocadoCarro() && carroFinal && !gokuYaPateo) {
+            gokuYaPateo = true;                       //solo la primera vez
+            goku->patadaGokuNivel1();             // (ahora ella misma se detiene)
             carroFinal->iniciarMovimientoEspiral();
         }
 
-        //fin de juego por vidas
-        if (goku->getNumeroVidas() <= 0) {
 
-        }
+        //fin de juego por vidas
+
     }else if(numeroNivel==2){
         //implementar
     }

@@ -51,6 +51,8 @@ public:
     int getMargenHUD() const;
 
 
+
+
 private slots:
     void moverNubes();
     void actualizarNivel();
@@ -59,6 +61,7 @@ private slots:
 protected:
     QTimer *temporizador = nullptr;
     int tiempoRestante = 0;
+    bool gokuYaPateo = false;   // true cuando la patada ya se ejecutó
 };
 
 #endif // NIVEL_H

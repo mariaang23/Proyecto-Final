@@ -5,6 +5,8 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QDebug>
+#include <QThread>
+#include <QCoreApplication>
 
 // Constructor de Goku
 Goku::Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHeight, int _nivel, QObject *parent)
@@ -34,9 +36,6 @@ Goku::Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHei
     // Inicializar banderas de colisión
     tocoCarro = false;
     tocoObstaculo = false;
-
-    // Número de vidas generales (por si se usan vidas múltiples además de la barra)
-    vidas = 3;
 }
 
 // Carga los frames de Goku desde un sprite sheet
@@ -212,6 +211,32 @@ Goku::~Goku() {
     vidaHUD = nullptr;
 }
 
-int Goku::getNumeroVidas(){
-    return vidas;
+void Goku::patadaGokuNivel1()
+{
+    // Mostrar frame de agacharse
+    actualizarFrame(2);  //frame 2 es agachado
+    QCoreApplication::processEvents();
+    QThread::msleep(200);  // Esperar para que se vea el frame
+
+    // Mostrar frame de patada
+    actualizarFrame(3);  // frame 3 es patada
+    QCoreApplication::processEvents();
+    QThread::msleep(200);  // Esperar para que se vea la patada
+
+    //detener a goku cuando ya pateo
+    detener();
 }
+
+void Goku::detener()
+{
+    // Apagar el timer de movimiento
+    if (timerMovimiento && timerMovimiento->isActive())
+        timerMovimiento->stop();
+
+    // Reiniciar banderas de desplazamiento vertical
+    mvtoArriba = mvtoAbajo = false;
+
+    // Dejarlo en su frame 0
+    actualizarFrame(0);
+}
+
