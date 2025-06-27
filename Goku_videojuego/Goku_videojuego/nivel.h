@@ -12,6 +12,7 @@
 #include "carro.h"
 #include "goku.h"
 #include "obstaculo.h"
+#include "progreso.h"
 
 class nivel : public QWidget
 {
@@ -19,6 +20,7 @@ class nivel : public QWidget
 
 private:
     int numeroNivel = 1;
+    const int margenHUD = 70;
     QPixmap nube;
     QPixmap background;
     QGraphicsView *vista;
@@ -30,6 +32,7 @@ private:
     QTimer* timerNubes = nullptr;
     Goku* goku = nullptr;
     Vida* barraVida = nullptr;
+    Progreso *barraProgreso = nullptr;
 
     std::vector<obstaculo*> listaObstaculos;
     std::vector<QGraphicsPixmapItem*> listaFondos;
@@ -43,6 +46,8 @@ public:
     void agregarObstaculos();
     void agregarGokuNivel1();
     void agregarCarroFinal();
+    int getMargenHUD() const;
+
 
 private slots:
     void moverNubes();

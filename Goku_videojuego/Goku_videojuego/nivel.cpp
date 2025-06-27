@@ -15,6 +15,17 @@ nivel::nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int n
         // Crear la cámara lógica que seguirá a Goku
         camara = new camaraLogica(vista, velocidad, this);
         camara->iniciarMovimiento();  // Comienza a mover la cámara
+        // Timer para actualizar la barra de progreso
+        QTimer *timerProgreso = new QTimer(this);
+        connect(timerProgreso, &QTimer::timeout, this, [=]() {
+            if (goku && carroFinal && barraProgreso) {
+                float posGoku = goku->x();
+                float inicio = 0;
+                float fin = carroFinal->getSprite()->pos().x();
+                barraProgreso->actualizarProgreso(posGoku, inicio, fin);
+            }
+        });
+        timerProgreso->start(50); // Actualiza cada 50 ms
     }
     else if (numeroNivel == 2){
         // Lógica para nivel 2
@@ -26,7 +37,7 @@ nivel::~nivel()
 {
     delete camara;
     delete goku;
-    delete barraVida;  // 👈 Asegúrate de liberar también la memoria de la barra de vida
+    delete barraVida;  // Asegúrate de liberar también la memoria de la barra de vida
 
     // Eliminar todas las nubes
     for (auto *item : listaNubes)
@@ -38,6 +49,7 @@ nivel::~nivel()
 
     if(numeroNivel==1){
         delete carroFinal;
+        delete barraProgreso;
 
         // Eliminar todos los obstáculos
         for (obstaculo* obj : listaObstaculos)
@@ -150,22 +162,29 @@ void nivel::agregarObstaculos()
         obstaculo *obj = nullptr;
 
         switch (tipo) {
-        case 0: {
-            int y = QRandomGenerator::global()->bounded(20, 170);
+        case 0: { // Ave
+            // Evita que las aves aparezcan en el área del HUD
+            int y = QRandomGenerator::global()->bounded(margenHUD + 5, margenHUD + 130);
             obj = new obstaculo(escena, obstaculo::Ave, velocidad, this);
             obj->iniciar(xActual, y);
             xActual += 600;
             break;
         }
-        case 1: {
-            obj = new obstaculo(escena, obstaculo::Montania, velocidad, this);
-            int y = QRandomGenerator::global()->bounded(280, 400);
+        case 1: { // Montaña (siempre en el suelo)
+            obstaculo *obj = new obstaculo(escena, obstaculo::Montania, velocidad, this);
+            obj->cargarImagenes(); // Cargar primero para conocer la altura real del sprite
+
+            int alturaEscena = escena->height();
+            int alturaMontana = obj->getAltura();  // método que debes implementar
+            int y = alturaEscena - alturaMontana;
+
             obj->iniciar(xActual, y);
             xActual += 800;
             break;
         }
-        case 2: {
-            int y = QRandomGenerator::global()->bounded(350, 650);
+        case 2: { // Roca
+            // Asegurarse de que no invada el HUD
+            int y = QRandomGenerator::global()->bounded(std::max(350, margenHUD + 50), 550);
             obj = new obstaculo(escena, obstaculo::Roca, velocidad, this);
             obj->iniciar(xActual, y);
             xActual += 700;
@@ -178,16 +197,21 @@ void nivel::agregarObstaculos()
     }
 }
 
+
 // Agrega a Goku y su barra de vida al nivel
 void nivel::agregarGokuNivel1()
 {
-    int posY = 784 / 2;       // Posición vertical centrada
+    int posY = std::max(margenHUD + 10, 784 / 2); // Posición vertical tomando margen HUD
     int velocidadGoku = 6;
 
     // Crear la barra de vida (como widget encima de la vista)
     barraVida = new Vida(vista);                     // Se mostrará encima del QGraphicsView
     barraVida->move(20, 20);                         // Posición fija en la esquina superior izquierda
     barraVida->show();       // Añadir a la escena
+
+    barraProgreso = new Progreso(vista);
+    barraProgreso->move(20, 60); //  Ubicarla debajo de la barra de vida
+    barraProgreso->show();  // Añadir a la escena
 
     // creacion de Goku y asociacion con vida
     goku = new Goku(escena, velocidadGoku, 250, 308, 1, this);
@@ -206,4 +230,8 @@ void nivel::agregarCarroFinal()
 
     carroFinal = new Carro(escena, 0, this);
     carroFinal->iniciar(x, y);
+}
+
+int nivel::getMargenHUD() const {
+    return margenHUD;
 }

@@ -12,6 +12,7 @@ SOURCES += \
     main.cpp \
     nivel.cpp \
     obstaculo.cpp \
+    progreso.cpp \
     vida.cpp
 
 HEADERS += \
@@ -21,6 +22,7 @@ HEADERS += \
     juego.h \
     nivel.h \
     obstaculo.h \
+    progreso.h \
     vida.h
 
 FORMS += \
