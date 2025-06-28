@@ -11,6 +11,8 @@ SOURCES += \
     juego.cpp \
     main.cpp \
     nivel.cpp \
+    nivel1.cpp \
+    nivel2.cpp \
     obstaculo.cpp \
     progreso.cpp \
     robot.cpp \
@@ -22,6 +24,8 @@ HEADERS += \
     goku.h \
     juego.h \
     nivel.h \
+    nivel1.h \
+    nivel2.h \
     obstaculo.h \
     progreso.h \
     robot.h \
