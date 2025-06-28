@@ -10,6 +10,7 @@
         <file>background2.png</file>
         <file>icono_carro.png</file>
         <file>robots1.png</file>
+        <file>pocion.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>
