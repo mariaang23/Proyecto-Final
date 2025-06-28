@@ -4,7 +4,9 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include "nivel.h"
+
+#include "nivel1.h"
+#include "nivel2.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -26,9 +28,9 @@ private:
     Ui::juego *ui;
     QGraphicsScene *scene;
     QGraphicsView *view;
-    nivel* nivel1;
-    nivel* nivel2;
-    nivel* nivelActual;
+    Nivel1* nivel1;
+    Nivel2* nivel2;
+    Nivel* nivelActual;
 };
 
 #endif // JUEGO_H

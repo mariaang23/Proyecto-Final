@@ -6,65 +6,59 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <vector>  // Usamos std::vector
+#include <vector>
 
 #include "camaralogica.h"
 #include "carro.h"
 #include "goku.h"
-#include "obstaculo.h"
+#include "vida.h"
 #include "progreso.h"
 
-class nivel : public QWidget
+class Nivel : public QWidget
 {
     Q_OBJECT
 
-private:
-    int numeroNivel = 1;
+protected:
+    // Elementos comunes a todos los niveles
+    int numeroNivel;
     const int margenHUD = 70;
+
     QPixmap nube;
     QPixmap background;
+
     QGraphicsView *vista;
     QGraphicsScene *escena;
-    QTimer *timerNivel = nullptr;
 
-    camaraLogica *camara;
-    Carro* carroFinal = nullptr;
-    QTimer* timerColision = nullptr;
-    QTimer* timerNubes = nullptr;
+    camaraLogica *camara = nullptr;
     Goku* goku = nullptr;
     Vida* barraVida = nullptr;
-    Progreso *barraProgreso = nullptr;
+    Progreso* barraProgreso = nullptr;
 
+    QTimer* timerNivel = nullptr;
+    QTimer* timerNubes = nullptr;
 
-    std::vector<obstaculo*> listaObstaculos;
     std::vector<QGraphicsPixmapItem*> listaFondos;
     std::vector<QGraphicsPixmapItem*> listaNubes;
 
-    bool robotsCreados = false; //para incluir los robot nivel 1
+    Carro* carroFinal = nullptr;
+    std::vector<obstaculo*> listaObstaculos;
+
 
 public:
-    explicit nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero);
-    virtual ~nivel();
+    explicit Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero);
+    virtual ~Nivel();
 
-    void cargarFondoNivel(const QString &ruta);
-    void agregarObstaculos();
-    void agregarGokuNivel1();
-    void agregarCarroFinal();
     int getMargenHUD() const;
-    void agregarRobotsNivel1();
 
+    // Métodos virtuales que cada subclase debe implementar
+    virtual void cargarFondoNivel(const QString &ruta) = 0;
+    virtual void agregarObstaculos() = 0;
+    virtual void agregarGoku() = 0;
+    virtual void agregarCarroFinal() = 0;
+    virtual void actualizarNivel() = 0;
 
-
-
-private slots:
+protected slots:
     void moverNubes();
-    void actualizarNivel();
-
-
-protected:
-    QTimer *temporizador = nullptr;
-    int tiempoRestante = 0;
-    bool gokuYaPateo = false;   // true cuando la patada ya se ejecutó
 };
 
 #endif // NIVEL_H
