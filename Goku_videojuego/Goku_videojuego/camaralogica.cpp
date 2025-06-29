@@ -10,6 +10,10 @@ camaraLogica::camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent)
     // Conectar temporizador con el slot
     connect(timer, &QTimer::timeout, this, &camaraLogica::moverVista);
 }
+//aunque el padre QTimer realiza la liberacion, por buena practica se realiza en el destructor
+camaraLogica::~camaraLogica() {
+    delete timer;
+}
 
 void  camaraLogica::iniciarMovimiento()
 {

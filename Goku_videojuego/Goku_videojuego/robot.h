@@ -12,6 +12,7 @@ class Robot : public QObject
     Q_OBJECT
 public:
     explicit Robot(QGraphicsScene *scene, int velocidad, int numeroRobot, QObject *parent = nullptr);
+    ~Robot();
 
     void iniciar(int x, int y, int xDestino = -1);
     void desplegarRobot();

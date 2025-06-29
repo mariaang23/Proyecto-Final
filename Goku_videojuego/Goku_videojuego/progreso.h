@@ -7,6 +7,7 @@ class Progreso : public QWidget
 
 public:
     explicit Progreso(QWidget *parent = nullptr);
+    ~Progreso();
     void actualizarProgreso(float posicionGoku, float inicio, float fin);
 
 protected:

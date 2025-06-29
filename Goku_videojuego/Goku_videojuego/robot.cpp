@@ -26,6 +26,20 @@ Robot::Robot(QGraphicsScene *scene,
             this,             &Robot::animar);
 }
 
+Robot::~Robot()
+{
+    delete sprite; // Eliminar el sprite creado con new
+
+    // Detener y eliminar los temporizadores
+    if (timerMovimiento) {
+        timerMovimiento->stop();
+        delete timerMovimiento;
+    }
+    if (timerAnimacion) {
+        timerAnimacion->stop();
+        delete timerAnimacion;
+    }
+}
 
 void Robot::cargarImagen(int numeroRobot)
 {

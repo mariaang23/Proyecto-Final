@@ -10,6 +10,7 @@ class Carro : public obstaculo
 
 public:
     Carro(QGraphicsScene *scene, int velocidad, QObject *parent = nullptr);
+    ~Carro();
     void iniciar(int x, int y) override;   // Posicionamiento
     void rotar();                          // Rotacion
     bool estaGirando() const;             //Esta girando?

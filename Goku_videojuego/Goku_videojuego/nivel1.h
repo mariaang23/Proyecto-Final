@@ -2,7 +2,7 @@
 #define NIVEL1_H
 
 #include "nivel.h"
-#include <QTimer>
+#include "robot.h"
 
 class Nivel1 : public Nivel
 {
@@ -18,14 +18,20 @@ public:
     void actualizarNivel() override;
     void cargarFondoNivel(const QString &ruta) override;
     void agregarGoku() override;
-    void agregarObstaculos() override;
-    void agregarCarroFinal() override;
+
+    //metodos de la clase
+    void agregarObstaculos();
+    void agregarCarroFinal();
 
 private:
     void agregarRobots(); // Crea los robots enemigos cuando el carro aterriza
 
+    Carro* carroFinal = nullptr;
     bool gokuYaPateo;
     bool robotsCreados;
+    Robot *r1;
+    Robot *r2;
+    Robot *r3;
 };
 
 #endif // NIVEL1_H
