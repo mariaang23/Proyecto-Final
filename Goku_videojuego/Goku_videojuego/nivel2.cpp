@@ -13,7 +13,6 @@ Nivel2::Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
 // Destructor: libera memoria
 Nivel2::~Nivel2()
 {
-    delete timerNivel;
 }
 
 void Nivel2::iniciarNivel()
@@ -92,11 +91,5 @@ void Nivel2::actualizarNivel()
     // Implementar
 }
 
-void Nivel2::agregarObstaculos() {
-    // Nivel 2 no tiene obstáculos, se deja vacío
-}
 
-void Nivel2::agregarCarroFinal() {
-    // Nivel 2 no tiene carro final, se deja vacío
-}
 

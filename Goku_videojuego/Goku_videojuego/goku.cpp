@@ -212,6 +212,7 @@ void Goku::recibirDanio(int cantidad) {
 
 // Destructor: no elimina la barra de vida, porque no la creó
 Goku::~Goku() {
+    delete timerMovimiento; // Eliminar el temporizador creado con new
     vidaHUD = nullptr;
 }
 

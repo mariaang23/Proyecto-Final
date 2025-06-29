@@ -14,7 +14,17 @@ Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
 // Destructor
 Nivel1::~Nivel1()
 {
-    delete timerNivel;
+    qDebug() << "Destructor de Nivel1 llamado";
+    delete carroFinal;
+    delete r1;
+    delete r2;
+    delete r3;
+
+    // Eliminar todos los obstaculos en listaObstaculos
+    for (auto *obs : listaObstaculos) {
+        delete obs;
+    }
+    listaObstaculos.clear();
 }
 
 // Método separado para iniciar el nivel (llamado después del constructor)
@@ -93,7 +103,7 @@ void Nivel1::agregarObstaculos()
     int x = 2000;
     int velocidad = 10;
 
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < 16; ++i) {
         int tipo = QRandomGenerator::global()->bounded(0, 3);
         obstaculo* obs = nullptr;
 
@@ -152,9 +162,9 @@ void Nivel1::agregarRobots()
     int ySuelo = 400;
     int velocidad = 6;
 
-    Robot* r1 = new Robot(escena, velocidad, 1, this);
-    Robot* r2 = new Robot(escena, velocidad, 2, this);
-    Robot* r3 = new Robot(escena, velocidad, 3, this);
+    r1 = new Robot(escena, velocidad, 1, this);
+    r2 = new Robot(escena, velocidad, 2, this);
+    r3 = new Robot(escena, velocidad, 3, this);
 
     r1->iniciar(5000, ySuelo, 5000);
     r1->desplegarRobot();

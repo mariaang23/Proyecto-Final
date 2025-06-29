@@ -40,7 +40,6 @@ protected:
     std::vector<QGraphicsPixmapItem*> listaFondos;
     std::vector<QGraphicsPixmapItem*> listaNubes;
 
-    Carro* carroFinal = nullptr;
     std::vector<obstaculo*> listaObstaculos;
 
 
@@ -52,9 +51,7 @@ public:
 
     // Métodos virtuales que cada subclase debe implementar
     virtual void cargarFondoNivel(const QString &ruta) = 0;
-    virtual void agregarObstaculos() = 0;
     virtual void agregarGoku() = 0;
-    virtual void agregarCarroFinal() = 0;
     virtual void actualizarNivel() = 0;
 
 protected slots:

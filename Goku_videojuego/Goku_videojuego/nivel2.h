@@ -18,8 +18,6 @@ public:
     void cargarFondoNivel(const QString &ruta) override;
     void agregarGoku() override;
     void actualizarNivel() override;
-    void agregarObstaculos() override;
-    void agregarCarroFinal() override;
 
 private:
     void agregarPociones();
@@ -29,6 +27,7 @@ private:
 
     bool robotInicialCreado = false;
     bool pocionesAgregadas = false;
+    Carro* carroFinal = nullptr;
 };
 
 #endif // NIVEL2_H

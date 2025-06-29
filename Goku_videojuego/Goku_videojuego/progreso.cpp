@@ -18,6 +18,11 @@ Progreso::Progreso(QWidget *parent) : QWidget(parent), porcentaje(0.0f)
     iconoCarro->show();
 }
 
+Progreso::~Progreso()
+{
+    delete iconoCarro;
+}
+
 // Método para actualizar el porcentaje de progreso
 void Progreso::actualizarProgreso(float posicionGoku, float inicio, float fin)
 {

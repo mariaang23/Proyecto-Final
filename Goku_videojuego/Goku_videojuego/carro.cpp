@@ -22,6 +22,10 @@ Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
 
 }
 
+Carro::~Carro() {
+    delete timerEspiral; // Eliminar el temporizador creado con new
+}
+
 void Carro::iniciar(int x, int y)
 {
     sprite->setPos(x, y);
