@@ -11,6 +11,9 @@
         <file>icono_carro.png</file>
         <file>robots1.png</file>
         <file>pocion.png</file>
+        <file>Goku_caminando.png</file>
+        <file>Goku_muere.png</file>
+        <file>Goku_saltando.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>
