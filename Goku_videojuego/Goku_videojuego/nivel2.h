@@ -2,7 +2,9 @@
 #define NIVEL2_H
 
 #include "nivel.h"
-#include <QTimer>
+#include "pocion.h"
+#include <vector>
+#include <QVector>
 
 class Nivel2 : public Nivel
 {
@@ -13,8 +15,6 @@ public:
     ~Nivel2();
 
     void iniciarNivel();
-
-    // Implementación obligatoria de métodos virtuales puros de Nivel
     void cargarFondoNivel(const QString &ruta) override;
     void agregarGoku() override;
     void actualizarNivel() override;
@@ -23,7 +23,8 @@ private:
     void agregarPociones();
     void agregarRobotInicial();
 
-    QTimer* timerNivel = nullptr;
+    QVector<QPixmap> framesPocion;     // Frames de animación de la poción
+    std::vector<Pocion*> listaPociones;
 
     bool robotInicialCreado = false;
     bool pocionesAgregadas = false;
