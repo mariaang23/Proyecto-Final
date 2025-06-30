@@ -3,6 +3,7 @@
 
 #include "nivel.h"
 #include "robot.h"
+#include "carro.h"
 
 class Nivel1 : public Nivel
 {

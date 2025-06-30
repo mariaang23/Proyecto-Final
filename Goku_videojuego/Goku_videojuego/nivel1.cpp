@@ -32,6 +32,7 @@ void Nivel1::iniciarNivel()
 {
     cargarFondoNivel(":/images/background1.png");
 
+    generarNubes();
     agregarGoku();
     agregarCarroFinal();
     agregarObstaculos();
