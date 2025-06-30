@@ -1,73 +1,89 @@
 #include "nivel2.h"
+#include "pocion.h"
 #include <QRandomGenerator>
-#include <QTimer>
 
 Nivel2::Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
-    : Nivel(escena, vista, parent, 2),
-    timerNivel(nullptr),
+    : Nivel(escena, vista, parent, 2),           // Llamar al constructor base con el número de nivel 2
     robotInicialCreado(false),
     pocionesAgregadas(false)
 {}
 
 
-// Destructor: libera memoria
 Nivel2::~Nivel2()
 {
+    for (auto* pocion : listaPociones)           // Libera memoria de cada poción
+        delete pocion;
+
+    listaPociones.clear();                       // Limpia la lista para evitar punteros colgantes
 }
 
+// Método principal que se llama para iniciar el nivel 2
 void Nivel2::iniciarNivel()
 {
-    cargarFondoNivel(":/images/background2.png");
-
-    generarNubes();
-    /*
-    agregarGoku();
-    agregarRobotInicial();
-    agregarPociones();
-
-    timerNivel = new QTimer(this);
-    connect(timerNivel, &QTimer::timeout, this, &Nivel2::actualizarNivel);
-    timerNivel->start(20);
-    */
+    cargarFondoNivel(":/images/background2.png");  // Carga el fondo del nivel 2
+    generarNubes();                                // Generar nubes (definido en clase base)
+    agregarPociones();                             // Colocar las pociones en escena
 }
+
 
 void Nivel2::cargarFondoNivel(const QString &ruta)
 {
-    // Fondo estático
     background = QPixmap(ruta);
-    QGraphicsPixmapItem* _background = new QGraphicsPixmapItem(background);
-    _background->setPos(0, 0);
-    escena->addItem(_background);
-    listaFondos.push_back(_background);
-
-    // Cargar imagen de nube
-    nube = QPixmap(":/images/nube.png");
+    QGraphicsPixmapItem* _background = new QGraphicsPixmapItem(background); // Crea un item gráfico
+    _background->setPos(0, 0);                  // Posición inicial en (0,0)
+    escena->addItem(_background);               // Agrega el fondo a la escena
+    listaFondos.push_back(_background);         // Guarda el fondo en la lista
 }
 
 
-// Agrega a Goku con barras de vida y progreso
 void Nivel2::agregarGoku()
 {
     // Implementar
 }
 
-// Agrega un robot enemigo al principio del nivel
 void Nivel2::agregarRobotInicial()
 {
     // Implementar
 }
 
-// Agrega pociones de vida repartidas en el nivel
+// Agrega varias pociones distribuidas por el nivel
 void Nivel2::agregarPociones()
 {
-    // Implementar
+    QPixmap hojaSprites(":/images/pocion.png");   // Carga la hoja de sprites de pociones
+
+    int anchoSprite = 65;                         // Ancho de cada sprite
+    int altoSprite = 64;                          // Alto de cada sprite
+
+    //Extraer los 6 frames desde la hoja de sprites
+    for (int i = 0; i < 6; ++i) {
+        QPixmap frame = hojaSprites.copy(i * anchoSprite, 0, anchoSprite, altoSprite); // Recorta cada frame
+        framesPocion.push_back(frame);                                                // Los guarda para animación
+    }
+
+    // Cantidad total de pociones y configuración de la matriz
+    int cantidad = 14;
+    int anchoVista = vista->width();
+
+    int columnas = 7;
+    int filas = 2;
+
+    // Crear las pociones y distribuirlas
+    for (int fila = 0; fila < filas; ++fila) {
+        for (int col = 0; col < columnas; ++col) {
+            if (static_cast<int>(listaPociones.size()) >= cantidad)
+                break; // Detiene si ya se alcanzó la cantidad deseada
+
+            // Crea nueva poción y la posiciona usando su constructor
+            Pocion* pocion = new Pocion(framesPocion, anchoVista, fila, col, columnas);
+
+            escena->addItem(pocion);            // La agrega a la escena
+            listaPociones.push_back(pocion);    // La guarda para futura gestión
+        }
+    }
 }
 
-// Método principal que actualiza el estado del nivel 2
+
 void Nivel2::actualizarNivel()
 {
     // Implementar
 }
-
-
-

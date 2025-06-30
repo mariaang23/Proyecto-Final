@@ -40,6 +40,7 @@ Goku::Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHei
 
 // Carga los frames de Goku desde un sprite sheet
 void Goku::cargarImagen() {
+
     QPixmap spriteSheet(":/images/GokuSpriter.png");
 
     // Intentar ruta alternativa si falla el recurso

@@ -14,6 +14,7 @@ SOURCES += \
     nivel1.cpp \
     nivel2.cpp \
     obstaculo.cpp \
+    pocion.cpp \
     progreso.cpp \
     robot.cpp \
     vida.cpp
@@ -27,6 +28,7 @@ HEADERS += \
     nivel1.h \
     nivel2.h \
     obstaculo.h \
+    pocion.h \
     progreso.h \
     robot.h \
     vida.h
