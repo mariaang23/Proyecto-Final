@@ -27,7 +27,6 @@ private:
 
     bool robotInicialCreado = false;
     bool pocionesAgregadas = false;
-    Carro* carroFinal = nullptr;
 };
 
 #endif // NIVEL2_H

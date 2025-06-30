@@ -18,6 +18,8 @@ Nivel2::~Nivel2()
 void Nivel2::iniciarNivel()
 {
     cargarFondoNivel(":/images/background2.png");
+
+    generarNubes();
     /*
     agregarGoku();
     agregarRobotInicial();
@@ -40,30 +42,6 @@ void Nivel2::cargarFondoNivel(const QString &ruta)
 
     // Cargar imagen de nube
     nube = QPixmap(":/images/nube.png");
-
-    // Agregar nubes con escala y posición aleatoria
-    for (int i = 0; i < 50; i++) {
-        float escala = 0.1f + QRandomGenerator::global()->bounded(0.1f);
-        int ancho = nube.width() * escala;
-        int alto = nube.height() * escala;
-
-        QPixmap nubeEscalada = nube.scaled(ancho, alto, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-        int x = i * 300 + QRandomGenerator::global()->bounded(-30, 30);
-        int y = QRandomGenerator::global()->bounded(0, 150);
-
-        QGraphicsPixmapItem* _nube = new QGraphicsPixmapItem(nubeEscalada);
-        _nube->setPos(x, y);
-        escena->addItem(_nube);
-        listaNubes.push_back(_nube);
-    }
-
-    // Timer para animar el movimiento de las nubes
-    if (!timerNubes) {
-        timerNubes = new QTimer(this);
-        connect(timerNubes, &QTimer::timeout, this, [this]() { this->moverNubes(); });
-        timerNubes->start(45);
-    }
 }
 
 

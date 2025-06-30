@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "camaralogica.h"
-#include "carro.h"
 #include "goku.h"
+#include "obstaculo.h"
 #include "vida.h"
 #include "progreso.h"
 
@@ -41,6 +41,8 @@ protected:
     std::vector<QGraphicsPixmapItem*> listaNubes;
 
     std::vector<obstaculo*> listaObstaculos;
+
+    void generarNubes();
 
 
 public:

@@ -38,6 +38,36 @@ int Nivel::getMargenHUD() const {
     return margenHUD;
 }
 
+void Nivel::generarNubes()
+{
+    nube = QPixmap(":/images/nube.png");
+
+    for (int i = 0; i < 35; i++) {   /// Crear las nubes y generarles el movimiento hasta que el nivel termine (Falta)
+        for (int j = 3; j > 0; --j) {
+            float escala = j * 0.05;
+            int ancho = nube.width() * escala;
+            int alto = nube.height() * escala;
+
+            QPixmap nubeEscalada = nube.scaled(ancho, alto, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+            int x = i * 250 + QRandomGenerator::global()->bounded(-60, 100);
+            int y = QRandomGenerator::global()->bounded(0, 80);
+
+            if (x + nubeEscalada.width() <= escena->width()) {
+                QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
+                _nube->setPos(x, y);
+                escena->addItem(_nube);
+                listaNubes.push_back(_nube);
+            }
+        }
+    }
+
+    // Conectar el timer si no está conectado
+    timerNubes = new QTimer(this);
+    connect(timerNubes, &QTimer::timeout, this, &Nivel::moverNubes);
+    timerNubes->start(45);
+}
+
 // Animación básica de las nubes (común a todos los niveles)
 void Nivel::moverNubes()
 {
