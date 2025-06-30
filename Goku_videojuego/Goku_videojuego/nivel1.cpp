@@ -144,8 +144,11 @@ void Nivel1::actualizarNivel()
 
     if (goku->haTocadoCarro() && !gokuYaPateo) {
         gokuYaPateo = true;
-        goku->patadaGokuNivel1();
-        carroFinal->iniciarMovimientoEspiral();
+        goku->patadaGokuNivel1(); //aqui se toma por referncia
+
+        float posXpatada=goku->x();
+        qDebug() << "poscion de goku en x = "<<posXpatada;
+        carroFinal->iniciarMovimientoEspiral(posXpatada);
     }
 
     if (carroFinal->espiralHecha && carroFinal->haLlegadoAlSuelo()) {
