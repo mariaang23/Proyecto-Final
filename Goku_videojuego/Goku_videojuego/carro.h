@@ -9,6 +9,7 @@ class Carro : public obstaculo
     Q_OBJECT
 
 public:
+    static int contCarro;
     Carro(QGraphicsScene *scene, int velocidad, QObject *parent = nullptr);
     ~Carro();
     void iniciar(int x, int y) override;   // Posicionamiento

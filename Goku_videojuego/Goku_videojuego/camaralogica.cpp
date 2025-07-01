@@ -1,10 +1,12 @@
 #include "camaralogica.h"
 #include "qgraphicsitem.h"
-
+int camaraLogica::contCamara=0;
 // Recibe un puntero a la vista (QGraphicsView), la velocidad del movimiento y el objeto padre
 camaraLogica::camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent)
     : QObject(parent), view(vista), velocidad(velocidad)
 {
+    contCamara+=1;
+    qDebug()<<"creo camara constructor "<<contCamara;
     // Crear temporizador para mover camara cada 60 ms
     timer = new QTimer(this);
     // Conectar temporizador con el slot
@@ -12,6 +14,9 @@ camaraLogica::camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent)
 }
 //aunque el padre QTimer realiza la liberacion, por buena practica se realiza en el destructor
 camaraLogica::~camaraLogica() {
+    contCamara-=1;
+    qDebug()<<"camara destructor "<<contCamara;
+    qDebug() << "Destructor de camara llamado";
     delete timer;
 }
 
@@ -24,10 +29,6 @@ void camaraLogica::detenerMovimiento()
 {
     timer->stop();
 }
-
-/*void camaraLogica::setNubes(QList<QGraphicsPixmapItem*> nubes){
-    this -> nubes = nubes;
-}*/
 
 void camaraLogica::moverVista()
 {

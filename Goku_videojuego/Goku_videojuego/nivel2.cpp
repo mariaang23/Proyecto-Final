@@ -11,6 +11,7 @@ Nivel2::Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
 
 Nivel2::~Nivel2()
 {
+    qDebug() << "Destructor de Nivel2 llamado";
     for (auto* pocion : listaPociones)           // Libera memoria de cada poción
         delete pocion;
 

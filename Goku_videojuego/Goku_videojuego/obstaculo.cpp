@@ -3,6 +3,9 @@
 #include "qtimer.h"
 #include <QRandomGenerator>
 
+
+int obstaculo::contObsta=0;
+
 // Constructor del obstáculo
 obstaculo::obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *parent)
     : QObject(parent), velocidad(velocidad), tipo(tipo), scene(scene)
@@ -23,33 +26,15 @@ obstaculo::obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *p
         timerAnimacion = new QTimer(this);
         connect(timerAnimacion, &QTimer::timeout, this, &obstaculo::actualizar);
     }
+
+    contObsta +=1;
+
+    qDebug() << "obstaculos existentes" << contObsta;
 }
 
 // Inicializa la posición del obstáculo y activa los timers
 void obstaculo::iniciar(int x, int y)
 {
-    // Si no se define x, se genera una posición aleatoria dentro del ancho de la escena
-    /*if (x == -1)
-        x = QRandomGenerator::global()->bounded(scene->width());*/
-
-    // Si no se define y, se ajusta según el tipo: aves en el aire, otros en el suelo
-    /*
-    if (y == -1) {
-        switch (tipo) {
-        case Ave:       // pájaro: altura libre (vuela)
-            y = QRandomGenerator::global()->bounded(20, 200);
-            break;
-
-        case Montania:  // montaña: SIEMPRE pegada al suelo
-            y = 600;
-            break;
-
-        case Roca:      // roca: puede o no tocar el suelo
-            y = QRandomGenerator::global()->bounded(350,500);
-            break;
-        }
-    }*/
-
     sprite->setPos(x, y);  // Posicionar el sprite
 
     timerMovimiento->start(60);  // Inicia el movimiento del obstáculo
@@ -107,6 +92,7 @@ void obstaculo::cargarImagenes()
 // Destructor del obstáculo
 obstaculo::~obstaculo()
 {
+    qDebug() << "Destructor de obs llamado";
     delete sprite;
     sprite = nullptr;
 
@@ -118,11 +104,15 @@ obstaculo::~obstaculo()
     }
 
     // Detener y liberar temporizador de animación si es ave
-    if (timerAnimacion) {
+    if (tipo==Ave) {
         timerAnimacion->stop();
         delete timerAnimacion;
         timerAnimacion = nullptr;
     }
+
+    contObsta -=1;
+
+    qDebug() << "obstaculos restantes" << contObsta;
 }
 
 // Función que mueve el obstáculo hacia la izquierda

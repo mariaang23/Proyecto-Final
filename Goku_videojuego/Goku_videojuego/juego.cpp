@@ -18,6 +18,7 @@ juego::juego(QWidget *parent)
 // Destructor: libera todos los recursos
 juego::~juego()
 {
+    qDebug() << "Destructor de juego llamado";
     delete nivel1;
     delete nivel2;
     delete view;

@@ -2,6 +2,8 @@
 #include <QRandomGenerator>
 #include <QGraphicsPixmapItem>
 
+int Nivel::contNubes=0;
+
 // Constructor base de Nivel
 Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero)
     : QWidget(parent), numeroNivel(numero), vista(view), escena(escena)
@@ -17,6 +19,7 @@ Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int n
 // Destructor base
 Nivel::~Nivel()
 {
+    //qDebug() << "Destructor de Nivel llamado";
     delete camara;
     delete goku;
     delete barraVida;
@@ -25,9 +28,11 @@ Nivel::~Nivel()
     delete timerNubes;
 
     // Liberar pixmaps de nubes
-    for (auto *nube : listaNubes)
+    for (auto *nube : listaNubes){
+        contNubes -=1;
+        //qDebug() << "nubes restantes "<<contNubes;
         delete nube;
-
+    }
     // Liberar pixmaps del fondo
     for (auto *fondo : listaFondos)
         delete fondo;
@@ -54,6 +59,8 @@ void Nivel::generarNubes()
             int y = QRandomGenerator::global()->bounded(0, 80);
 
             if (x + nubeEscalada.width() <= escena->width()) {
+                contNubes += 1;
+                //qDebug() << "nubes creadas "<< contNubes;
                 QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
                 _nube->setPos(x, y);
                 escena->addItem(_nube);
@@ -61,7 +68,6 @@ void Nivel::generarNubes()
             }
         }
     }
-
     // Conectar el timer si no está conectado
     timerNubes = new QTimer(this);
     connect(timerNubes, &QTimer::timeout, this, &Nivel::moverNubes);
