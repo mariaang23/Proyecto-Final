@@ -23,6 +23,7 @@ public:
     //metodos de la clase
     void agregarObstaculos();
     void agregarCarroFinal();
+    void quitarCarroVista();
 
 private:
     void agregarRobots(); // Crea los robots enemigos cuando el carro aterriza
