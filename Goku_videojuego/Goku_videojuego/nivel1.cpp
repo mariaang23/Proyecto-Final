@@ -15,7 +15,6 @@ Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
 Nivel1::~Nivel1()
 {
     qDebug() << "Destructor de Nivel1 llamado";
-    delete carroFinal;
     delete r1;
     delete r2;
     delete r3;
@@ -153,6 +152,7 @@ void Nivel1::actualizarNivel()
 
     if (carroFinal->espiralHecha && carroFinal->haLlegadoAlSuelo()) {
         agregarRobots();
+        quitarCarroVista();
     }
 }
 
@@ -188,4 +188,15 @@ void Nivel1::agregarRobots()
         r2->detenerMvtoRobot();
         r3->detenerMvtoRobot();
     });
+}
+
+void Nivel1::quitarCarroVista() {
+    if (carroFinal && escena) {
+        // Eliminar el carro de la escena
+        escena->removeItem(carroFinal->getSprite());
+        // eliminar el objeto carroFinal
+        // como ya se libera aqui, no es necesario ponerlo en el destructor
+        delete carroFinal;
+        carroFinal = nullptr;
+    }
 }
