@@ -18,6 +18,7 @@ juego::juego(QWidget *parent)
 // Destructor: libera todos los recursos
 juego::~juego()
 {
+    qDebug() << "Destructor de juego llamado";
     delete nivel1;
     delete nivel2;
     delete view;
@@ -29,7 +30,7 @@ juego::~juego()
 // Inicia el juego en el nivel 1
 void juego::iniciarJuego()
 {
-    cambiarNivel(2); //Para probar ambos niveles
+    cambiarNivel(1); //Para probar ambos niveles
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente

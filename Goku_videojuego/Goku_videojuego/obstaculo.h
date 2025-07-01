@@ -11,6 +11,7 @@ class obstaculo : public QObject
 {
     Q_OBJECT
 public:
+    static int contObsta;
     enum Tipo {Ave, Montania, Roca};
     obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *parent = nullptr);
     ~obstaculo();
@@ -43,5 +44,4 @@ protected:
     QGraphicsScene *scene;
 
 };
-
 #endif // OBSTACULO_H

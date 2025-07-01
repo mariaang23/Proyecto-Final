@@ -1,5 +1,6 @@
 #include "carro.h"
 
+int Carro::contCarro=0;
 Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
     : obstaculo(scene, obstaculo::Roca, velocidad, parent), anguloActual(0), girando(false)
 {
@@ -19,10 +20,16 @@ Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
     //conexion para el movimiento
     timerEspiral = new QTimer(this);
     connect(timerEspiral, &QTimer::timeout, this, &Carro::actualizarMovimiento);
+    contCarro+=1;
+    qDebug()<<"creo carro constructor "<<contCarro;
 
 }
 
 Carro::~Carro() {
+    //qDebug() << "Destructor de carro llamado";
+    contCarro-=1;
+    qDebug()<<"libero carro desstructor "<<contCarro;
+    timerEspiral->stop();
     delete timerEspiral; // Eliminar el temporizador creado con new
 }
 
@@ -44,9 +51,15 @@ bool Carro::estaGirando() const {
     return girando;
 }
 
-void Carro::iniciarMovimientoEspiral()
+void Carro::iniciarMovimientoEspiral(float _posXpatada)
 {
     if (espiralHecha || fase != 3) return;         // si ya estaba girando, no hacer nada
+
+    posXpatada = _posXpatada; //se toma por referencia en nivel 1 la posicion en x que quedo goku cuando pateo
+
+    //cambiamos los valores de inicio para que se realice el movimiento mas lejos de goku y no pase por encima
+    inicio.setX(posXpatada + 1000); // Ajusta la distancia
+    inicio.setY(sprite->y());      // Mantener la misma altura inicial
 
     espiralHecha = true;
     fase   = 0;                    // comenzamos con la fase de subida
@@ -62,7 +75,8 @@ void Carro::actualizarMovimiento()
 
     if (fase == 0)  // Subida
     {
-        float x = inicio.x() + vx * tiempo;
+        // el numero 127 sale de la resta de las posiciones finales para evitar que el carro pase por encima de goku
+        float x = 127 + inicio.x() + vx * tiempo;
         float y = inicio.y() - vy * tiempo + 0.5f * g * tiempo * tiempo;
         sprite->setPos(x, y);
 
@@ -81,7 +95,7 @@ void Carro::actualizarMovimiento()
         sprite->setPos(x, y);
 
         if (tiempo >= tiempoGiro) {
-            inicio = sprite->pos();  // guardamos el punto final del círculo
+            inicio = sprite->pos();  // guardamos el punto final del circulo
             tiempo = 0.0f;
             fase = 2;
         }
@@ -90,6 +104,9 @@ void Carro::actualizarMovimiento()
     {
         float y = inicio.y() + 0.5f * g * tiempo * tiempo;
         sprite->setY(y);
+
+        //float posXcarroFinal=sprite->x();
+        //qDebug() << "poscion de carro final en x = "<<posXcarroFinal;
 
         if (y >= ySuelo) {
             sprite->setY(ySuelo);

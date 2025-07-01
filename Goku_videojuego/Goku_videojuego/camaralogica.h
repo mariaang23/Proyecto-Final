@@ -11,6 +11,7 @@ class camaraLogica : public QObject
     Q_OBJECT
 
 public:
+    static int contCamara ;
     camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent = nullptr);
     ~camaraLogica();
     void iniciarMovimiento();

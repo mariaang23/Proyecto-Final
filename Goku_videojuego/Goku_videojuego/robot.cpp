@@ -28,6 +28,7 @@ Robot::Robot(QGraphicsScene *scene,
 
 Robot::~Robot()
 {
+    qDebug() << "Destructor de robot llamado";
     delete sprite; // Eliminar el sprite creado con new
 
     // Detener y eliminar los temporizadores

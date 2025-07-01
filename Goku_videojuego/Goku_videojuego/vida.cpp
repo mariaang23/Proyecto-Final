@@ -64,7 +64,9 @@ Vida::Vida(QWidget *parent)
 }
 
 // Destructor: los hijos (texto, barra, layout) se destruyen automáticamente
-Vida::~Vida() {}
+Vida::~Vida() {
+    qDebug() << "Destructor de vida llamado";
+}
 
 // --- Método para reducir la vida ---
 void Vida::restar(int cantidad)

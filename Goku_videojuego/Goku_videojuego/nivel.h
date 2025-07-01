@@ -46,6 +46,7 @@ protected:
 
 
 public:
+    static int contNubes;
     explicit Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero);
     virtual ~Nivel();
 

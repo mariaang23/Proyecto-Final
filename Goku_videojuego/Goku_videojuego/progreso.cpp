@@ -20,6 +20,7 @@ Progreso::Progreso(QWidget *parent) : QWidget(parent), porcentaje(0.0f)
 
 Progreso::~Progreso()
 {
+    qDebug() << "Destructor de progreso llamado";
     delete iconoCarro;
 }
 
