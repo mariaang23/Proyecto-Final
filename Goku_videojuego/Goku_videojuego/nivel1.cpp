@@ -1,5 +1,5 @@
 #include "nivel1.h"
-#include "goku.h"
+#include "goku1.h"
 #include "robot.h"
 #include "obstaculo.h"
 #include <QRandomGenerator>
@@ -74,7 +74,10 @@ void Nivel1::agregarGoku()
     barraProgreso->move(20, 60);
     barraProgreso->show();
 
-    goku = new Goku(escena, velocidad, 200, 249, 1, this);
+    // Crear Goku1 y cargar imagen luego
+    goku = new Goku1(escena, velocidad, 200, 249, this);
+    static_cast<Goku1*>(goku)->cargarImagen(); // llamada segura al método virtual
+
     goku->setBarraVida(barraVida);
     goku->iniciar(posX, posY);
     goku->setFocus();
@@ -89,6 +92,7 @@ void Nivel1::agregarGoku()
     });
     timerProgreso->start(50);
 }
+
 
 // Agrega el carro final al nivel
 void Nivel1::agregarCarroFinal()
@@ -141,12 +145,14 @@ void Nivel1::actualizarNivel()
 {
     if (!goku || !carroFinal) return;
 
-    if (goku->haTocadoCarro() && !gokuYaPateo) {
+    // Intentamos hacer cast a Goku1 para acceder a métodos específicos de nivel 1
+    Goku1* goku1 = dynamic_cast<Goku1*>(goku);
+    if (goku1 && goku1->haTocadoCarro() && !gokuYaPateo) {
         gokuYaPateo = true;
-        goku->patadaGokuNivel1(); //aqui se toma por referncia
+        goku1->patadaGokuNivel1();
 
-        float posXpatada=goku->x();
-        qDebug() << "poscion de goku en x = "<<posXpatada;
+        float posXpatada = goku1->x();
+        qDebug() << "posición de Goku en x = " << posXpatada;
         carroFinal->iniciarMovimientoEspiral(posXpatada);
     }
 
@@ -155,6 +161,7 @@ void Nivel1::actualizarNivel()
         quitarCarroVista();
     }
 }
+
 
 // Agrega enemigos robots cuando el carro cae
 void Nivel1::agregarRobots()
