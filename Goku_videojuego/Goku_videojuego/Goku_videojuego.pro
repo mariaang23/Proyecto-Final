@@ -8,6 +8,8 @@ SOURCES += \
     camaralogica.cpp \
     carro.cpp \
     goku.cpp \
+    goku1.cpp \
+    goku2.cpp \
     juego.cpp \
     main.cpp \
     nivel.cpp \
@@ -23,6 +25,8 @@ HEADERS += \
     camaralogica.h \
     carro.h \
     goku.h \
+    goku1.h \
+    goku2.h \
     juego.h \
     nivel.h \
     nivel1.h \

@@ -26,6 +26,7 @@ public:
     void quitarCarroVista();
 
 private:
+
     void agregarRobots(); // Crea los robots enemigos cuando el carro aterriza
 
     Carro* carroFinal = nullptr;
