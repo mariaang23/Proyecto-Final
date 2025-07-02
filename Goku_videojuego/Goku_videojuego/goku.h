@@ -3,9 +3,11 @@
 
 #include <QObject>
 #include <QGraphicsPixmapItem>
-#include <QTimer>
+#include <QGraphicsScene>
 #include <QKeyEvent>
+#include <QTimer>
 #include <QVector>
+
 #include "vida.h"
 
 class Goku : public QObject, public QGraphicsPixmapItem
@@ -13,37 +15,48 @@ class Goku : public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 
 public:
-    Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHeight, int _nivel, QObject *parent = nullptr);
+    Goku(QGraphicsScene *scene, int velocidad, int fotogWidth, int fotogHeight, int nivel, QObject *parent = nullptr);
     ~Goku();
 
-    void cargarImagen();
-    void iniciar(int x = -1, int y = -1);
-
-    void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
-
+    void iniciar(int x, int y);
     void setBarraVida(Vida* barra);
     void recibirDanio(int cantidad);
+    void detener();
+    void patadaGokuNivel1();
 
-    void actualizarFrame(int indice);
     QString detectarColision() const;
     bool haTocadoCarro() const;
     bool haTocadoObstaculo() const;
-    void patadaGokuNivel1();
-    void mientrasTocaObstaculo();
 
-    // Detiene por completo el desplazamiento y la entrada de teclas
-    void detener();
+    void setSueloY(float y);
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private slots:
     void mover();
 
 private:
+    void cargarImagen();
+    void actualizarFrame(int indice);
+    void mientrasTocaObstaculo();
+
+    void actualizarSpriteSalto();       // Solo nivel 2
+    void actualizarSpriteCaminar(bool derecha); // Solo nivel 2
+
     QGraphicsScene *scene;
-    QVector<QPixmap> frames;
-    int frameActual;
     QTimer *timerMovimiento;
+    QTimer *timerSalto;                 // <--- Agregado timerSalto
+    QVector<QPixmap> frames;
+
+    QTimer* timerDanio;
+    bool puedeRecibirDanio;
+
+
+    int frameActual;
+    int contadorCaminata;  // Solo nivel 2
+
     int velocidad;
     int fotogWidth;
     int fotogHeight;
@@ -51,11 +64,23 @@ private:
 
     bool mvtoArriba;
     bool mvtoAbajo;
-    bool tocoCarro;
-    bool tocoObstaculo;
+    bool mvtoIzquierda;
+    bool mvtoDerecha;
+    bool mirandoDerecha;
     bool yaRecibioDanio;
 
-    Vida* vidaHUD = nullptr; // Nueva: barra de vida en HUD
+    Vida* vidaHUD;
+    bool tocoCarro;
+    bool tocoObstaculo;
+
+    // Físicas para nivel 2
+    qreal yInicial;
+    bool enSalto;
+    float tiempoSalto;
+    float gravedad;
+    float sueloY;
+    float velocidadVertical = 0;
+
 };
 
 #endif // GOKU_H
