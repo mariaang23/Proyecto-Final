@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QDebug>
-#include <iostream>
 
 using namespace std;
 int liberar = 0;
@@ -20,6 +19,10 @@ void operator delete(void* p, std::size_t){
     liberar-=1;
 
     qDebug() << "memoria restante "<<liberar;
+    free(p);
+}
+
+void operator delete(void* p) noexcept {
     free(p);
 }
 

@@ -1,98 +1,172 @@
 #include "goku.h"
-#include "qgraphicsitem.h"
-#include "qgraphicsscene.h"
-#include "qtimer.h"
 #include <QKeyEvent>
-#include <QMessageBox>
 #include <QDebug>
-#include <QThread>
 #include <QCoreApplication>
+#include <QThread>
+#include <QtMath>
 
-// Constructor de Goku
 Goku::Goku(QGraphicsScene *scene, int _velocidad, int _fotogWidth, int _fotogHeight, int _nivel, QObject *parent)
     : QObject(parent),
     QGraphicsPixmapItem(),
     scene(scene),
     frameActual(1),
+    contadorCaminata(0),
     velocidad(_velocidad),
     fotogWidth(_fotogWidth),
     fotogHeight(_fotogHeight),
     nivel(_nivel),
     mvtoArriba(false),
     mvtoAbajo(false),
+    mvtoIzquierda(false),
+    mvtoDerecha(false),
+    mirandoDerecha(true),
     yaRecibioDanio(false),
-    vidaHUD(nullptr) // No se crea aquí, se recibirá desde fuera
+    vidaHUD(nullptr),
+    enSalto(false),
+    tiempoSalto(0.0f),
+    gravedad(0.8f),
+    sueloY(300.0f),
+    velocidadVertical(0.0f)
 {
-    scene->addItem(this);    // Añadir a la escena
-    cargarImagen();          // Cargar los sprites del personaje
+    // Agrega este objeto a la escena para que se dibuje
+    scene->addItem(this);
+    // Carga los sprites según el nivel
+    cargarImagen();
 
-    setFlag(QGraphicsItem::ItemIsFocusable); // Para que reciba teclas
-    setFocus();                              // Toma el foco inmediatamente
+    // Permite que el objeto reciba eventos de teclado
+    setFlag(QGraphicsItem::ItemIsFocusable);
+    setFocus();
 
-    // Timer para controlar el movimiento con el tiempo
+    // Timer para movimiento horizontal y vertical
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout, this, &Goku::mover);
 
-    // Inicializar banderas de colisión
+    // Timer para manejar el salto, con una lambda que actualiza la física del salto
+    timerSalto = new QTimer(this);
+    connect(timerSalto, &QTimer::timeout, this, [this]() {
+        /*
+            Física del salto (movimiento vertical con aceleración constante):
+
+            Variables:
+            y = posición vertical
+            v = velocidad vertical
+            g = gravedad (constante positiva hacia abajo)
+
+            Ecuaciones discretas por frame:
+            v(t+1) = v(t) + g
+            y(t+1) = y(t) + v(t+1)
+
+            Al iniciar el salto, se da una velocidad inicial negativa (hacia arriba).
+            La gravedad incrementa la velocidad hacia abajo en cada frame,
+            haciendo que Goku suba, desacelere, y luego caiga.
+        */
+        velocidadVertical += gravedad;  // Incrementa velocidad vertical por gravedad (aceleración)
+
+        qreal nuevaY = y() + velocidadVertical;  // Actualiza posición vertical sumando la velocidad
+
+        // Si Goku cae más allá del suelo, se posiciona en el suelo y termina el salto
+        if (nuevaY >= sueloY) {
+            nuevaY = sueloY;
+            enSalto = false;         // Ya no está saltando
+            velocidadVertical = 0;   // Velocidad vertical se reinicia
+            timerSalto->stop();      // Detiene timer de salto
+
+            actualizarSpriteCaminar(mirandoDerecha);  // Actualiza sprite a caminar cuando aterriza
+        }
+
+        setY(nuevaY);
+    });
+
+    // Inicializa colisiones
     tocoCarro = false;
     tocoObstaculo = false;
+
+    // --- Protección contra daño continuo de obstáculos (nivel 1) ---
+    puedeRecibirDanio = true;  // Goku inicia con posibilidad de recibir daño
+
+    timerDanio = new QTimer(this);  // Timer que habilita el daño tras cierto tiempo
+    timerDanio->setSingleShot(true);  // Solo se dispara una vez por activación
+
+    connect(timerDanio, &QTimer::timeout, this, [=]() {
+        puedeRecibirDanio = true;  // Habilita recibir daño otra vez después del tiempo
+    });
 }
 
-// Carga los frames de Goku desde un sprite sheet
+
 void Goku::cargarImagen() {
-
-    QPixmap spriteSheet(":/images/GokuSpriter.png");
-
-    // Intentar ruta alternativa si falla el recurso
-    if (spriteSheet.isNull()) {
-        spriteSheet.load("imagenes/GokuSpriter.png");
-    }
-    if (spriteSheet.isNull()) {
-        QMessageBox::critical(nullptr, "Error", "No se encontró GokuSpriter.png; verifica el .qrc o la ruta.");
-        return;
-    }
-
-    // Cortar el sprite en frames individuales (4 en este caso)
     frames.clear();
-    for (int i = 0; i < 5; ++i) {
-        frames.append(spriteSheet.copy(i * fotogWidth, 0, fotogWidth, fotogHeight));
-    }
 
-    // Mostrar el primer frame
-    if (!frames.isEmpty()) {
+    if (nivel == 1) {
+        // Carga el sprite sheet para nivel 1
+        QPixmap spriteSheet(":/images/GokuSpriter.png");
+        if (spriteSheet.isNull()) spriteSheet.load("imagenes/GokuSpriter.png");
+
+        // Si no se encuentra la imagen, muestra error por consola
+        if (spriteSheet.isNull()) {
+            qDebug() << "Error: No se encontró GokuSpriter.png";
+            return;
+        }
+
+        // Extrae frames individuales del sprite sheet
+        for (int i = 0; i < 5; ++i) {
+            frames.append(spriteSheet.copy(i * fotogWidth, 0, fotogWidth, fotogHeight));
+        }
+
+        // Establece frame inicial
         setPixmap(frames[1]);
-        setScale(0.8); // Escalar al 80% del tamaño original
+
+    } else if (nivel == 2) {
+        // Carga imagen de caminar para nivel 2
+        QPixmap sprite(":/images/Goku_caminando.png");
+        if (sprite.isNull()) sprite.load("imagenes/Goku_caminando.png");
+
+        if (sprite.isNull()) {
+            qDebug() << "Error: No se encontró Goku_caminando.png";
+            return;
+        }
+
+        // Usa fotogWidth y fotogHeight para definir el recorte del sprite
+        setPixmap(sprite.copy(0, 0, fotogWidth, fotogHeight));
     }
 }
 
-// Posiciona a Goku y arranca su movimiento
 void Goku::iniciar(int x, int y) {
     setPos(x, y);
-    timerMovimiento->start(60); // Actualizar posición cada 60 ms
+    sueloY = y;          // Define el nivel del suelo para el salto
+    timerMovimiento->start(60);  // Inicia timer que mueve a Goku aprox cada 60 ms
 }
 
-// Método principal de movimiento
 void Goku::mover() {
-    if (nivel == 1) {
-        int movimientoVertical = 0;
+    /*
+        Movimiento nivel 1:
 
-        // Detectar teclas presionadas
+        Movimiento vertical con teclas W/S:
+        - Si W se presiona, mvtoArriba = true => mueve hacia arriba (y disminuye)
+        - Si S se presiona, mvtoAbajo = true => mueve hacia abajo (y aumenta)
+
+        Movimiento horizontal constante hacia la derecha con velocidad fija.
+
+        Para limitar el movimiento dentro de la escena, se usan límites en x e y.
+
+        No hay aceleración, solo velocidad constante: Δx = velocidad, Δy = ±velocidad.
+    */
+    if (nivel == 1) {
+        // Movimiento vertical según teclas W y S
+        int movimientoVertical = 0;
         if (mvtoArriba) movimientoVertical = -velocidad;
         else if (mvtoAbajo) movimientoVertical = velocidad;
 
-        // Calcular nueva posición en X
-        qreal nuevaX = x() + velocidad;
+        qreal nuevaX = x() + velocidad;  // Movimiento horizontal fijo a la derecha
+        qreal limiteX = scene->width() - pixmap().width();
 
-        // Limitar X para no pasarse del borde derecho
-        qreal limiteX = scene->width() - pixmap().width() * scale();
-
+        // Verifica que no se pase del límite derecho
         if (nuevaX <= limiteX) {
             moveBy(velocidad, movimientoVertical);
         } else {
             setX(limiteX);
         }
 
-        // Corregir Y para no salirse de la escena
+        // Limita verticalmente la posición dentro de la escena
         QPointF posicionActual = this->pos();
         const int altoEscena = scene->height();
         const int altoSprite = pixmap().height() - 80;
@@ -101,15 +175,14 @@ void Goku::mover() {
         posicionActual.setY(nuevaY);
         setPos(posicionActual);
 
-        // Reiniciar colisiones
+        // Reinicia colisiones
         tocoCarro = false;
         tocoObstaculo = false;
 
-        // Revisar colisiones
+        // Detecta colisiones con carros y obstáculos
         const QList<QGraphicsItem*> &items = collidingItems();
         for (QGraphicsItem *item : items) {
             QString etiqueta = item->data(0).toString();
-
             if (etiqueta == "carro") {
                 tocoCarro = true;
                 break;
@@ -118,149 +191,229 @@ void Goku::mover() {
             }
         }
 
-        // Reacciones a colisiones
         if (tocoCarro) {
-            // TODO: lógica de fin de nivel
-
-            yaRecibioDanio = false; // Reiniciar para próximas colisiones
-        } else if (tocoObstaculo) {
-            if (!yaRecibioDanio) {
-                recibirDanio(20);
-                yaRecibioDanio = true;
-            }
-        } else{
-            yaRecibioDanio = false;
+            yaRecibioDanio = false; // Resetea el estado si toca el carro
+        } else if (tocoObstaculo && puedeRecibirDanio) {
+            recibirDanio(20);
+            puedeRecibirDanio = false;
+            timerDanio->start(1000); // 1 segundo de inmunidad
         }
 
-        //mantener el frame 0 mientras dure la colision
+        // Actualiza sprite si toca obstáculo
         mientrasTocaObstaculo();
-    } else if (nivel == 2) {
-        // TODO: implementar lógica para nivel 2
+    }
+
+    else if (nivel == 2) {
+        /*
+        Movimiento nivel 2:
+
+        Movimiento horizontal controlado por teclas A y D:
+        - A mueve hacia izquierda (x disminuye)
+        - D mueve hacia derecha (x aumenta)
+
+        Velocidad constante, sin aceleración.
+
+        El salto se maneja en timerSalto con física de movimiento uniformemente acelerado.
+        */
+        qreal nuevaX = x();
+        qreal limiteIzq = 0;
+        qreal limiteDer = scene->width() - pixmap().width();
+
+        if (mvtoDerecha) {
+            nuevaX += velocidad;
+        } else if (mvtoIzquierda) {
+            nuevaX -= velocidad;
+        }
+
+        // Limita el movimiento dentro de la escena horizontalmente
+        if (nuevaX < limiteIzq) nuevaX = limiteIzq;
+        if (nuevaX > limiteDer) nuevaX = limiteDer;
+
+        setX(nuevaX);
+
+        // Actualiza sprite de caminar si no está saltando
+        if (!enSalto) {
+            if (mvtoDerecha)
+                actualizarSpriteCaminar(true);
+            else if (mvtoIzquierda)
+                actualizarSpriteCaminar(false);
+        }
+
+        // Limita la posición vertical para no salirse de la escena
+        if (y() < 0)
+            setY(0);
+        if (y() + pixmap().height() > scene->height())
+            setY(scene->height() - pixmap().height());
     }
 }
 
 
-// Evento al presionar teclas
 void Goku::keyPressEvent(QKeyEvent *event) {
-    switch (event->key()) {
-    case Qt::Key_W:
-        mvtoArriba = true;
-        actualizarFrame(1); // Regresar al sprite principal
-        break;
-    case Qt::Key_S:
-        mvtoAbajo = true;
-        actualizarFrame(2); // Cambiar sprite a posición descendente
-        break;
+    if (nivel == 1) {
+        // Movimiento vertical con W y S, cambia frame para animar
+        if (event->key() == Qt::Key_W) mvtoArriba = true, actualizarFrame(1);
+        else if (event->key() == Qt::Key_S) mvtoAbajo = true, actualizarFrame(2);
+    } else if (nivel == 2) {
+        /*
+            Salto:
+            Cuando se presiona W y Goku no está saltando,
+            se asigna una velocidad inicial vertical negativa (impulso hacia arriba)
+            y se activa el timer que actualiza posición vertical y velocidad.
+
+            Física del salto:
+            v0 = -15 (velocidad inicial hacia arriba)
+            g = 0.8 (gravedad)
+
+            El timer actualiza velocidad y posición con:
+            v(t+1) = v(t) + g
+            y(t+1) = y(t) + v(t+1)
+        */
+        if (event->key() == Qt::Key_W && !enSalto) {
+            enSalto = true;
+            velocidadVertical = -15.0f;  // Impulso hacia arriba
+            timerSalto->start(16);        // Aproximadamente 60 FPS para física salto
+            actualizarSpriteSalto();
+        } else if (event->key() == Qt::Key_D) mvtoDerecha = true;
+        else if (event->key() == Qt::Key_A) mvtoIzquierda = true;
     }
 }
 
-// Evento al soltar teclas
 void Goku::keyReleaseEvent(QKeyEvent *event) {
-    switch (event->key()) {
-    case Qt::Key_W:
-        mvtoArriba = false;
-        break;
-    case Qt::Key_S:
-        mvtoAbajo = false;
-        actualizarFrame(1); // Regresar al sprite principal
-        break;
+    if (nivel == 1) {
+        // Detiene movimiento vertical cuando suelta W o S
+        if (event->key() == Qt::Key_W) mvtoArriba = false;
+        else if (event->key() == Qt::Key_S) mvtoAbajo = false, actualizarFrame(1);
+    } else if (nivel == 2) {
+        // Detiene movimiento horizontal al soltar A o D
+        if (event->key() == Qt::Key_D) mvtoDerecha = false;
+        else if (event->key() == Qt::Key_A) mvtoIzquierda = false;
     }
 }
 
-// Cambiar el frame actual (imagen) de Goku
 void Goku::actualizarFrame(int indice) {
+    // Cambia el frame actual de nivel 1
     if (indice >= 0 && indice < frames.size())
         setPixmap(frames[indice]);
 }
 
-// Detectar colisiones con "carro" u "obstaculo"
+void Goku::actualizarSpriteCaminar(bool derecha) {
+    // Carga sprite sheet de caminar para nivel 2
+    QPixmap sprite(":/images/Goku_caminando.png");
+    if (sprite.isNull()) sprite.load("imagenes/Goku_caminando.png");
+
+    if (sprite.isNull()) {
+        qDebug() << "Error: No se encontró Goku_caminando.png";
+        return;
+    }
+
+    int totalFrames = sprite.width() / fotogWidth;
+
+    // Animación simple que avanza un frame en cada llamada
+    static int frameIndex = 0;
+    frameIndex = (frameIndex + 1) % totalFrames;
+
+    // Actualiza el pixmap con el frame correspondiente
+    setPixmap(sprite.copy(frameIndex * fotogWidth, 0, fotogWidth, fotogHeight));
+
+    // Si cambia de dirección, aplica transformación para voltear la imagen
+    if (mirandoDerecha != derecha) {
+        mirandoDerecha = derecha;
+
+        QTransform transform;
+        if (!mirandoDerecha) {
+            transform.scale(-1, 1); // Voltea horizontalmente
+            transform.translate(-pixmap().width(), 0);
+        }
+        setTransform(transform);
+    }
+}
+
+void Goku::actualizarSpriteSalto() {
+    // Carga el sprite de salto para nivel 2
+    QPixmap sprite(":/images/Goku_saltando.png");
+    if (sprite.isNull()) sprite.load("imagenes/Goku_saltando.png");
+
+    if (sprite.isNull()) return;
+
+    // Actualiza pixmap con la imagen de salto
+    setPixmap(sprite.copy(0, 0, 200, 256));
+
+    // Aplica transformación horizontal si está mirando hacia la izquierda
+    QTransform transform;
+    if (!mirandoDerecha) {
+        transform.scale(-1, 1);
+        transform.translate(-pixmap().width(), 0);
+        setTransform(transform);
+    } else {
+        setTransform(QTransform());
+    }
+}
+
+void Goku::mientrasTocaObstaculo() {
+    // Si toca obstáculo, fija un frame especial para mostrar daño o bloqueo
+    if (tocoObstaculo) {
+        if (pixmap().cacheKey() != frames[0].cacheKey())
+            actualizarFrame(0);
+        return;
+    }
+
+    // Si no toca obstáculo, actualiza el frame según movimiento vertical
+    if (mvtoAbajo) actualizarFrame(2);
+    else actualizarFrame(1);
+}
+
 QString Goku::detectarColision() const {
+    // Retorna etiqueta del primer objeto con el que colisiona que sea "carro" u "obstaculo"
     const QList<QGraphicsItem*> &items = collidingItems();
     for (QGraphicsItem *item : items) {
-        const QString etiqueta = item->data(0).toString();
+        QString etiqueta = item->data(0).toString();
         if (etiqueta == "carro" || etiqueta == "obstaculo")
             return etiqueta;
     }
     return "";
 }
 
-// Saber si tocó un carro
-bool Goku::haTocadoCarro() const {
-    return tocoCarro;
-}
+bool Goku::haTocadoCarro() const { return tocoCarro; }
+bool Goku::haTocadoObstaculo() const { return tocoObstaculo; }
 
-// Saber si tocó un obstáculo
-bool Goku::haTocadoObstaculo() const {
-    return tocoObstaculo;
-}
+void Goku::setBarraVida(Vida* barra) { vidaHUD = barra; }
 
-// Asignar barra de vida externa (HUD)
-void Goku::setBarraVida(Vida* barra) {
-    vidaHUD = barra;
-}
-
-// Quitarle vida a Goku al recibir daño
 void Goku::recibirDanio(int cantidad) {
+    // Resta vida al HUD y avisa si la vida llegó a cero o menos
     if (vidaHUD) {
         vidaHUD->restar(cantidad);
-
-        if (vidaHUD->obtenerVida() <= 0) {
+        if (vidaHUD->obtenerVida() <= 0)
             qDebug() << "Goku ha perdido toda la vida";
-            // Aquí podrías detener el juego o mostrar un mensaje
-        }
     }
 }
 
-// Destructor: no elimina la barra de vida, porque no la creó
-Goku::~Goku() {
-    qDebug() << "Destructor de goku llamado";
-    delete timerMovimiento; // Eliminar el temporizador creado con new
-    vidaHUD = nullptr;
-}
-
-void Goku::patadaGokuNivel1()
-{
-    // Mostrar frame de agacharse
-    actualizarFrame(3);  //frame 3 es agachado
+void Goku::patadaGokuNivel1() {
+    // Animación simple para patada nivel 1: cambia frames, espera, y luego detiene movimiento
+    actualizarFrame(3);
     QCoreApplication::processEvents();
-    QThread::msleep(200);  // Esperar para que se vea el frame
-
-    // Mostrar frame de patada
-    actualizarFrame(4);  // frame 4 es patada
+    QThread::msleep(200);
+    actualizarFrame(4);
     QCoreApplication::processEvents();
-    QThread::msleep(200);  // Esperar para que se vea la patada
-
-    //detener a goku cuando ya pateo
+    QThread::msleep(200);
     detener();
 }
 
-void Goku::detener()
-{
-    // Apagar el timer de movimiento
+void Goku::detener() {
+    // Detiene el timer de movimiento y resetea movimientos verticales
     if (timerMovimiento && timerMovimiento->isActive())
         timerMovimiento->stop();
 
-    // Reiniciar banderas de desplazamiento vertical
     mvtoArriba = mvtoAbajo = false;
-
-    // Dejarlo en su frame 1
     actualizarFrame(1);
 }
 
-void Goku::mientrasTocaObstaculo()
-{
-    //esta tocando?
-    if (tocoObstaculo) {
+void Goku::setSueloY(float y) { sueloY = y; }
 
-        // Si no esta ya en rojo se cambia
-        if (pixmap().cacheKey() != frames[0].cacheKey())
-            actualizarFrame(0);      // frame 0 = modo daño
-        return;
-    }
-
-    // dejo de tocar, volver al frame apropiado segun su estado vertical
-    if (mvtoAbajo)
-        actualizarFrame(2);          // agachado
-    else
-        actualizarFrame(1);          // idle
+Goku::~Goku() {
+    // Limpieza de timers para evitar fugas de memoria
+    qDebug() << "Destructor de Goku llamado";
+    delete timerMovimiento;
+    delete timerSalto;
+    delete timerDanio;
+    vidaHUD = nullptr;
 }
