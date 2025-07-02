@@ -57,6 +57,10 @@ public:
     virtual void agregarGoku() = 0;
     virtual void actualizarNivel() = 0;
 
+    // nivel.h
+    Goku* getGoku() const { return goku; }
+
+
 protected slots:
     void moverNubes();
 };

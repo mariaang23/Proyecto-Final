@@ -24,6 +24,8 @@ public:
     void agregarObstaculos();
     void agregarCarroFinal();
     void quitarCarroVista();
+    Goku* getGoku() const;
+
 
 private:
 

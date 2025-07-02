@@ -16,9 +16,6 @@ Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
     sueloY(300),
     velocidadVertical(0)
 {
-    // Carga el sprite inicial
-    cargarImagen();
-
     // Timer para movimiento horizontal
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout, this, &Goku2::mover);

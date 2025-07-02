@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-
 #include "nivel1.h"
 #include "nivel2.h"
 
@@ -21,16 +20,19 @@ class juego : public QMainWindow
 public:
     explicit juego(QWidget *parent = nullptr);
     ~juego();
-    void iniciarJuego();
-    void cambiarNivel(int numero);
+
+private slots:
+    void iniciarJuego();         // Slot que se activa al presionar el botón de inicio
 
 private:
     Ui::juego *ui;
     QGraphicsScene *scene;
     QGraphicsView *view;
-    Nivel1* nivel1;
-    Nivel2* nivel2;
-    Nivel* nivelActual;
+    Nivel1 *nivel1;
+    Nivel2 *nivel2;
+    Nivel *nivelActual;
+
+    void cambiarNivel(int numero);  // Método privado para cambiar entre niveles
 };
 
 #endif // JUEGO_H
