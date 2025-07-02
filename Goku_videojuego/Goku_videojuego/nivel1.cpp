@@ -42,6 +42,8 @@ void Nivel1::iniciarNivel()
     timerNivel = new QTimer(this);
     connect(timerNivel, &QTimer::timeout, this, &Nivel1::actualizarNivel);
     timerNivel->start(20);
+
+
 }
 
 // Implementación de método obligatorio: carga fondo
@@ -77,10 +79,8 @@ void Nivel1::agregarGoku()
     // Crear Goku1 y cargar imagen luego
     goku = new Goku1(escena, velocidad, 200, 249, this);
     static_cast<Goku1*>(goku)->cargarImagen(); // llamada segura al método virtual
-
     goku->setBarraVida(barraVida);
     goku->iniciar(posX, posY);
-    goku->setFocus();
 
     QTimer* timerProgreso = new QTimer(this);
     connect(timerProgreso, &QTimer::timeout, this, [=]() {
@@ -206,4 +206,8 @@ void Nivel1::quitarCarroVista() {
         delete carroFinal;
         carroFinal = nullptr;
     }
+}
+
+Goku* Nivel1::getGoku() const {
+    return goku;
 }

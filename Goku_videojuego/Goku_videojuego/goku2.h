@@ -12,12 +12,12 @@ public:
 
     void detener() override;
     void iniciar(int x, int y) override;
+    void cargarImagen() override;
     void setSueloY(float y);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
-    void cargarImagen() override;
     void mover() override;
 
 private:

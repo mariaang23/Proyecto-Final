@@ -38,8 +38,9 @@ void Nivel2::agregarGoku() {
     int altoFrame = 298;
     int velocidad = 12;
 
-    // Crear Goku2 (NO Goku, que es abstracta)
+    // Crear Goku2
     goku = new Goku2(escena, velocidad, anchoFrame, altoFrame, this);
+    static_cast<Goku2*>(goku)->cargarImagen();
 
     int xInicial = 100;
     int yInicial = vista->height() - altoFrame - 30;
@@ -97,3 +98,6 @@ void Goku2::detener() {
     timerSalto->stop();
 }
 
+Goku* Nivel2::getGoku() const {
+    return goku;
+}

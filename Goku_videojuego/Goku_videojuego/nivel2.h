@@ -18,6 +18,7 @@ public:
     void cargarFondoNivel(const QString &ruta) override;
     void agregarGoku() override;
     void actualizarNivel() override;
+    Goku* getGoku() const;
 
 private:
     void agregarPociones();
