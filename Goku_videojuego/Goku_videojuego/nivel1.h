@@ -28,9 +28,6 @@ public:
     bool haTerminado() const;
     Goku* getGoku() const;
 
-signals:
-    juegoTerminado();
-
 private:
     void agregarRobots(); // Crea los robots enemigos cuando el carro aterriza
 

@@ -46,8 +46,6 @@ protected:
     Vida* vidaHUD;
     bool puedeRecibirDanio;
 
-private signals:
-    void gokuMurio();
 };
 
 #endif // GOKU_H

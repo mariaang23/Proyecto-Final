@@ -208,8 +208,8 @@ void Nivel1::gameOver() {
     }
 
     nivelTerminado = true;
-    emit juegoTerminado(); // Emite la señal de finalización del juego
 }
+
 // Indica si el nivel ha terminado
 bool Nivel1::haTerminado() const
 {

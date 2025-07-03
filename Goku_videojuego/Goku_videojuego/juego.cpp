@@ -24,10 +24,6 @@ juego::juego(QWidget *parent)
     // Conectar botón de iniciar con la función que arranca el juego
     connect(ui->botonIniciar, &QPushButton::clicked, this, &juego::iniciarJuego);
 
-    // Crear un temporizador para actualizar el estado del juego
-    /*timerEstado = new QTimer(this);
-    connect(timerEstado, &QTimer::timeout, this, &juego::actualizarEstado);
-    timerEstado->start(1000); // Verificar cada segundo*/
 }
 
 // Destructor: libera todos los recursos
@@ -52,7 +48,7 @@ void juego::iniciarJuego()
     ui->widget->setEnabled(false);      // Evita que el widget del menú reciba foco
     ui->widget->clearFocus();           // Libera foco del menú
 
-    cambiarNivel(2);                    // Cambia al nivel 1
+    cambiarNivel(1);                    // Cambia al nivel 1
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente
@@ -113,11 +109,4 @@ void juego::cambiarNivel(int numero)
     view->show();
 }
 
-// Nuevo método para actualizar el estado del juego
-/*
-void juego::actualizarEstado() {
-    if (nivelActual == nivel1 && nivel1->haTerminado()) {
-        // El nivel 1 ha terminado, cerrar el juego
-        nivel1->close();
-    }
-}*/
+
