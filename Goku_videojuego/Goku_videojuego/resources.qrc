@@ -14,6 +14,7 @@
         <file>Goku_caminando.png</file>
         <file>Goku_muere.png</file>
         <file>Goku_saltando.png</file>
+        <file>iniciar_juego.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>

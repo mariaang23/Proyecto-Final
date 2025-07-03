@@ -1,5 +1,5 @@
 #include "nivel1.h"
-#include "goku.h"
+#include "goku1.h"
 #include "robot.h"
 #include "obstaculo.h"
 #include <QRandomGenerator>
@@ -9,7 +9,7 @@
 Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     : Nivel(escena, vista, parent, 1), gokuYaPateo(false), robotsCreados(false)
 {
-    nivelTerminado=false;
+    nivelTerminado = false;
     // No se hace nada más aquí para evitar errores con funciones virtuales
 }
 
@@ -21,14 +21,13 @@ Nivel1::~Nivel1()
     delete r2;
     delete r3;
 
-    // Eliminar todos los obstaculos en listaObstaculos
-    for (auto *obs : listaObstaculos) {
+    for (auto* obs : listaObstaculos) {
         delete obs;
     }
     listaObstaculos.clear();
 }
 
-// Método separado para iniciar el nivel (llamado después del constructor)
+// Método separado para iniciar el nivel
 void Nivel1::iniciarNivel()
 {
     cargarFondoNivel(":/images/background1.png");
@@ -46,7 +45,7 @@ void Nivel1::iniciarNivel()
     timerNivel->start(20);
 }
 
-// Implementación de método obligatorio: carga fondo
+// Carga el fondo repetido horizontalmente
 void Nivel1::cargarFondoNivel(const QString &ruta)
 {
     QPixmap fondo(ruta);
@@ -76,10 +75,10 @@ void Nivel1::agregarGoku()
     barraProgreso->move(20, 60);
     barraProgreso->show();
 
-    goku = new Goku(escena, velocidad, 200, 249, 1, this);
+    goku = new Goku1(escena, velocidad, 200, 249, this);
+    static_cast<Goku1*>(goku)->cargarImagen();
     goku->setBarraVida(barraVida);
     goku->iniciar(posX, posY);
-    goku->setFocus();
 
     QTimer* timerProgreso = new QTimer(this);
     connect(timerProgreso, &QTimer::timeout, this, [=]() {
@@ -99,7 +98,7 @@ void Nivel1::agregarCarroFinal()
     carroFinal->iniciar(4700, 500);
 }
 
-// Agrega obstáculos al nivel
+// Agrega obstáculos de varios tipos
 void Nivel1::agregarObstaculos()
 {
     int x = 2000;
@@ -110,53 +109,48 @@ void Nivel1::agregarObstaculos()
         obstaculo* obs = nullptr;
 
         switch (tipo) {
-        case 0: {
+        case 0:
             obs = new obstaculo(escena, obstaculo::Ave, velocidad, this);
-            int y = QRandomGenerator::global()->bounded(100, 150);
-            obs->iniciar(x, y);
+            obs->iniciar(x, QRandomGenerator::global()->bounded(100, 150));
             x += 500;
             break;
-        }
-        case 1: {
+        case 1:
             obs = new obstaculo(escena, obstaculo::Montania, velocidad, this);
             obs->cargarImagenes();
-            int y = escena->height() - obs->getAltura();
-            obs->iniciar(x, y);
+            obs->iniciar(x, escena->height() - obs->getAltura());
             x += 600;
             break;
-        }
-        case 2: {
+        case 2:
             obs = new obstaculo(escena, obstaculo::Roca, velocidad, this);
-            int y = QRandomGenerator::global()->bounded(350, 550);
-            obs->iniciar(x, y);
+            obs->iniciar(x, QRandomGenerator::global()->bounded(350, 550));
             x += 700;
             break;
-        }
         }
 
         listaObstaculos.push_back(obs);
     }
 }
 
-// Lógica del nivel ejecutada en cada ciclo
+// Lógica de actualización del nivel en cada ciclo
 void Nivel1::actualizarNivel()
 {
     if (!goku || !carroFinal) return;
 
-    // Verificar si el jugador ha perdido todas las vidas
+    // Si se acabó la vida de Goku
     if (goku->obtenerVida() <= 0) {
-        //cambiar estado de nivel
         nivelTerminado = true;
-        qDebug() << "nivel terminado "<<nivelTerminado;
+        qDebug() << "nivel terminado " << nivelTerminado;
         gameOver();
     }
 
-    if (goku->haTocadoCarro() && !gokuYaPateo) {
+    // Detectar si Goku llegó al carro
+    Goku1* goku1 = dynamic_cast<Goku1*>(goku);
+    if (goku1 && goku1->haTocadoCarro() && !gokuYaPateo) {
         gokuYaPateo = true;
-        goku->patadaGokuNivel1(); //aqui se toma por referncia
+        goku1->patadaGokuNivel1();
 
-        float posXpatada=goku->x();
-        qDebug() << "poscion de goku en x = "<<posXpatada;
+        float posXpatada = goku1->x();
+        qDebug() << "posición de Goku en x = " << posXpatada;
         carroFinal->iniciarMovimientoEspiral(posXpatada);
     }
 
@@ -166,7 +160,7 @@ void Nivel1::actualizarNivel()
     }
 }
 
-// Agrega enemigos robots cuando el carro cae
+// Agrega los tres robots cuando el carro cae
 void Nivel1::agregarRobots()
 {
     if (robotsCreados || !carroFinal || !carroFinal->haLlegadoAlSuelo())
@@ -200,29 +194,31 @@ void Nivel1::agregarRobots()
     });
 }
 
-void Nivel1::quitarCarroVista() {
+// Elimina el carro de la escena
+void Nivel1::quitarCarroVista()
+{
     if (carroFinal && escena) {
-        // Eliminar el carro de la escena
         escena->removeItem(carroFinal->getSprite());
-        // eliminar el objeto carroFinal
-        // como ya se libera aqui, no es necesario ponerlo en el destructor
         delete carroFinal;
         carroFinal = nullptr;
     }
 }
 
-void Nivel1::gameOver() {
-    // Detener el temporizador del nivel
-    /*if (timerNivel) {
-        timerNivel->stop();
-    }*/
-
-    //prueba
-    //QMessageBox::critical(vista, "Game Over", "Se te han acabado las vidas. ¡Juego terminado!");
+// Método llamado cuando se termina el nivel por perder toda la vida
+void Nivel1::gameOver()
+{
+    // Aquí podrías mostrar un mensaje de Game Over o cambiar de vista
+    // QMessageBox::critical(vista, "Game Over", "Se te han acabado las vidas. ¡Juego terminado!");
 }
 
-bool Nivel1::haTerminado() const {
+// Indica si el nivel ha terminado
+bool Nivel1::haTerminado() const
+{
     return nivelTerminado;
 }
 
-void Nivel1::
+// Devuelve el puntero al Goku del nivel
+Goku* Nivel1::getGoku() const
+{
+    return goku;
+}

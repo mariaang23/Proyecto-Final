@@ -1,5 +1,6 @@
 #include "nivel2.h"
 #include "pocion.h"
+#include "goku2.h"
 #include <QRandomGenerator>
 
 Nivel2::Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
@@ -37,14 +38,22 @@ void Nivel2::agregarGoku() {
     int altoFrame = 298;
     int velocidad = 12;
 
-    goku = new Goku(escena, velocidad, anchoFrame, altoFrame, 2);
+    // Crear Goku2
+    goku = new Goku2(escena, velocidad, anchoFrame, altoFrame, this);
+    static_cast<Goku2*>(goku)->cargarImagen();
 
     int xInicial = 100;
     int yInicial = vista->height() - altoFrame - 30;
 
-    goku->setSueloY(yInicial);
+    // Convertir a Goku2 para acceder a setSueloY
+    Goku2* goku2 = dynamic_cast<Goku2*>(goku);
+    if (goku2) {
+        goku2->setSueloY(yInicial);
+    }
+
     goku->iniciar(xInicial, yInicial);
 }
+
 
 void Nivel2::agregarRobotInicial() {
     // Por implementar
@@ -81,4 +90,14 @@ void Nivel2::agregarPociones() {
 
 void Nivel2::actualizarNivel() {
     // Por implementar
+}
+
+
+void Goku2::detener() {
+    timerMovimiento->stop();
+    timerSalto->stop();
+}
+
+Goku* Nivel2::getGoku() const {
+    return goku;
 }
