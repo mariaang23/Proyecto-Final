@@ -18,8 +18,10 @@ public:
 
     void setBarraVida(Vida* barra);
     void recibirDanio(int cantidad);
-    virtual void iniciar(int x, int y) = 0;
-    virtual void detener() = 0;
+    int obtenerVida() const; // Getter de vida actual
+
+    virtual void iniciar(int x, int y) = 0; // Método abstracto para inicializar
+    virtual void detener() = 0;             // Método abstracto para detenerse
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override = 0;
@@ -40,6 +42,7 @@ protected:
     int fotogWidth;
     int fotogHeight;
     bool mirandoDerecha;
+
     Vida* vidaHUD;
     bool puedeRecibirDanio;
 };

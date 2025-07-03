@@ -37,3 +37,10 @@ Goku::~Goku() {
     qDebug() << "Destructor de Goku base llamado";
     vidaHUD = nullptr;
 }
+
+int Goku::obtenerVida() const {
+    if (vidaHUD) {
+        return vidaHUD->obtenerVida();
+    }
+    return 0; // Valor por defecto si vidaHUD no está inicializada
+}
