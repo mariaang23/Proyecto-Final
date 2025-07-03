@@ -29,6 +29,9 @@ public:
     bool haTocadoObstaculo() const;
 
     void setSueloY(float y);
+    // metodo getter para obtener la vida actual
+    int obtenerVida() const;
+
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -68,8 +71,9 @@ private:
     bool mvtoDerecha;
     bool mirandoDerecha;
     bool yaRecibioDanio;
-
     Vida* vidaHUD;
+
+
     bool tocoCarro;
     bool tocoObstaculo;
 

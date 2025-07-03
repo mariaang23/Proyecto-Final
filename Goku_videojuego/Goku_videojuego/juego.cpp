@@ -13,6 +13,11 @@ juego::juego(QWidget *parent)
 {
     ui->setupUi(this); // Inicializa interfaz gráfica
     iniciarJuego();    // Inicia juego automáticamente
+
+    // Crear un temporizador para actualizar el estado del juego
+    timerEstado = new QTimer(this);
+    connect(timerEstado, &QTimer::timeout, this, &juego::actualizarEstado);
+    timerEstado->start(1000); // Verificar cada segundo
 }
 
 // Destructor: libera todos los recursos
@@ -25,12 +30,13 @@ juego::~juego()
     view = nullptr; // Establecer en nullptr despes de eliminar
     delete scene;
     delete ui;
+    delete timerEstado;
 }
 
 // Inicia el juego en el nivel 1
 void juego::iniciarJuego()
 {
-    cambiarNivel(2); //Para probar ambos niveles
+    cambiarNivel(1); //Para probar ambos niveles
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente
@@ -77,4 +83,12 @@ void juego::cambiarNivel(int numero)
     }
 
     view->show();
+}
+
+// Nuevo método para actualizar el estado del juego
+void juego::actualizarEstado() {
+    if (nivelActual == nivel1 && (nivel1->haTerminado()==true)) {
+        // El nivel 1 ha terminado, cerrar el juego
+        nivel1->close();
+    }
 }

@@ -24,6 +24,9 @@ public:
     void iniciarJuego();
     void cambiarNivel(int numero);
 
+private slots:
+    void actualizarEstado();
+
 private:
     Ui::juego *ui;
     QGraphicsScene *scene;
@@ -31,6 +34,7 @@ private:
     Nivel1* nivel1;
     Nivel2* nivel2;
     Nivel* nivelActual;
+    QTimer *timerEstado;
 };
 
 #endif // JUEGO_H

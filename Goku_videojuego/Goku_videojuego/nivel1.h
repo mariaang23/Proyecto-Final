@@ -24,7 +24,9 @@ public:
     void agregarObstaculos();
     void agregarCarroFinal();
     void quitarCarroVista();
-
+    void gameOver();
+    // para verificar si el nivel ha terminado
+    bool haTerminado() const;
 private:
     void agregarRobots(); // Crea los robots enemigos cuando el carro aterriza
 
@@ -34,6 +36,7 @@ private:
     Robot *r1;
     Robot *r2;
     Robot *r3;
+    bool nivelTerminado; //para cerra nivel 1
 };
 
 #endif // NIVEL1_H

@@ -3,11 +3,13 @@
 #include "robot.h"
 #include "obstaculo.h"
 #include <QRandomGenerator>
+#include <QMessageBox>
 
 // Constructor
 Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     : Nivel(escena, vista, parent, 1), gokuYaPateo(false), robotsCreados(false)
 {
+    nivelTerminado=false;
     // No se hace nada más aquí para evitar errores con funciones virtuales
 }
 
@@ -141,6 +143,14 @@ void Nivel1::actualizarNivel()
 {
     if (!goku || !carroFinal) return;
 
+    // Verificar si el jugador ha perdido todas las vidas
+    if (goku->obtenerVida() <= 0) {
+        //cambiar estado de nivel
+        nivelTerminado = true;
+        qDebug() << "nivel terminado "<<nivelTerminado;
+        gameOver();
+    }
+
     if (goku->haTocadoCarro() && !gokuYaPateo) {
         gokuYaPateo = true;
         goku->patadaGokuNivel1(); //aqui se toma por referncia
@@ -200,3 +210,19 @@ void Nivel1::quitarCarroVista() {
         carroFinal = nullptr;
     }
 }
+
+void Nivel1::gameOver() {
+    // Detener el temporizador del nivel
+    /*if (timerNivel) {
+        timerNivel->stop();
+    }*/
+
+    //prueba
+    //QMessageBox::critical(vista, "Game Over", "Se te han acabado las vidas. ¡Juego terminado!");
+}
+
+bool Nivel1::haTerminado() const {
+    return nivelTerminado;
+}
+
+void Nivel1::
