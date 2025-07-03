@@ -2,24 +2,106 @@
 <ui version="4.0">
  <class>juego</class>
  <widget class="QMainWindow" name="juego">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>760</width>
+    <height>738</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>juego</string>
+   <string>Goku - El gran plan de Pilaf</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>741</width>
+      <height>551</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-image: url(:/images/iniciar_juego.png);
+background-repeat: no-repeat;
+background-position: center;
+background-size: cover;
+</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="botonIniciar">
+    <property name="geometry">
+     <rect>
+      <x>284</x>
+      <y>600</y>
+      <width>191</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    font-family: &quot;Showcard Gothic&quot;;
+    font-size: 20px;
+    color: black;
+    background-color: gold;
+    border: 3px solid darkgoldenrod;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+QPushButton:hover {
+    background-color: #FFD700; /* más brillante al pasar el mouse */
+    border: 3px solid #DAA520;
+}
+
+QPushButton:pressed {
+    background-color: #E6BE8A; /* más oscuro al presionar */
+    padding-top: 12px;         /* efecto visual de &quot;hundido&quot; */
+    padding-left: 12px;
+}
+</string>
+    </property>
+    <property name="text">
+     <string>JUGAR</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>113</x>
+      <y>10</y>
+      <width>534</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel {
+    font-family: &quot;Showcard Gothic&quot;;
+    font-size: 28px;
+    color: black;
+    background-color: transparent;
+}
+</string>
+    </property>
+    <property name="text">
+     <string>¡Bienvenido a la Aventura de Goku!</string>
+    </property>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>760</width>
      <height>26</height>
     </rect>
    </property>

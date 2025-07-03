@@ -14,10 +14,11 @@ public:
     Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent = nullptr);
     ~Nivel2();
 
-    void iniciarNivel();
+    void iniciarNivel() override;
     void cargarFondoNivel(const QString &ruta) override;
     void agregarGoku() override;
     void actualizarNivel() override;
+    Goku* getGoku() const;
 
 private:
     void agregarPociones();

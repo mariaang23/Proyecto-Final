@@ -13,20 +13,24 @@ public:
     Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent = nullptr);
     ~Nivel1();
 
-    void iniciarNivel(); // Llamado después del constructor
+    void iniciarNivel() override;
 
     // Métodos sobrescritos de la clase base
     void actualizarNivel() override;
     void cargarFondoNivel(const QString &ruta) override;
     void agregarGoku() override;
 
-    //metodos de la clase
+    // Métodos específicos del nivel 1
     void agregarObstaculos();
     void agregarCarroFinal();
     void quitarCarroVista();
     void gameOver();
-    // para verificar si el nivel ha terminado
     bool haTerminado() const;
+    Goku* getGoku() const;
+
+signals:
+    juegoTerminado();
+
 private:
     void agregarRobots(); // Crea los robots enemigos cuando el carro aterriza
 
@@ -36,7 +40,7 @@ private:
     Robot *r1;
     Robot *r2;
     Robot *r3;
-    bool nivelTerminado; //para cerra nivel 1
+    bool nivelTerminado; // Indica si el nivel ha terminado (por muerte de Goku)
 };
 
 #endif // NIVEL1_H

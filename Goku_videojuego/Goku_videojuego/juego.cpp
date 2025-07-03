@@ -1,6 +1,8 @@
 #include "juego.h"
 #include "ui_juego.h"
 #include <QDebug>
+#include <QScreen>
+#include <QGuiApplication>
 
 // Constructor de la ventana principal del juego
 juego::juego(QWidget *parent)
@@ -12,12 +14,20 @@ juego::juego(QWidget *parent)
     , nivelActual(nullptr)
 {
     ui->setupUi(this); // Inicializa interfaz gráfica
-    iniciarJuego();    // Inicia juego automáticamente
+
+    // Centrar ventana en la pantalla
+    QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
+    int x = (screenGeometry.width() - this->width()) / 2;
+    int y = (screenGeometry.height() - this->height()) / 2;
+    this->move(x, y);
+
+    // Conectar botón de iniciar con la función que arranca el juego
+    connect(ui->botonIniciar, &QPushButton::clicked, this, &juego::iniciarJuego);
 
     // Crear un temporizador para actualizar el estado del juego
-    timerEstado = new QTimer(this);
+    /*timerEstado = new QTimer(this);
     connect(timerEstado, &QTimer::timeout, this, &juego::actualizarEstado);
-    timerEstado->start(1000); // Verificar cada segundo
+    timerEstado->start(1000); // Verificar cada segundo*/
 }
 
 // Destructor: libera todos los recursos
@@ -27,7 +37,7 @@ juego::~juego()
     delete nivel1;
     delete nivel2;
     delete view;
-    view = nullptr; // Establecer en nullptr despes de eliminar
+    view = nullptr;
     delete scene;
     delete ui;
     delete timerEstado;
@@ -36,17 +46,25 @@ juego::~juego()
 // Inicia el juego en el nivel 1
 void juego::iniciarJuego()
 {
-    cambiarNivel(1); //Para probar ambos niveles
+    // Ocultar los elementos del menú
+    ui->botonIniciar->hide();
+    ui->widget->hide();
+    ui->widget->setEnabled(false);      // Evita que el widget del menú reciba foco
+    ui->widget->clearFocus();           // Libera foco del menú
+
+    cambiarNivel(2);                    // Cambia al nivel 1
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente
 void juego::cambiarNivel(int numero)
 {
+    // Elimina el nivel actual si existe
     if (nivelActual != nullptr) {
         delete nivelActual;
         nivelActual = nullptr;
     }
 
+    // Elimina la vista si existe
     if (view != nullptr) {
         delete view;
         view = nullptr;
@@ -54,7 +72,7 @@ void juego::cambiarNivel(int numero)
 
     scene = nullptr;
 
-    // Configuración común
+    // Configuración del tamaño de la escena
     int sceneWidth = (numero == 1) ? 1536 * 4 : 1536;
     int sceneHeight = 784;
 
@@ -70,15 +88,25 @@ void juego::cambiarNivel(int numero)
 
     view->setSceneRect(0, 0, widthView, heightView);
     view->setFixedSize(widthView, heightView);
-    view->activateWindow();
+    view->setFocusPolicy(Qt::NoFocus); // para que no robe el foco de Goku
 
+    // Crear el nivel correspondiente
     if (numero == 1) {
         nivel1 = new Nivel1(scene, view, this);
-        nivel1->iniciarNivel();
+        nivel1->iniciarNivel(); // aquí se le da foco a Goku
+        QTimer::singleShot(100, this, [=]() {
+            if (nivel1 && nivel1->getGoku())
+                nivel1->getGoku()->setFocus(Qt::FocusReason::ActiveWindowFocusReason);
+        });
         nivelActual = nivel1;
+
     } else {
         nivel2 = new Nivel2(scene, view, this);
-        nivel2->iniciarNivel();
+        nivel2->iniciarNivel(); // aquí también debe darse foco a Goku
+        QTimer::singleShot(100, this, [=]() {
+            if (nivel2 && nivel2->getGoku())
+                nivel2->getGoku()->setFocus(Qt::FocusReason::ActiveWindowFocusReason);
+        });
         nivelActual = nivel2;
     }
 
@@ -86,9 +114,10 @@ void juego::cambiarNivel(int numero)
 }
 
 // Nuevo método para actualizar el estado del juego
+/*
 void juego::actualizarEstado() {
-    if (nivelActual == nivel1 && (nivel1->haTerminado()==true)) {
+    if (nivelActual == nivel1 && nivel1->haTerminado()) {
         // El nivel 1 ha terminado, cerrar el juego
         nivel1->close();
     }
-}
+}*/
