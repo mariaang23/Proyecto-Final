@@ -24,7 +24,6 @@ public:
 
 private slots:
     void iniciarJuego();         // Slot que se activa al presionar el botón de inicio
-    void actualizarEstado();     // Revisa si el nivel ha terminado
 
 private:
     Ui::juego *ui;

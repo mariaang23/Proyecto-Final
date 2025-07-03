@@ -138,8 +138,6 @@ void Nivel1::actualizarNivel()
 
     // Si se acabó la vida de Goku
     if (goku->obtenerVida() <= 0) {
-        nivelTerminado = true;
-        qDebug() << "nivel terminado " << nivelTerminado;
         gameOver();
     }
 
@@ -204,11 +202,12 @@ void Nivel1::quitarCarroVista()
     }
 }
 
-// Método llamado cuando se termina el nivel por perder toda la vida
-void Nivel1::gameOver()
-{
-    // Aquí podrías mostrar un mensaje de Game Over o cambiar de vista
-    // QMessageBox::critical(vista, "Game Over", "Se te han acabado las vidas. ¡Juego terminado!");
+void Nivel1::gameOver() {
+    if (timerNivel) {
+        timerNivel->stop();
+    }
+
+    nivelTerminado = true;
 }
 
 // Indica si el nivel ha terminado

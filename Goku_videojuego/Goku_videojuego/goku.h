@@ -45,6 +45,7 @@ protected:
 
     Vida* vidaHUD;
     bool puedeRecibirDanio;
+
 };
 
 #endif // GOKU_H
