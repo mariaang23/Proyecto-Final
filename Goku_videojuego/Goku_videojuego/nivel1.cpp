@@ -162,7 +162,11 @@ void Nivel1::actualizarNivel()
     if (carroFinal->espiralHecha && carroFinal->haLlegadoAlSuelo()) {
         agregarRobots();
         quitarCarroVista();
-        emit nivelCompletado();
+
+        // Espera 5 segundos antes de emitir la señal
+        QTimer::singleShot(5000, this, [this]() {
+            emit nivelCompletado();
+        });
     }
 }
 

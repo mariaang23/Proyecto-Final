@@ -96,8 +96,11 @@ void juego::cambiarNivel(int numero)
         nivel1 = new Nivel1(scene, view, this);
         //cinectar nivel con señal de gokuMurio
         connect(nivel1, &Nivel1::gokuMurio,this, [this]{QTimer::singleShot(
-                        10000, this, &juego::regresarAlMenuTrasDerrota); // slot que cierra y muestra menu y 2500mls
+                        3000, this, &juego::regresarAlMenuTrasDerrota); // slot que cierra y muestra menu y 3s
                 });
+        //conectar con la transicion
+        connect(nivel1, &Nivel1::nivelCompletado,
+                this,   &juego::mostrarTransicion);
         nivel1->iniciarNivel(); // aquí se le da foco a Goku
         QTimer::singleShot(100, this, [=]() {
             if (nivel1 && nivel1->getGoku())
@@ -143,6 +146,25 @@ void juego::cerrarNivel(bool mostrarMenu)
 void juego::regresarAlMenuTrasDerrota()
 {
     cerrarNivel(true);          // elimina todo y muestra el menú
+}
+
+void juego::mostrarTransicion()
+{
+    if (nivelActual) nivelActual->setEnabled(false); // opcional
+
+    QLabel *transicion = new QLabel(view);           // encima de la vista
+    transicion->setPixmap(QPixmap(":/images/transicion.png")
+                              .scaled(view->size(), Qt::KeepAspectRatio,
+                                      Qt::SmoothTransformation));
+    transicion->setAlignment(Qt::AlignCenter);
+    transicion->setAttribute(Qt::WA_DeleteOnClose);
+    transicion->show();
+
+    // Tras 2 s cierra la imagen y pasa al Nivel 2
+    QTimer::singleShot(2000, this, [=]() {
+        transicion->close();       // libera el QLabel
+        cambiarNivel(2);           // crea y muestra Nivel 2
+    });
 }
 
 
