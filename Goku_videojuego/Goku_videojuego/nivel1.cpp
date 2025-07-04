@@ -10,6 +10,7 @@ Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     : Nivel(escena, vista, parent, 1), gokuYaPateo(false), robotsCreados(false)
 {
     nivelTerminado = false;
+    perdioGoku = false;
     // No se hace nada más aquí para evitar errores con funciones virtuales
 }
 
@@ -95,16 +96,16 @@ void Nivel1::agregarGoku()
 void Nivel1::agregarCarroFinal()
 {
     carroFinal = new Carro(escena, 0, this);
-    carroFinal->iniciar(4700, 500);
+    carroFinal->iniciar(4900, 550);
 }
 
 // Agrega obstáculos de varios tipos
 void Nivel1::agregarObstaculos()
 {
-    int x = 2000;
+    int x = 1500;
     int velocidad = 10;
 
-    for (int i = 0; i < 16; ++i) {
+    for (int i = 0; i < 18; ++i) {
         int tipo = QRandomGenerator::global()->bounded(0, 3);
         obstaculo* obs = nullptr;
 
@@ -138,6 +139,7 @@ void Nivel1::actualizarNivel()
 
     // Si se acabó la vida de Goku
     if (goku->obtenerVida() <= 0) {
+        perdioGoku = true;
         gameOver();
     }
 
@@ -155,6 +157,7 @@ void Nivel1::actualizarNivel()
     if (carroFinal->espiralHecha && carroFinal->haLlegadoAlSuelo()) {
         agregarRobots();
         quitarCarroVista();
+        emit nivelCompletado();
     }
 }
 
@@ -165,23 +168,23 @@ void Nivel1::agregarRobots()
         return;
 
     robotsCreados = true;
-    int ySuelo = 400;
+    int ySuelo = 500;
     int velocidad = 6;
 
     r1 = new Robot(escena, velocidad, 1, this);
     r2 = new Robot(escena, velocidad, 2, this);
     r3 = new Robot(escena, velocidad, 3, this);
 
-    r1->iniciar(5000, ySuelo, 5000);
+    r1->iniciar(5000, ySuelo, 5300);
     r1->desplegarRobot();
 
     QTimer::singleShot(600, this, [=]() {
-        r2->iniciar(5300, ySuelo, 5300);
+        r2->iniciar(5300, ySuelo, 5600);
         r2->desplegarRobot();
     });
 
     QTimer::singleShot(1200, this, [=]() {
-        r3->iniciar(5600, ySuelo, 5600);
+        r3->iniciar(5600, ySuelo, 5900);
         r3->desplegarRobot();
     });
 
@@ -202,15 +205,20 @@ void Nivel1::quitarCarroVista()
     }
 }
 
-void Nivel1::gameOver() {
-    if (timerNivel) {
-        timerNivel->stop();
-    }
+void Nivel1::gameOver()
+{
+    if (timerNivel) timerNivel->stop();
 
-    nivelTerminado = true;
+    mostrarGameOver();          //  heredado de Nivel
+    emit gokuMurio();           // seguirá avisando al objeto juego
 }
 
-// Indica si el nivel ha terminado
+//indica goku muere
+bool Nivel1::getPerdioGoku() const{
+    return perdioGoku;
+}
+
+// Indica si el nivel ha terminado exitosamente
 bool Nivel1::haTerminado() const
 {
     return nivelTerminado;

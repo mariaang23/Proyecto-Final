@@ -26,6 +26,7 @@ public:
     void quitarCarroVista();
     void gameOver();
     bool haTerminado() const;
+    bool getPerdioGoku() const;
     Goku* getGoku() const;
 
 private:
@@ -37,7 +38,12 @@ private:
     Robot *r1;
     Robot *r2;
     Robot *r3;
-    bool nivelTerminado; // Indica si el nivel ha terminado (por muerte de Goku)
+    bool nivelTerminado; // Indica si el nivel ha terminado exitosamente
+    bool perdioGoku;
+
+
+signals:
+    void nivelCompletado();
 };
 
 #endif // NIVEL1_H

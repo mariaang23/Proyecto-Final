@@ -32,8 +32,9 @@ juego::~juego()
     qDebug() << "Destructor de juego llamado";
     delete nivel1;
     delete nivel2;
-    delete view;
-    view = nullptr;
+    if(view != nullptr){
+        delete view;
+    }
     delete scene;
     delete ui;
     delete timerEstado;
@@ -43,12 +44,17 @@ juego::~juego()
 void juego::iniciarJuego()
 {
     // Ocultar los elementos del menú
-    ui->botonIniciar->hide();
-    ui->widget->hide();
-    ui->widget->setEnabled(false);      // Evita que el widget del menú reciba foco
-    ui->widget->clearFocus();           // Libera foco del menú
+    if (nivelActual || view || scene){
+        cerrarNivel(false);          // cierra recursos sin mostrar de nuevo el menu
+    }
 
-    cambiarNivel(1);                    // Cambia al nivel 1
+    ui->widget->hide();              // imagen / panel de bienvenida
+    ui->widget->setEnabled(false);
+    ui->botonIniciar->hide();
+    ui->botonIniciar->clearFocus();  // libera el foco
+
+    cambiarNivel(1);                 // se encarga de crear scene, view y Nivel1
+
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente
@@ -89,6 +95,10 @@ void juego::cambiarNivel(int numero)
     // Crear el nivel correspondiente
     if (numero == 1) {
         nivel1 = new Nivel1(scene, view, this);
+        //cinectar nivel con señal de gokuMurio
+        connect(nivel1, &Nivel1::gokuMurio,this, [this]{QTimer::singleShot(
+                        10000, this, &juego::regresarAlMenuTrasDerrota); // slot que cierra y muestra menu y 2500mls
+                });
         nivel1->iniciarNivel(); // aquí se le da foco a Goku
         QTimer::singleShot(100, this, [=]() {
             if (nivel1 && nivel1->getGoku())
@@ -107,6 +117,33 @@ void juego::cambiarNivel(int numero)
     }
 
     view->show();
+}
+
+void juego::mostrarPantallaInicio()
+{
+    ui->widget->show();
+    ui->widget->setEnabled(true);
+    ui->botonIniciar->show();
+    ui->botonIniciar->setFocus();
+}
+
+void juego::cerrarNivel(bool mostrarMenu)
+{
+    delete nivelActual;
+    nivelActual = nullptr;
+    if (view) {
+        view->deleteLater();
+        view = nullptr;
+    }
+    delete scene;
+    scene = nullptr;
+
+    if (mostrarMenu) mostrarPantallaInicio();
+}
+
+void juego::regresarAlMenuTrasDerrota()
+{
+    cerrarNivel(true);          // elimina todo y muestra el menú
 }
 
 

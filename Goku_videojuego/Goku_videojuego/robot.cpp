@@ -126,7 +126,7 @@ void Robot::desplegarRobot()
 
     //vector para los frames secuencia
     static const QVector<int> orden = {0,1,3,2,5,4};
-    const int delay = 1200; // ms entre cuadros
+    const int delay = 1500; // ms entre cuadros
 
     for (int i = 0; i < orden.size(); ++i) {
         QTimer::singleShot(i * delay, this, [this, i]() {

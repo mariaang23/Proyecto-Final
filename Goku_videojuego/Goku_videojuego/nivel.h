@@ -44,6 +44,10 @@ protected:
 
     void generarNubes();
 
+    //final gameover
+    void mostrarGameOver();
+    QLabel* overlayGameOver = nullptr;
+
 
 public:
     static int contNubes;
@@ -64,6 +68,9 @@ public:
 
 protected slots:
     void moverNubes();
+
+signals:
+    void gokuMurio();
 };
 
 #endif // NIVEL_H

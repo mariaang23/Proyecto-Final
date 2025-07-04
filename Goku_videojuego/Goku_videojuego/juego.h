@@ -24,6 +24,7 @@ public:
 
 private slots:
     void iniciarJuego();         // Slot que se activa al presionar el botón de inicio
+    void regresarAlMenuTrasDerrota();      // se llama con QTimer
 
 private:
     Ui::juego *ui;
@@ -37,6 +38,9 @@ private:
     QTimer *timerEstado;         // Temporizador para revisar el estado del nivel
 
     void cambiarNivel(int numero);  // Método privado para cambiar entre niveles
+
+    void mostrarPantallaInicio();          // vuelve a mostrar juego.ui
+    void cerrarNivel(bool mostrarMenu);    // ahora acepta flag
 };
 
 #endif // JUEGO_H
