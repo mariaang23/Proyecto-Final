@@ -53,12 +53,7 @@ void juego::iniciarJuego()
     ui->botonIniciar->hide();
     ui->botonIniciar->clearFocus();  // libera el foco
 
-    cambiarNivel(1);                 // se encarga de crear scene, view y Nivel1
-
-<<<<<<< HEAD
-=======
-    cambiarNivel(2);                    // Cambia al nivel 1
->>>>>>> 9659c82d0d6d224a47c2065fe8cff2f160c5259f
+    cambiarNivel(1);                 // se encarga de crear scene, view
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente
