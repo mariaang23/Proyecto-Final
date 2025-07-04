@@ -62,25 +62,30 @@ void Nivel1::cargarFondoNivel(const QString &ruta)
 }
 
 // Agrega a Goku al nivel
+// Agrega a Goku al nivel
 void Nivel1::agregarGoku()
 {
     int posX = 100;
     int posY = 400;
     int velocidad = 6;
 
+    // Barra de vida en la esquina superior izquierda
     barraVida = new Vida(vista);
     barraVida->move(20, 20);
     barraVida->show();
 
-    barraProgreso = new Progreso(vista);
+    // Nueva barra de progreso usando el ícono del carro y tipo Horizontal
+    barraProgreso = new Progreso(Horizontal, ":/images/icono_carro.png", vista);
     barraProgreso->move(20, 60);
     barraProgreso->show();
 
+    // Goku nivel 1
     goku = new Goku1(escena, velocidad, 200, 249, this);
     static_cast<Goku1*>(goku)->cargarImagen();
     goku->setBarraVida(barraVida);
     goku->iniciar(posX, posY);
 
+    // Timer para actualizar el progreso de avance
     QTimer* timerProgreso = new QTimer(this);
     connect(timerProgreso, &QTimer::timeout, this, [=]() {
         if (goku && carroFinal && barraProgreso) {

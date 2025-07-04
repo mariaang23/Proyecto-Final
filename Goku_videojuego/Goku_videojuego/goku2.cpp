@@ -1,12 +1,14 @@
 #include "goku2.h"
+#include "nivel2.h"
+#include "pocion.h"
 #include <QKeyEvent>
 #include <QTimer>
 #include <QTransform>
 #include <QPixmap>
 #include <QDebug>
 
-// Constructor de Goku2
-Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeight, QObject* parent)
+// Constructor
+Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeight, Nivel2* nivel, QObject* parent)
     : Goku(scene, velocidad, fotogWidth, fotogHeight, parent),
     mvtoIzquierda(false),
     mvtoDerecha(false),
@@ -14,18 +16,22 @@ Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
     tiempoSalto(0),
     gravedad(0.8f),
     sueloY(300),
-    velocidadVertical(0)
+    velocidadVertical(0),
+    nivel2(nivel)
 {
-    // Timer para movimiento horizontal
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout, this, &Goku2::mover);
 
-    // Timer para salto
     timerSalto = new QTimer(this);
     connect(timerSalto, &QTimer::timeout, this, &Goku2::actualizarSalto);
 }
 
-// Método que carga el sprite de caminata
+Goku2::~Goku2() {
+    // Los timers se eliminan automáticamente por el parent
+    detener();  // Detiene los timers antes de destrucción
+}
+
+// Cargar sprite inicial
 void Goku2::cargarImagen() {
     QPixmap sprite(":/images/Goku_caminando.png");
     if (sprite.isNull()) sprite.load("imagenes/Goku_caminando.png");
@@ -38,14 +44,14 @@ void Goku2::cargarImagen() {
     setPixmap(sprite.copy(0, 0, fotogWidth, fotogHeight));
 }
 
-// Posiciona a Goku2 en escena y lo activa
+// Posicionar en la escena
 void Goku2::iniciar(int x, int y) {
     setPos(x, y);
     sueloY = y;
     timerMovimiento->start(60);
 }
 
-// Movimiento lateral limitado por la vista
+// Movimiento lateral y animación
 void Goku2::mover() {
     qreal nuevaX = x();
 
@@ -65,7 +71,7 @@ void Goku2::mover() {
         setY(scene->height() - pixmap().height());
 }
 
-// Aplica física de salto
+// Salto con física básica
 void Goku2::actualizarSalto() {
     velocidadVertical += gravedad;
     qreal nuevaY = y() + velocidadVertical;
@@ -79,17 +85,36 @@ void Goku2::actualizarSalto() {
     }
 
     setY(nuevaY);
+
+    detectarPocion();
 }
 
-// Movimiento y salto por teclado
+// Detección de colisión con poción
+void Goku2::detectarPocion() {
+    QList<QGraphicsItem*> colisiones = collidingItems();
+    for (QGraphicsItem* item : colisiones) {
+        Pocion* pocion = dynamic_cast<Pocion*>(item);
+        if (pocion) {
+            scene->removeItem(pocion);
+            delete pocion;
+            if (nivel2)
+                nivel2->pocionRecolectada();
+        }
+    }
+}
+
+// Controles
 void Goku2::keyPressEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_W && !enSalto) {
         enSalto = true;
         velocidadVertical = -15.0f;
         timerSalto->start(16);
         actualizarSpriteSalto();
-    } else if (event->key() == Qt::Key_D) mvtoDerecha = true;
-    else if (event->key() == Qt::Key_A) mvtoIzquierda = true;
+    } else if (event->key() == Qt::Key_D) {
+        mvtoDerecha = true;
+    } else if (event->key() == Qt::Key_A) {
+        mvtoIzquierda = true;
+    }
 }
 
 void Goku2::keyReleaseEvent(QKeyEvent* event) {
@@ -97,7 +122,7 @@ void Goku2::keyReleaseEvent(QKeyEvent* event) {
     else if (event->key() == Qt::Key_A) mvtoIzquierda = false;
 }
 
-// Sprite caminando (con reflejo si mira izquierda)
+// Sprite de caminata con espejo si va a la izquierda
 void Goku2::actualizarSpriteCaminar(bool derecha) {
     QPixmap sprite(":/images/Goku_caminando.png");
     if (sprite.isNull()) sprite.load("imagenes/Goku_caminando.png");
@@ -105,8 +130,8 @@ void Goku2::actualizarSpriteCaminar(bool derecha) {
 
     static int frameIndex = 0;
     int totalFrames = sprite.width() / fotogWidth;
-
     frameIndex = (frameIndex + 1) % totalFrames;
+
     setPixmap(sprite.copy(frameIndex * fotogWidth, 0, fotogWidth, fotogHeight));
 
     if (mirandoDerecha != derecha) {
@@ -120,7 +145,7 @@ void Goku2::actualizarSpriteCaminar(bool derecha) {
     }
 }
 
-// Sprite de salto
+// Sprite durante el salto
 void Goku2::actualizarSpriteSalto() {
     QPixmap sprite(":/images/Goku_saltando.png");
     if (sprite.isNull()) sprite.load("imagenes/Goku_saltando.png");
@@ -136,13 +161,13 @@ void Goku2::actualizarSpriteSalto() {
     setTransform(transform);
 }
 
-// Define la altura del suelo
+// Setter para altura del suelo
 void Goku2::setSueloY(float y) {
     sueloY = y;
 }
 
-// Destructor
-Goku2::~Goku2() {
-    delete timerMovimiento;
-    delete timerSalto;
+// Detiene timers
+void Goku2::detener() {
+    timerMovimiento->stop();
+    timerSalto->stop();
 }
