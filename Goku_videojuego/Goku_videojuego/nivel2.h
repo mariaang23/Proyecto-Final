@@ -3,6 +3,7 @@
 
 #include "nivel.h"
 #include "pocion.h"
+#include "progreso.h"
 #include <vector>
 #include <QVector>
 
@@ -20,15 +21,24 @@ public:
     void actualizarNivel() override;
     Goku* getGoku() const;
 
+    void pocionRecolectada();
+
 private:
     void agregarPociones();
     void agregarRobotInicial();
 
-    QVector<QPixmap> framesPocion;     // Frames de animación de la poción
+    QVector<QPixmap> framesPocion;
     std::vector<Pocion*> listaPociones;
 
     bool robotInicialCreado = false;
     bool pocionesAgregadas = false;
+
+    Progreso* barraProgreso = nullptr;
+    const int totalPociones = 20;
+
+    QTimer* temporizadorPociones = nullptr;
+    void agregarPocionAleatoria();
+
 };
 
 #endif // NIVEL2_H

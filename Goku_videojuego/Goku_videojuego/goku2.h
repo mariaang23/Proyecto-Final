@@ -3,11 +3,13 @@
 
 #include "goku.h"
 
+class Nivel2; // Declaración adelantada
+
 class Goku2 : public Goku
 {
     Q_OBJECT
 public:
-    Goku2(QGraphicsScene *scene, int velocidad, int fotogWidth, int fotogHeight, QObject *parent = nullptr);
+    Goku2(QGraphicsScene *scene, int velocidad, int fotogWidth, int fotogHeight, Nivel2* nivel, QObject *parent = nullptr);
     ~Goku2();
 
     void detener() override;
@@ -22,23 +24,26 @@ protected:
 
 private:
     void actualizarSpriteSalto();
-    void actualizarSpriteCaminar(bool derecha);
+    void actualizarSpriteCaminar(bool dir);
     void actualizarSalto();
+    void detectarPocion();
 
     QTimer *timerSalto;
-    int contadorCaminata;
 
+    int contadorCaminata;
     bool mvtoIzquierda;
     bool mvtoDerecha;
     bool mirandoDerecha;
 
-    // Físicas del salto
+    // Física del salto
     qreal yInicial;
     bool enSalto;
     float tiempoSalto;
     float gravedad;
     float sueloY;
     float velocidadVertical;
+
+    Nivel2* nivel2; // Referencia al nivel actual
 };
 
 #endif // GOKU2_H

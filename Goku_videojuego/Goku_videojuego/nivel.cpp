@@ -19,23 +19,27 @@ Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int n
 // Destructor base
 Nivel::~Nivel()
 {
-    //qDebug() << "Destructor de Nivel llamado";
+    // 1. Eliminar elementos principales del nivel (si fueron creados con new)
     delete camara;
     delete goku;
     delete barraVida;
     delete barraProgreso;
+
+    // 2. Eliminar temporizadores
     delete timerNivel;
     delete timerNubes;
 
-    // Liberar pixmaps de nubes
-    for (auto *nube : listaNubes){
-        contNubes -=1;
-        //qDebug() << "nubes restantes "<<contNubes;
+    // 3. Eliminar todas las nubes creadas (pixmaps en la escena)
+    for (auto *nube : listaNubes) {
+        contNubes -= 1;
         delete nube;
     }
-    // Liberar pixmaps del fondo
+    listaNubes.clear();  // Por seguridad
+
+    // 4. Eliminar fondos
     for (auto *fondo : listaFondos)
         delete fondo;
+    listaFondos.clear();  // Por seguridad
 }
 
 // Devuelve el margen reservado en pantalla para elementos HUD (como vida)
