@@ -95,3 +95,18 @@ void Nivel::moverNubes()
         }
     }
 }
+
+void Nivel::mostrarGameOver()
+{
+    if (overlayGameOver) return;       // ya esta mostrado
+
+    // Crea un QLabel hijo de la vista para que quede “encima”
+    overlayGameOver = new QLabel(vista);
+    overlayGameOver->setPixmap(
+        QPixmap(":/images/gameOver.png")
+            .scaled(vista->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    overlayGameOver->setAlignment(Qt::AlignCenter);
+    overlayGameOver->setAttribute(Qt::WA_TransparentForMouseEvents); // opcional
+    overlayGameOver->setAttribute(Qt::WA_DeleteOnClose);
+    overlayGameOver->show();
+}

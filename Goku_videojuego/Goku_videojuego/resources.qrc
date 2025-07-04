@@ -15,7 +15,9 @@
         <file>Goku_muere.png</file>
         <file>Goku_saltando.png</file>
         <file>iniciar_juego.png</file>
+        <file>gameOver.png</file>
         <file>icono_pocion.png</file>
+
     </qresource>
     <qresource prefix="/music"/>
 </RCC>
