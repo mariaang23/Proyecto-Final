@@ -13,6 +13,12 @@
     <height>738</height>
    </rect>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>760</width>
+    <height>738</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Goku - El gran plan de Pilaf</string>
   </property>
