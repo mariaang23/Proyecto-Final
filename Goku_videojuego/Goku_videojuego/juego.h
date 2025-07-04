@@ -25,6 +25,7 @@ public:
 private slots:
     void iniciarJuego();         // Slot que se activa al presionar el botón de inicio
     void regresarAlMenuTrasDerrota();      // se llama con QTimer
+    void mostrarTransicion();  // muestra la imagen de transicion.png y luego pasa a Nivel2
 
 private:
     Ui::juego *ui;
