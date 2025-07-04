@@ -48,7 +48,7 @@ void juego::iniciarJuego()
     ui->widget->setEnabled(false);      // Evita que el widget del menú reciba foco
     ui->widget->clearFocus();           // Libera foco del menú
 
-    cambiarNivel(1);                    // Cambia al nivel 1
+    cambiarNivel(2);                    // Cambia al nivel 1
 }
 
 // Cambia entre niveles, manejando la memoria adecuadamente

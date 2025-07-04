@@ -1,59 +1,91 @@
 #include "progreso.h"
 #include <QPainter>
-#include <QBrush>
-#include <QColor>
 #include <QPixmap>
+#include <QDebug>
 
-// Constructor: se inicializa en 0% de avance
-Progreso::Progreso(QWidget *parent) : QWidget(parent), porcentaje(0.0f)
+// Constructor general
+Progreso::Progreso(TipoProgreso tipo, const QString& rutaIcono, QWidget *parent)
+    : QWidget(parent),
+    tipo(tipo),
+    porcentaje(0.0f),
+    totalPociones(0),
+    pocionesRecolectadas(0)
 {
-    // Tamaño fijo del widget (incluye espacio para el ícono)
-    setFixedSize(220, 25); // Ancho mayor para incluir ícono
+    setFixedSize(220, 25);
 
-    // Crear el ícono del carro a la izquierda de la barra
-    iconoCarro = new QLabel(this);
-    QPixmap pixmap(":/images/icono_carro.png");
-    iconoCarro->setPixmap(pixmap.scaled(35, 25, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    iconoCarro->move(0, (height() - iconoCarro->height()) / 2); // Centrado verticalmente
-    iconoCarro->show();
+    icono = new QLabel(this);
+    QPixmap pixmap(rutaIcono);
+    icono->setPixmap(pixmap.scaled(35, 25, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    icono->move(0, (height() - icono->height()) / 2);
+    icono->show();
 }
 
 Progreso::~Progreso()
 {
     qDebug() << "Destructor de progreso llamado";
-    delete iconoCarro;
+    delete icono;
 }
 
-// Método para actualizar el porcentaje de progreso
+// Nivel 1: actualizar según posición
 void Progreso::actualizarProgreso(float posicionGoku, float inicio, float fin)
 {
-    if (fin == inicio) return; // Evitar división por cero
+    if (tipo != Horizontal || fin == inicio) return;
 
-    // Calcular el porcentaje de avance
     porcentaje = (posicionGoku - inicio) / (fin - inicio);
-    porcentaje = qBound(0.0f, porcentaje, 1.0f); // Limitar entre 0 y 1
-
-    update(); //llama automáticamente a paintEvent(...) para redibujar la barra
+    porcentaje = qBound(0.0f, porcentaje, 1.0f);
+    update();
 }
 
-// Método que dibuja la barra de progreso
+// Nivel 2: establecer cantidad total de pociones
+void Progreso::setTotalPociones(int total)
+{
+    if (tipo == Pociones) {
+        totalPociones = total;
+        pocionesRecolectadas = 0;
+        porcentaje = 0.0f;
+        update();
+    }
+}
+
+// Nivel 2: sumar una poción recolectada
+void Progreso::sumarPocion()
+{
+    if (tipo == Pociones && pocionesRecolectadas < totalPociones) {
+        ++pocionesRecolectadas;
+        porcentaje = static_cast<float>(pocionesRecolectadas) / totalPociones;
+        update();
+    }
+}
+
+// Dibujar la barra de progreso
+// Dibujar la barra de progreso
 void Progreso::paintEvent(QPaintEvent *event)
 {
-    Q_UNUSED(event); // macro de Qt para evitar advertencias del compilador por no usar variable event
-
+    Q_UNUSED(event);
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
 
     int margen = 5;
-    int xInicioBarra = iconoCarro->width() + margen;
+    int xInicioBarra = icono->width() + margen;
     int anchoBarra = width() - xInicioBarra;
     int altoBarra = height();
 
-    // Fondo gris
+    // Fondo gris de la barra
     painter.setBrush(Qt::lightGray);
     painter.setPen(Qt::NoPen);
-    painter.drawRect(xInicioBarra, 0, anchoBarra, altoBarra);
+    painter.drawRoundedRect(xInicioBarra, 2, anchoBarra, altoBarra - 4, 5, 5);
 
-    // Barra de progreso azul
-    painter.setBrush(Qt::blue);
-    painter.drawRect(xInicioBarra, 0, anchoBarra * porcentaje, altoBarra);
+    // Color de la barra según tipo
+    QColor colorRelleno = Qt::blue;
+    painter.setBrush(colorRelleno);
+    painter.drawRoundedRect(xInicioBarra, 2, anchoBarra * porcentaje, altoBarra - 4, 5, 5);
+
+    // Borde opcional
+    painter.setPen(QPen(Qt::black, 1));
+    painter.setBrush(Qt::NoBrush);
+    painter.drawRoundedRect(xInicioBarra, 2, anchoBarra, altoBarra - 4, 5, 5);
+}
+
+float Progreso::getPorcentaje() const {
+    return porcentaje;
 }

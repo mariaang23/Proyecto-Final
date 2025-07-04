@@ -2,26 +2,56 @@
 #include "pocion.h"
 #include "goku2.h"
 #include <QRandomGenerator>
+#include <QTimer>
+#include <QDebug>
 
 Nivel2::Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     : Nivel(escena, vista, parent, 2),
     robotInicialCreado(false),
-    pocionesAgregadas(false)
+    pocionesAgregadas(false),
+    barraProgreso(nullptr),
+    temporizadorPociones(nullptr)
 {}
 
-Nivel2::~Nivel2() {
+Nivel2::~Nivel2()
+{
     qDebug() << "Destructor de Nivel2 llamado";
 
+    // 1. Eliminar cada poción creada dinámicamente
     for (auto* pocion : listaPociones)
         delete pocion;
-
     listaPociones.clear();
+
+    // 2. Detener y eliminar el temporizador de pociones si existe
+    if (temporizadorPociones) {
+        temporizadorPociones->stop();
+        delete temporizadorPociones;
+        temporizadorPociones = nullptr;
+    }
 }
 
 void Nivel2::iniciarNivel() {
     cargarFondoNivel(":/images/background2.png");
     generarNubes();
-    agregarPociones();
+
+    // Crear barra de vida
+    barraVida = new Vida(vista);      // Usa la misma vista que la barra de progreso
+    barraVida->move(20, 20);          // Posición superior
+    barraVida->show();
+
+    // Crear barra de progreso para las pociones
+    barraProgreso = new Progreso(Pociones, ":/images/icono_pocion.png", vista);
+    barraProgreso->move(20, 60);
+    barraProgreso->setTotalPociones(totalPociones);
+    barraProgreso->show();
+
+    agregarPociones(); // Poción inicial
+
+    // Timer para seguir generando más pociones
+    temporizadorPociones = new QTimer(this);
+    connect(temporizadorPociones, &QTimer::timeout, this, &Nivel2::agregarPocionAleatoria);
+    temporizadorPociones->start(2500); // cada 1 segundo
+
     agregarGoku();
 }
 
@@ -38,14 +68,12 @@ void Nivel2::agregarGoku() {
     int altoFrame = 298;
     int velocidad = 12;
 
-    // Crear Goku2
     goku = new Goku2(escena, velocidad, anchoFrame, altoFrame, this);
     static_cast<Goku2*>(goku)->cargarImagen();
 
     int xInicial = 100;
     int yInicial = vista->height() - altoFrame - 30;
 
-    // Convertir a Goku2 para acceder a setSueloY
     Goku2* goku2 = dynamic_cast<Goku2*>(goku);
     if (goku2) {
         goku2->setSueloY(yInicial);
@@ -53,7 +81,6 @@ void Nivel2::agregarGoku() {
 
     goku->iniciar(xInicial, yInicial);
 }
-
 
 void Nivel2::agregarRobotInicial() {
     // Por implementar
@@ -70,32 +97,39 @@ void Nivel2::agregarPociones() {
         framesPocion.push_back(frame);
     }
 
-    int cantidad = 14;
+    // Crea una sola poción inicial para que empiece el nivel
+    int anchoVista = vista->width();
+    Pocion* pocion = new Pocion(framesPocion, anchoVista, 0, 0, 1);
+    escena->addItem(pocion);
+    listaPociones.push_back(pocion);
+}
+
+void Nivel2::agregarPocionAleatoria() {
+    if (!barraProgreso || barraProgreso->getPorcentaje() >= 1.0f) {
+        if (temporizadorPociones) {
+            temporizadorPociones->stop();
+            temporizadorPociones->deleteLater();
+            temporizadorPociones = nullptr;
+        }
+        return;
+    }
+
+    int fila = QRandomGenerator::global()->bounded(0, 2);
+    int columna = QRandomGenerator::global()->bounded(0, 7);
     int anchoVista = vista->width();
 
-    int columnas = 7;
-    int filas = 2;
+    Pocion* nuevaPocion = new Pocion(framesPocion, anchoVista, fila, columna, 7);
+    escena->addItem(nuevaPocion);
+    listaPociones.push_back(nuevaPocion);
+}
 
-    for (int fila = 0; fila < filas; ++fila) {
-        for (int col = 0; col < columnas; ++col) {
-            if (static_cast<int>(listaPociones.size()) >= cantidad)
-                break;
-
-            Pocion* pocion = new Pocion(framesPocion, anchoVista, fila, col, columnas);
-            escena->addItem(pocion);
-            listaPociones.push_back(pocion);
-        }
-    }
+void Nivel2::pocionRecolectada() {
+    if (barraProgreso)
+        barraProgreso->sumarPocion();
 }
 
 void Nivel2::actualizarNivel() {
     // Por implementar
-}
-
-
-void Goku2::detener() {
-    timerMovimiento->stop();
-    timerSalto->stop();
 }
 
 Goku* Nivel2::getGoku() const {
