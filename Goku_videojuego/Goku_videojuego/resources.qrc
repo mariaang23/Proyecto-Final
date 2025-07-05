@@ -18,6 +18,7 @@
         <file>gameOver.png</file>
         <file>icono_pocion.png</file>
         <file>transicion.png</file>
+        <file>robot.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>
