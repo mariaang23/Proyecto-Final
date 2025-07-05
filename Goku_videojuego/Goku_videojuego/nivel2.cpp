@@ -1,6 +1,9 @@
 #include "nivel2.h"
 #include "pocion.h"
 #include "goku2.h"
+#include "robot.h"
+#include <QMessageBox>
+#include <QGraphicsPixmapItem>
 #include <QRandomGenerator>
 #include <QTimer>
 #include <QDebug>
@@ -53,6 +56,7 @@ void Nivel2::iniciarNivel() {
     temporizadorPociones->start(2500); // cada 1 segundo
 
     agregarGoku();
+    agregarRobot();
 }
 
 void Nivel2::cargarFondoNivel(const QString &ruta) {
@@ -135,3 +139,27 @@ void Nivel2::actualizarNivel() {
 Goku* Nivel2::getGoku() const {
     return goku;
 }
+
+void Nivel2::agregarRobot()
+{
+    const float escala       = 3.0;   // escala
+    const int   margenSuelo = 10;
+    const int   margenDerecha   = 30;
+
+    robot = new Robot(escena, this);          // crea el sprite
+    robot->getSprite()->setScale(escala);     // primero la escala
+
+    //alto y ancho la escala
+    const QPixmap& frame0 = robot->getSprite()->pixmap();
+    const int anchoRob = frame0.width()  * escala;
+    const int altoRob = frame0.height() * escala;
+
+    // coloca abajo derecha en el suelo
+    const int x = 1530  - anchoRob - margenDerecha;
+    const int y = 784 - altoRob  - margenSuelo;
+
+    robot->getSprite()->setPos(x, y);
+
+    escena->addItem(robot->getSprite());
+}
+

@@ -26,6 +26,21 @@ Robot::Robot(QGraphicsScene *scene,
             this,             &Robot::animar);
 }
 
+//sobre carga del constructor robot para el robot nivel 2
+Robot::Robot(QGraphicsScene *scene, QObject *parent)
+    : QObject(parent),
+    scene(scene)
+{
+    sprite = new QGraphicsPixmapItem;
+    scene->addItem(sprite);
+
+    cargarRobot2();                 // llena framesRobot2 y muestra frame 0
+    sprite->setScale(1.5);
+    sprite->setData(0, "robot_nivel2");
+
+    //implementar conexion de ataque
+}
+
 Robot::~Robot()
 {
     qDebug() << "Destructor de robot llamado";
@@ -149,4 +164,28 @@ void Robot::detenerMvtoRobot()
     //siga activa la animacion
     if (!timerAnimacion->isActive())
         timerAnimacion->start(120);   // la misma cadencia que usabas
+}
+
+void Robot::cargarRobot2()
+{
+    const int anchoFrame = 135;
+    const int altoFrame  = 194;
+
+    QPixmap sheet(":/images/robot.png");
+
+    if (sheet.isNull()) {
+        QMessageBox::critical(nullptr, "Error",
+                              "No se encontró robot.png en el .qrc ni en /imagenes");
+        return;
+    }
+
+    const int numFrames = sheet.width() / anchoFrame; // 5 frames
+    framesRobot2.clear();
+    for (int i = 0; i < numFrames; ++i)
+        framesRobot2.append(sheet.copy(i * anchoFrame, 0, anchoFrame, altoFrame));
+
+    if (!framesRobot2.isEmpty()) {
+        sprite->setPixmap(framesRobot2[0]); // Frame inicial
+        frames = framesRobot2;
+    }
 }

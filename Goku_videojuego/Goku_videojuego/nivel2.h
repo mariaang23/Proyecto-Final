@@ -4,6 +4,7 @@
 #include "nivel.h"
 #include "pocion.h"
 #include "progreso.h"
+#include "robot.h"
 #include <vector>
 #include <QVector>
 
@@ -22,6 +23,7 @@ public:
     Goku* getGoku() const;
 
     void pocionRecolectada();
+    void agregarRobot();  //para agregar robot
 
 private:
     void agregarPociones();
@@ -38,6 +40,8 @@ private:
 
     QTimer* temporizadorPociones = nullptr;
     void agregarPocionAleatoria();
+
+    Robot *robot;
 
 };
 
