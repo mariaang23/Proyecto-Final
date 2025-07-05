@@ -19,6 +19,7 @@
         <file>icono_pocion.png</file>
         <file>transicion.png</file>
         <file>robot.png</file>
+        <file>explosion.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>

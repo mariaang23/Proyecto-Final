@@ -31,6 +31,11 @@ Nivel2::~Nivel2()
         delete temporizadorPociones;
         temporizadorPociones = nullptr;
     }
+    //Liberar explosiones
+    for (auto* exp : listaExplosiones){
+        delete exp;
+    }
+    listaExplosiones.clear();
 }
 
 void Nivel2::iniciarNivel() {
@@ -57,6 +62,7 @@ void Nivel2::iniciarNivel() {
 
     agregarGoku();
     agregarRobot();
+    agregarExplosion(); //agregar explosion
 }
 
 void Nivel2::cargarFondoNivel(const QString &ruta) {
@@ -163,3 +169,11 @@ void Nivel2::agregarRobot()
     escena->addItem(robot->getSprite());
 }
 
+void Nivel2::agregarExplosion()
+{
+    //creo la explosion
+    explosion= new Explosion(escena, this);
+
+    //agrega a escena
+    escena->addItem(explosion->sprite);
+}

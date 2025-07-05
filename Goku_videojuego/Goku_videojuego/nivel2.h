@@ -5,6 +5,7 @@
 #include "pocion.h"
 #include "progreso.h"
 #include "robot.h"
+#include "explosion.h"
 #include <vector>
 #include <QVector>
 
@@ -28,9 +29,11 @@ public:
 private:
     void agregarPociones();
     void agregarRobotInicial();
+    void agregarExplosion();
 
     QVector<QPixmap> framesPocion;
     std::vector<Pocion*> listaPociones;
+    std::vector<Explosion*> listaExplosiones;
 
     bool robotInicialCreado = false;
     bool pocionesAgregadas = false;
@@ -43,6 +46,7 @@ private:
 
     Robot *robot;
 
+    Explosion *explosion;
 };
 
 #endif // NIVEL2_H

@@ -7,6 +7,7 @@ CONFIG += c++17
 SOURCES += \
     camaralogica.cpp \
     carro.cpp \
+    explosion.cpp \
     goku.cpp \
     goku1.cpp \
     goku2.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
 HEADERS += \
     camaralogica.h \
     carro.h \
+    explosion.h \
     goku.h \
     goku1.h \
     goku2.h \

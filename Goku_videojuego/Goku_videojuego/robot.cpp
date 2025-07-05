@@ -185,7 +185,7 @@ void Robot::cargarRobot2()
         framesRobot2.append(sheet.copy(i * anchoFrame, 0, anchoFrame, altoFrame));
 
     if (!framesRobot2.isEmpty()) {
-        sprite->setPixmap(framesRobot2[0]); // Frame inicial
+        sprite->setPixmap(framesRobot2[4]); // Frame inicial//final para poder ver la posicion de la explosion
         frames = framesRobot2;
     }
 }
