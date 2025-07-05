@@ -12,7 +12,7 @@ class obstaculo : public QObject
     Q_OBJECT
 public:
     static int contObsta;
-    enum Tipo {Ave, Montania, Roca};
+    enum Tipo {Ave, Montania, Roca, Explosion};
     obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *parent = nullptr);
     ~obstaculo();
 
@@ -21,13 +21,16 @@ public:
     int getAltura() const;
     QGraphicsPixmapItem* getSprite() const { return sprite; }
 
+    //cambio para poder realizar herencia a explosion
+    QGraphicsPixmapItem *sprite;
+    QGraphicsScene *scene;
+    QVector<QPixmap> frames;  // Para almacenar los fotogramas del sprite del ave
 
 private slots:
     void mover();
     void actualizar();
 
 private:
-    QVector<QPixmap> frames;  // Para almacenar los fotogramas del sprite del ave
 
     QTimer *timerMovimiento;
     QTimer *timerAnimacion;
@@ -39,9 +42,6 @@ private:
     int fotogHeight;
     Tipo tipo;
 
-protected:
-    QGraphicsPixmapItem *sprite;
-    QGraphicsScene *scene;
 
 };
 #endif // OBSTACULO_H
