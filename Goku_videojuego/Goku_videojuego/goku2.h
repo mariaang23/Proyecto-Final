@@ -16,6 +16,7 @@ public:
     void iniciar(int x, int y) override;
     void cargarImagen() override;
     void setSueloY(float y);
+    void animarMuerte();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

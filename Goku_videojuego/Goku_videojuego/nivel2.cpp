@@ -62,7 +62,6 @@ void Nivel2::iniciarNivel() {
 
     agregarGoku();
     agregarRobot();
-    agregarExplosion(); //agregar explosion
 }
 
 void Nivel2::cargarFondoNivel(const QString &ruta) {
@@ -167,13 +166,16 @@ void Nivel2::agregarRobot()
     robot->getSprite()->setPos(x, y);
 
     escena->addItem(robot->getSprite());
+
+    robot->iniciarAtaques();
 }
 
-void Nivel2::agregarExplosion()
-{
-    //creo la explosion
-    explosion= new Explosion(escena, this);
+void Nivel2::agregarExplosion(Explosion* e) {
+    listaExplosiones.push_back(e);
+}
 
-    //agrega a escena
-    escena->addItem(explosion->sprite);
+
+void Nivel2::restarVidaGoku(int cantidad) {
+    if (barraVida)
+        barraVida->restar(cantidad);
 }

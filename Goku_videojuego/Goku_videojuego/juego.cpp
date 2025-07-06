@@ -44,9 +44,10 @@ juego::~juego()
 void juego::iniciarJuego()
 {
     // Ocultar los elementos del menú
+    /*
     if (nivelActual || view || scene){
         cerrarNivel(false);          // cierra recursos sin mostrar de nuevo el menu
-    }
+    }*/
 
     ui->widget->hide();              // imagen / panel de bienvenida
     ui->widget->setEnabled(false);

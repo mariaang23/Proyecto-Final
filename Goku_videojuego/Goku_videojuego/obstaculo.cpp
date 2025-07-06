@@ -8,7 +8,19 @@ int obstaculo::contObsta=0;
 
 // Constructor del obstáculo
 obstaculo::obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *parent)
-    : QObject(parent), velocidad(velocidad), tipo(tipo), scene(scene)
+    : QObject(parent),
+    sprite(nullptr),
+    scene(scene),
+    frames(),
+    timerMovimiento(nullptr),
+    timerAnimacion(nullptr),
+    frameActual(0),
+    velocidad(velocidad),
+    coordX(0),
+    coordY(0),
+    fotogWidth(0),
+    fotogHeight(0),
+    tipo(tipo)
 {
     // Crear el objeto gráfico (sprite del obstáculo)
     sprite = new QGraphicsPixmapItem();

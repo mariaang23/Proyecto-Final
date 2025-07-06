@@ -24,7 +24,9 @@ public:
     Goku* getGoku() const;
 
     void pocionRecolectada();
-    void agregarRobot();  //para agregar robot
+    void agregarRobot();
+    void restarVidaGoku(int cantidad);
+    void agregarExplosion(Explosion* e);
 
 private:
     void agregarPociones();
@@ -45,7 +47,6 @@ private:
     void agregarPocionAleatoria();
 
     Robot *robot;
-
     Explosion *explosion;
 };
 

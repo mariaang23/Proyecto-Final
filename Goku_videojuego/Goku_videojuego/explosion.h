@@ -2,19 +2,36 @@
 #define EXPLOSION_H
 
 #include "obstaculo.h"
+#include <QTimer>
+#include <QPointF>
 
 class Explosion : public obstaculo
 {
     Q_OBJECT
 public:
-    // posicion fija de la boca del arma del robor
-    // se declara static para que sea la misma para todas las explosiones
-    static const QPointF posicionDisparo;
+    enum TipoMovimiento {
+        Parabolico,
+        MRU
+    };
 
-    // Constructor: crea los frames y arranca el timer
-    Explosion(QGraphicsScene* scene,QObject* parent = nullptr);
+    static const QPointF posicionDisparo;  // por defecto
 
+    Explosion(QGraphicsScene* scene, QObject* parent = nullptr);
+
+    void setTipoMovimiento(TipoMovimiento tipo);
+    void setPosicionInicial(QPointF pos);
+    void lanzar();  // inicia la animación y movimiento
+
+private:
+    QTimer* timerMovimiento;
+    float velocidadX;
+    float velocidadY;
+    float gravedad;
+    float tiempo;
+    int frameActual;
+
+    TipoMovimiento tipoMovimiento;
+    QPointF posicionInicial;
 };
-
 
 #endif // EXPLOSION_H

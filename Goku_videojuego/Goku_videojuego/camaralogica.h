@@ -18,8 +18,6 @@ public:
     void detenerMovimiento();
     void seguirAGoku(Goku* goku);
 
-    //void setNubes(QList<QGraphicsPixmapItem*> nubes);
-
 private slots:
     void moverVista();
 
@@ -27,7 +25,7 @@ private:
     QGraphicsView *view;
     QTimer *timer;
     int velocidad;
-    //QList<QGraphicsPixmapItem*> nubes;
+
 };
 
 #endif // CAMARALOGICA_H

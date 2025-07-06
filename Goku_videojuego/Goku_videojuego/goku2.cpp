@@ -27,8 +27,12 @@ Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
 }
 
 Goku2::~Goku2() {
-    // Los timers se eliminan automáticamente por el parent
-    detener();  // Detiene los timers antes de destrucción
+    // Lógica directa en lugar de llamar a un virtual
+    if (timerMovimiento) {
+        timerMovimiento->stop();
+        delete timerMovimiento;
+        timerMovimiento = nullptr;
+    }
 }
 
 // Cargar sprite inicial
@@ -92,8 +96,8 @@ void Goku2::actualizarSalto() {
 // Detección de colisión con poción
 void Goku2::detectarPocion() {
     QList<QGraphicsItem*> colisiones = collidingItems();
-    for (QGraphicsItem* item : colisiones) {
-        Pocion* pocion = dynamic_cast<Pocion*>(item);
+    for (int i = 0; i < colisiones.size(); ++i) {
+        Pocion* pocion = dynamic_cast<Pocion*>(colisiones[i]);
         if (pocion) {
             scene->removeItem(pocion);
             delete pocion;
@@ -102,6 +106,7 @@ void Goku2::detectarPocion() {
         }
     }
 }
+
 
 // Controles
 void Goku2::keyPressEvent(QKeyEvent* event) {
@@ -171,3 +176,43 @@ void Goku2::detener() {
     timerMovimiento->stop();
     timerSalto->stop();
 }
+
+void Goku2::animarMuerte()
+{
+    QPixmap spriteSheet(":/images/Goku_muere.png");
+    if (spriteSheet.isNull()) {
+        qDebug() << "No se encontró Goku_muere.png";
+        return;
+    }
+
+    const int anchoFrame = 280;
+    const int altoFrame  = 298;
+
+    QVector<QPixmap> framesMuerte;
+    for (int i = 0; i < 6; ++i) {
+        framesMuerte.append(spriteSheet.copy(i * anchoFrame, 0, anchoFrame, altoFrame));
+    }
+
+    // Detener movimiento mientras muere
+    detener();
+
+    int* index = new int(0);
+    QTimer* timerMuerte = new QTimer(this);  // se elimina automáticamente con el parent
+
+    connect(timerMuerte, &QTimer::timeout, this, [=]() mutable {
+        if (*index < framesMuerte.size()) {
+            this->setPixmap(framesMuerte[*index]);
+            (*index)++;
+        } else {
+            timerMuerte->stop();
+            timerMuerte->deleteLater();
+            delete index;
+
+            //  Reanudar movimiento después de la muerte
+            timerMovimiento->start(60);
+        }
+    });
+
+    timerMuerte->start(50);  // 100 ms por frame
+}
+
