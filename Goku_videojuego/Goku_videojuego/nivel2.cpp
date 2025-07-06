@@ -80,6 +80,9 @@ void Nivel2::agregarGoku() {
     goku = new Goku2(escena, velocidad, anchoFrame, altoFrame, this);
     static_cast<Goku2*>(goku)->cargarImagen();
 
+    //vida de goku
+    goku->setBarraVida(barraVida);
+
     int xInicial = 100;
     int yInicial = vista->height() - altoFrame - 30;
 
@@ -89,10 +92,6 @@ void Nivel2::agregarGoku() {
     }
 
     goku->iniciar(xInicial, yInicial);
-}
-
-void Nivel2::agregarRobotInicial() {
-    // Por implementar
 }
 
 void Nivel2::agregarPociones() {
@@ -137,13 +136,38 @@ void Nivel2::pocionRecolectada() {
         barraProgreso->sumarPocion();
 }
 
-void Nivel2::actualizarNivel() {
-    // Por implementar
+void Nivel2::actualizarNivel()
+{
+    if (!goku) return;
+
+    //goku murio?
+    if (barraVida && barraVida->obtenerVida() <= 0) {// Vida llega a 0
+        perdioGoku = true;
+        gameOver();
+        return;
+    }
+
+    //si completa todas las pociones
+    if (barraProgreso && barraProgreso->getPorcentaje() >= 1.0f) {
+
+        // Dejamos de crear pociones nuevas
+        if (temporizadorPociones) {
+            temporizadorPociones->stop();
+            temporizadorPociones->deleteLater();
+            temporizadorPociones = nullptr;
+        }
+
+        //detener ataques del robot
+        if (timerNivel) timerNivel->stop();
+
+        //emite nivel completado si completa las pociones (por ahora)
+        QTimer::singleShot(1000, this, [this]() {
+            emit nivelCompletado();
+        });
+        return;
+    }
 }
 
-Goku* Nivel2::getGoku() const {
-    return goku;
-}
 
 void Nivel2::agregarRobot()
 {
@@ -174,8 +198,14 @@ void Nivel2::agregarExplosion(Explosion* e) {
     listaExplosiones.push_back(e);
 }
 
+void Nivel2::gameOver()
+{
+    if (timerNivel) timerNivel->stop();
 
-void Nivel2::restarVidaGoku(int cantidad) {
-    if (barraVida)
-        barraVida->restar(cantidad);
+    mostrarGameOver();          //  heredado de Nivel
+    emit gokuMurio();           // seguirá avisando al objeto juego
+}
+
+Goku* Nivel2::getGoku() const {
+    return goku;
 }

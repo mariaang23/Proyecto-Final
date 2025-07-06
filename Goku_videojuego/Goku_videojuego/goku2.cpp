@@ -24,6 +24,11 @@ Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
 
     timerSalto = new QTimer(this);
     connect(timerSalto, &QTimer::timeout, this, &Goku2::actualizarSalto);
+
+    timerDanio = new QTimer(this);
+    connect(timerDanio, &QTimer::timeout, this, [=]() {
+        puedeRecibirDanio = true;  // Goku puede recibir daño de nuevo
+    });
 }
 
 Goku2::~Goku2() {
@@ -73,6 +78,17 @@ void Goku2::mover() {
     if (y() < 0) setY(0);
     if (y() + pixmap().height() > scene->height())
         setY(scene->height() - pixmap().height());
+
+    // Verificar colisiones con explosiones
+    QList<QGraphicsItem*> colisiones = collidingItems();
+    for (QGraphicsItem* item : colisiones) {
+        QString etiqueta = item->data(0).toString();
+        if (etiqueta == "explosion" && puedeRecibirDanio) {
+            recibirDanio(20);  // Reducir la vida de Goku
+            puedeRecibirDanio = false;  // Goku no puede recibir daño temporalmente
+            timerDanio->start(1000);    // Esperar 1 segundo antes de poder recibir daño de nuevo
+        }
+    }
 }
 
 // Salto con física básica

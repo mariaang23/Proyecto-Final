@@ -24,14 +24,13 @@ public:
     Goku* getGoku() const;
 
     void pocionRecolectada();
-    void agregarRobot();
-    void restarVidaGoku(int cantidad);
     void agregarExplosion(Explosion* e);
 
 private:
     void agregarPociones();
-    void agregarRobotInicial();
+    void agregarRobot();
     void agregarExplosion();
+    void gameOver();
 
     QVector<QPixmap> framesPocion;
     std::vector<Pocion*> listaPociones;
@@ -48,6 +47,11 @@ private:
 
     Robot *robot;
     Explosion *explosion;
+
+    bool perdioGoku = false;
+
+signals:
+    void nivelCompletado();
 };
 
 #endif // NIVEL2_H
