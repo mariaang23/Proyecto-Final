@@ -20,6 +20,7 @@
         <file>transicion.png</file>
         <file>robot.png</file>
         <file>explosion.png</file>
+        <file>exito.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>

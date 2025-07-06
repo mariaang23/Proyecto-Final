@@ -95,13 +95,15 @@ void juego::cambiarNivel(int numero)
     // Crear el nivel correspondiente
     if (numero == 1) {
         nivel1 = new Nivel1(scene, view, this);
+
         //cinectar nivel con señal de gokuMurio
         connect(nivel1, &Nivel1::gokuMurio,this, [this]{QTimer::singleShot(
                         3000, this, &juego::regresarAlMenuTrasDerrota); // slot que cierra y muestra menu y 3s
                 });
+
         //conectar con la transicion
-        connect(nivel1, &Nivel1::nivelCompletado,
-                this,   &juego::mostrarTransicion);
+        connect(nivel1, &Nivel1::nivelCompletado,  this,   &juego::mostrarTransicion);
+
         nivel1->iniciarNivel(); // aquí se le da foco a Goku
         QTimer::singleShot(100, this, [=]() {
             if (nivel1 && nivel1->getGoku())
@@ -111,6 +113,15 @@ void juego::cambiarNivel(int numero)
 
     } else {
         nivel2 = new Nivel2(scene, view, this);
+
+        // conexion de señal de nivel completado
+        connect(nivel2, &Nivel2::nivelCompletado, this,   &juego::mostrarExito);
+
+        //para regresar el juego.ui cuando pierda
+        connect(nivel2, &Nivel2::gokuMurio, this, [this]{
+            QTimer::singleShot(3000, this, &juego::regresarAlMenuTrasDerrota);
+        });
+
         nivel2->iniciarNivel(); // aquí también debe darse foco a Goku
         QTimer::singleShot(100, this, [=]() {
             if (nivel2 && nivel2->getGoku())
@@ -168,4 +179,23 @@ void juego::mostrarTransicion()
     });
 }
 
+void juego::mostrarExito()
+{
+    if (nivelActual) nivelActual->setEnabled(false);   // pausa todo
+
+    // crea el qlabel para imagen
+    exito = new QLabel(view);
+    exito->setPixmap(QPixmap(":/images/exito.png")
+                         .scaled(view->size(), Qt::KeepAspectRatio,
+                                 Qt::SmoothTransformation));
+    exito->setAlignment(Qt::AlignCenter);
+    exito->setAttribute(Qt::WA_DeleteOnClose);
+    exito->show();
+
+    // esperar 4s de mostrar imagen y cierra el nivel
+    QTimer::singleShot(4000, this, [=]() {
+        exito->close();          // libera qLabel
+        cerrarNivel(true);       // destruye nivel, vista y muestra juego.ui
+    });
+}
 
