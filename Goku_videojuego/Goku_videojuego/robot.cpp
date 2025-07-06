@@ -1,4 +1,6 @@
 #include "robot.h"
+#include "explosion.h"
+#include "nivel2.h"
 #include <QMessageBox>
 
 Robot::Robot(QGraphicsScene *scene,
@@ -12,11 +14,10 @@ Robot::Robot(QGraphicsScene *scene,
     sprite = new QGraphicsPixmapItem;
     scene->addItem(sprite);
 
-    cargarImagen(numeroRobot);               // ← asigna frames y primer pixmap
-    sprite->setScale(5.0);                   // tamaño final en pantalla
-    sprite->setData(0, "robot");             // etiqueta para colisiones
+    cargarImagen(numeroRobot);
+    sprite->setScale(5.0);
+    sprite->setData(0, "robot");
 
-    /* timers */
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout,
             this,             &Robot::mover);
@@ -26,7 +27,6 @@ Robot::Robot(QGraphicsScene *scene,
             this,             &Robot::animar);
 }
 
-//sobre carga del constructor robot para el robot nivel 2
 Robot::Robot(QGraphicsScene *scene, QObject *parent)
     : QObject(parent),
     scene(scene)
@@ -34,19 +34,16 @@ Robot::Robot(QGraphicsScene *scene, QObject *parent)
     sprite = new QGraphicsPixmapItem;
     scene->addItem(sprite);
 
-    cargarRobot2();                 // llena framesRobot2 y muestra frame 0
+    cargarRobot2();
     sprite->setScale(1.5);
     sprite->setData(0, "robot_nivel2");
-
-    //implementar conexion de ataque
 }
 
 Robot::~Robot()
 {
     qDebug() << "Destructor de robot llamado";
-    delete sprite; // Eliminar el sprite creado con new
+    delete sprite;
 
-    // Detener y eliminar los temporizadores
     if (timerMovimiento) {
         timerMovimiento->stop();
         delete timerMovimiento;
@@ -59,14 +56,13 @@ Robot::~Robot()
 
 void Robot::cargarImagen(int numeroRobot)
 {
-    const int ancho           = 50;   // tamaño de cada cuadro
-    const int alto            = 56;
-    const int framesPorRobot  = 6;    // 6 imágenes por robot
+    const int ancho = 50;
+    const int alto = 56;
+    const int framesPorRobot = 6;
 
-    //cargar sprite
     QPixmap spriteSheet(":/images/robots1.png");
     if (spriteSheet.isNull())
-        spriteSheet.load("imagenes/robots1.png");     // ruta alternativa
+        spriteSheet.load("imagenes/robots1.png");
 
     if (spriteSheet.isNull()) {
         QMessageBox::critical(nullptr, "Error",
@@ -74,47 +70,41 @@ void Robot::cargarImagen(int numeroRobot)
         return;
     }
 
-    //determinar los bloques
-    int bloque = 0;      // robot 1 → bloque 0 (frames 0-5)
+    int bloque = 0;
     switch (numeroRobot) {
-    case 1: bloque = 0; break;      // 0-5
-    case 2: bloque = 1; break;      // 6-11
-    case 3: bloque = 2; break;      // 12-17
-    case 4: bloque = 3; break;      // reserva para nivel 2 (18-23)
+    case 1: bloque = 0; break;
+    case 2: bloque = 1; break;
+    case 3: bloque = 2; break;
+    case 4: bloque = 3; break;
     default: bloque = 0; break;
     }
 
     const int frameInicial = bloque * framesPorRobot;
 
-    //recortar frames
     frames.clear();
     for (int i = 0; i < framesPorRobot; ++i) {
         int x = (frameInicial + i) * ancho;
         frames.append(spriteSheet.copy(x, 0, ancho, alto));
     }
 
-    //mostrar
     if (!frames.isEmpty())
         sprite->setPixmap(frames[0]);
 }
 
 void Robot::iniciar(int x, int y, int xDestino)
 {
-    destinoX = xDestino;                 // guarda el destino
+    destinoX = xDestino;
     sprite->setPos(x, y);
     timerMovimiento->start(60);
     timerAnimacion->start(120);
 }
 
-
 void Robot::mover()
 {
     sprite->moveBy(-velocidad, 0);
 
-    //detener cuando alcance la x destino
     if (destinoX >= 0 && sprite->x() <= destinoX) {
-        timerMovimiento->stop();         // deja de desplazarse
-        // Opcional: cambiar a frame “quieto”
+        timerMovimiento->stop();
         sprite->setPixmap(frames[0]);
     }
 }
@@ -124,24 +114,20 @@ void Robot::animar()
     if (frames.isEmpty()) return;
 
     if (modoMarcha) {
-        //simular modo marcha
         frameActual = (frameActual == 4) ? 5 : 4;
     } else {
-        //animacion normal
         frameActual = (frameActual + 1) % frames.size();
     }
     sprite->setPixmap(frames[frameActual]);
 }
 
-
 void Robot::desplegarRobot()
 {
-    if (desplegado) return; // evita la repeticion
+    if (desplegado) return;
     desplegado = true;
 
-    //vector para los frames secuencia
     static const QVector<int> orden = {0,1,3,2,5,4};
-    const int delay = 1500; // ms entre cuadros
+    const int delay = 1500;
 
     for (int i = 0; i < orden.size(); ++i) {
         QTimer::singleShot(i * delay, this, [this, i]() {
@@ -152,18 +138,15 @@ void Robot::desplegarRobot()
 
 void Robot::detenerMvtoRobot()
 {
-    //parar el desplazamiento
     if (timerMovimiento->isActive())
         timerMovimiento->stop();
 
-    //cambiar a los frames modo marcha
     modoMarcha = true;
-    frameActual = 4; // frame 4 "parado"
+    frameActual = 4;
     sprite->setPixmap(frames[frameActual]);
 
-    //siga activa la animacion
     if (!timerAnimacion->isActive())
-        timerAnimacion->start(120);   // la misma cadencia que usabas
+        timerAnimacion->start(120);
 }
 
 void Robot::cargarRobot2()
@@ -179,13 +162,82 @@ void Robot::cargarRobot2()
         return;
     }
 
-    const int numFrames = sheet.width() / anchoFrame; // 5 frames
+    const int numFrames = sheet.width() / anchoFrame;
     framesRobot2.clear();
     for (int i = 0; i < numFrames; ++i)
         framesRobot2.append(sheet.copy(i * anchoFrame, 0, anchoFrame, altoFrame));
 
     if (!framesRobot2.isEmpty()) {
-        sprite->setPixmap(framesRobot2[4]); // Frame inicial//final para poder ver la posicion de la explosion
+        sprite->setPixmap(framesRobot2[4]);
         frames = framesRobot2;
     }
+}
+
+void Robot::iniciarAtaques()
+{
+    timerAtaque = new QTimer(this);
+    connect(timerAtaque, &QTimer::timeout, this, [=]() {
+        // 1. Animar el disparo (cambio de frame)
+        static QVector<int> framesDisparo = {0, 1, 2, 3, 4};  // simulación
+        static int indexFrame = 0;
+        sprite->setPixmap(framesRobot2[framesDisparo[indexFrame]]);
+        indexFrame = (indexFrame + 1) % framesDisparo.size();
+
+        // 2. Solo disparar cuando finaliza la animación (frame final)
+        if (indexFrame == 0) {
+            // Crear una nueva explosión
+            Explosion* explosion = new Explosion(scene, this);
+
+            // Alternar tipo de movimiento
+            if (usarParabolico)
+                explosion->setTipoMovimiento(Explosion::Parabolico);
+            else
+                explosion->setTipoMovimiento(Explosion::MRU);
+
+            usarParabolico = !usarParabolico; // alternar para el próximo
+
+            // Posicionar la explosión justo en el arma del robot
+            QPointF posArma = sprite->scenePos() + QPointF(sprite->pixmap().width() * -0.35, // ancho para que salga explosion del arma
+                                                           sprite->pixmap().height() * 0.9); // alto para que salga explosion del arma
+            explosion->setPosicionInicial(posArma);
+            explosion->lanzar();
+
+            // Aquí es donde se registra en Nivel2
+            Nivel2* nivel2 = dynamic_cast<Nivel2*>(this->parent());
+            if (nivel2)
+                nivel2->agregarExplosion(explosion);
+        }
+    });
+
+    timerAtaque->start(1000);  // cada 2.5 s
+}
+
+
+void Robot::animarYDisparar()
+{
+    // Animar frames para levantar el brazo: 0 → 1 → 2
+    if (framesRobot2.size() < 5) return;
+
+    sprite->setPixmap(framesRobot2[0]); // inicio
+    QTimer::singleShot(200, this, [this]() {
+        sprite->setPixmap(framesRobot2[1]); // brazo medio
+    });
+    QTimer::singleShot(400, this, [this]() {
+        sprite->setPixmap(framesRobot2[2]); // brazo arriba
+    });
+    QTimer::singleShot(600, this, [this]() {
+        dispararExplosion(true); // Parabólica. Cambia a false si prefieres MRU.
+        sprite->setPixmap(framesRobot2[4]); // regresa al frame de espera
+    });
+}
+
+void Robot::dispararExplosion(bool parabolica)
+{
+    Explosion* ex = new Explosion(scene, this);
+    ex->setTipoMovimiento(parabolica ? Explosion::Parabolico : Explosion::MRU);
+
+    // Posición frente al robot
+    QPointF pos = sprite->pos() + QPointF(sprite->boundingRect().width() / 2, 60);
+    ex->setPosicionInicial(pos);
+    ex->lanzar();
 }
