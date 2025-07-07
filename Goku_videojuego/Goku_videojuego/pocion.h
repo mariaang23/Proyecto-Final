@@ -6,6 +6,10 @@
 #include <QVector>
 #include <QObject>
 
+/**
+ * Clase gráfica animada que representa una poción en la escena del juego.
+ * Hereda de QObject para usar señales/slots y de QGraphicsPixmapItem para renderizado.
+ */
 class Pocion : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
@@ -15,18 +19,17 @@ public:
     ~Pocion();
     void detener();
 
-
 private slots:
-    void moverYAnimar();
+    void moverYAnimar();         // Slot que mueve y cambia el frame de la poción.
 
 private:
-    QVector<QPixmap> frames;
-    int indiceFrame;
-    QTimer* timer;
+    QVector<QPixmap> frames;     //Frames animados escalados.
+    int indiceFrame;             // Índice actual del frame mostrado.
+    QTimer* timer;               // Temporizador que controla la animación.
 
-    int fila;
-    int columna;
-    int columnasTotales;
+    int fila;                    // Posición lógica (grilla) en Y.
+    int columna;                 // Posición lógica (grilla) en X.
+    int columnasTotales;         // Número total de columnas disponibles.
 };
 
 #endif // POCION_H

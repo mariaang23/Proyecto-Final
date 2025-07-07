@@ -6,8 +6,9 @@
 #include <QTransform>
 #include <QPixmap>
 #include <QDebug>
+#include <stdexcept>  // Excepciones estándar
 
-// Constructor
+// Constructor: inicializa Goku2 y sus timers
 Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeight, Nivel2* nivel, QObject* parent)
     : Goku(scene, velocidad, fotogWidth, fotogHeight, parent),
     mvtoIzquierda(false),
@@ -19,48 +20,71 @@ Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
     velocidadVertical(0),
     nivel2(nivel)
 {
+    if (!nivel2) {
+        throw std::invalid_argument("Goku2: el puntero a Nivel2 no puede ser nulo.");
+    }
+
+    // Timer para movimiento lateral continuo
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout, this, &Goku2::mover);
 
+    // Timer para física del salto
     timerSalto = new QTimer(this);
     connect(timerSalto, &QTimer::timeout, this, &Goku2::actualizarSalto);
 
+    // Timer que controla inmunidad temporal tras recibir daño
     timerDanio = new QTimer(this);
     connect(timerDanio, &QTimer::timeout, this, [=]() {
-        puedeRecibirDanio = true;  // Goku puede recibir daño de nuevo
+        puedeRecibirDanio = true;
     });
 }
 
+// Destructor: detiene y libera timers
 Goku2::~Goku2() {
-    // Lógica directa en lugar de llamar a un virtual
+    qDebug() << "Destructor de Goku2 llamado";
+
     if (timerMovimiento) {
         timerMovimiento->stop();
         delete timerMovimiento;
         timerMovimiento = nullptr;
     }
+
+    if (timerSalto && timerSalto->isActive()) {
+        timerSalto->stop();
+    }
+    timerSalto = nullptr;
+
+    if (timerDanio && timerDanio->isActive()) {
+        timerDanio->stop();
+    }
+    timerDanio = nullptr;
 }
 
-// Cargar sprite inicial
+// Carga sprite inicial desde recursos
 void Goku2::cargarImagen() {
     QPixmap sprite(":/images/Goku_caminando.png");
     if (sprite.isNull()) sprite.load("imagenes/Goku_caminando.png");
 
     if (sprite.isNull()) {
-        qDebug() << "Error: No se encontró Goku_caminando.png";
-        return;
+        throw std::runtime_error("Goku2::cargarImagen - No se encontró Goku_caminando.png.");
     }
 
     setPixmap(sprite.copy(0, 0, fotogWidth, fotogHeight));
 }
 
-// Posicionar en la escena
+// Posiciona a Goku y activa movimiento
 void Goku2::iniciar(int x, int y) {
     setPos(x, y);
     sueloY = y;
+
+    if (!timerMovimiento) {
+        throw std::runtime_error("Goku2::iniciar - Timer de movimiento no inicializado.");
+    }
+
     timerMovimiento->start(60);
 }
 
-// Movimiento lateral y animación
+// Mueve a Goku según teclas presionadas y detecta daño
 void Goku2::mover() {
     qreal nuevaX = x();
 
@@ -75,24 +99,25 @@ void Goku2::mover() {
         else if (mvtoIzquierda) actualizarSpriteCaminar(false);
     }
 
+    // Corrección de límites verticales
     if (y() < 0) setY(0);
     if (y() + pixmap().height() > scene->height())
         setY(scene->height() - pixmap().height());
 
-    // Verificar colisiones con explosiones
+    // Colisión con explosión: daño temporal
     const QList<QGraphicsItem*> colisiones = collidingItems();
     for (int i = 0; i < colisiones.size(); ++i) {
         QGraphicsItem* item = colisiones[i];
         QString etiqueta = item->data(0).toString();
         if (etiqueta == "explosion" && puedeRecibirDanio) {
-            recibirDanio(20);           // Reducir la vida de Goku
-            puedeRecibirDanio = false;  // Goku no puede recibir daño temporalmente
-            timerDanio->start(1000);    // Esperar 1 segundo antes de poder recibir daño de nuevo
+            recibirDanio(20);
+            puedeRecibirDanio = false;
+            timerDanio->start(1000);  // 1 segundo de inmunidad
         }
     }
 }
 
-// Salto con física básica
+// Física del salto con gravedad
 void Goku2::actualizarSalto() {
     velocidadVertical += gravedad;
     qreal nuevaY = y() + velocidadVertical;
@@ -101,16 +126,17 @@ void Goku2::actualizarSalto() {
         nuevaY = sueloY;
         enSalto = false;
         velocidadVertical = 0;
-        timerSalto->stop();
+
+        if (timerSalto) timerSalto->stop();
+
         actualizarSpriteCaminar(mirandoDerecha);
     }
 
     setY(nuevaY);
-
     detectarPocion();
 }
 
-// Detección de colisión con poción
+// Detección y recolección de pociones
 void Goku2::detectarPocion() {
     QList<QGraphicsItem*> colisiones = collidingItems();
     for (int i = 0; i < colisiones.size(); ++i) {
@@ -118,18 +144,25 @@ void Goku2::detectarPocion() {
         if (pocion) {
             scene->removeItem(pocion);
             delete pocion;
-            if (nivel2)
-                nivel2->pocionRecolectada();
+
+            if (!nivel2) {
+                throw std::runtime_error("Goku2::detectarPocion - nivel2 no está inicializado.");
+            }
+            nivel2->pocionRecolectada();
         }
     }
 }
 
-
-// Controles
+// Interacción con teclas (WASD)
 void Goku2::keyPressEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_W && !enSalto) {
         enSalto = true;
         velocidadVertical = -15.0f;
+
+        if (!timerSalto) {
+            throw std::runtime_error("Goku2::keyPressEvent - timerSalto no está inicializado.");
+        }
+
         timerSalto->start(16);
         actualizarSpriteSalto();
     } else if (event->key() == Qt::Key_D) {
@@ -139,16 +172,19 @@ void Goku2::keyPressEvent(QKeyEvent* event) {
     }
 }
 
+// Fin de movimiento al soltar teclas
 void Goku2::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_D) mvtoDerecha = false;
     else if (event->key() == Qt::Key_A) mvtoIzquierda = false;
 }
 
-// Sprite de caminata con espejo si va a la izquierda
+// Cambia sprite de caminata y voltea si es necesario
 void Goku2::actualizarSpriteCaminar(bool derecha) {
     QPixmap sprite(":/images/Goku_caminando.png");
     if (sprite.isNull()) sprite.load("imagenes/Goku_caminando.png");
-    if (sprite.isNull()) return;
+    if (sprite.isNull()) {
+        throw std::runtime_error("Goku2::actualizarSpriteCaminar - No se encontró el sprite.");
+    }
 
     static int frameIndex = 0;
     int totalFrames = sprite.width() / fotogWidth;
@@ -167,11 +203,13 @@ void Goku2::actualizarSpriteCaminar(bool derecha) {
     }
 }
 
-// Sprite durante el salto
+// Sprite para cuando está saltando
 void Goku2::actualizarSpriteSalto() {
     QPixmap sprite(":/images/Goku_saltando.png");
     if (sprite.isNull()) sprite.load("imagenes/Goku_saltando.png");
-    if (sprite.isNull()) return;
+    if (sprite.isNull()) {
+        throw std::runtime_error("Goku2::actualizarSpriteSalto - No se encontró el sprite.");
+    }
 
     setPixmap(sprite.copy(0, 0, 200, 256));
 
@@ -188,33 +226,31 @@ void Goku2::setSueloY(float y) {
     sueloY = y;
 }
 
-// Detiene timers
+// Detiene todos los timers activos
 void Goku2::detener() {
-    timerMovimiento->stop();
-    timerSalto->stop();
+    if (timerMovimiento) timerMovimiento->stop();
+    if (timerSalto) timerSalto->stop();
 }
 
-void Goku2::animarMuerte()
-{
+// Animación de muerte de Goku usando 6 frames
+void Goku2::animarMuerte() {
     QPixmap spriteSheet(":/images/Goku_muere.png");
     if (spriteSheet.isNull()) {
-        qDebug() << "No se encontró Goku_muere.png";
-        return;
+        throw std::runtime_error("Goku2::animarMuerte - No se encontró Goku_muere.png.");
     }
 
-    const int anchoFrame = 280;
-    const int altoFrame  = 298;
-
     QVector<QPixmap> framesMuerte;
+    const int anchoFrame = 280;
+    const int altoFrame = 298;
+
     for (int i = 0; i < 6; ++i) {
         framesMuerte.append(spriteSheet.copy(i * anchoFrame, 0, anchoFrame, altoFrame));
     }
 
-    // Detener movimiento mientras muere
-    detener();
+    detener();  // Detener movimiento mientras muere
 
-    int* index = new int(0);
-    QTimer* timerMuerte = new QTimer(this);  // se elimina automáticamente con el parent
+    int* index = new int(0);  // Índice dinámico para animación
+    QTimer* timerMuerte = new QTimer(this);  // Se destruye automáticamente
 
     connect(timerMuerte, &QTimer::timeout, this, [=]() mutable {
         if (*index < framesMuerte.size()) {
@@ -225,17 +261,17 @@ void Goku2::animarMuerte()
             timerMuerte->deleteLater();
             delete index;
 
-            //  Reanudar movimiento después de la muerte
+            // Reanudar movimiento después de morir (opcional)
             timerMovimiento->start(60);
         }
     });
 
-    timerMuerte->start(50);  // 100 ms por frame
+    timerMuerte->start(50);  // 50 ms entre frames para una animación fluida
 }
 
-// Nuevo iniciarKamehameha con puntero a robot
+// Inicia animación del Kamehameha y ataque al robot
 void Goku2::iniciarKamehameha(float xObjetivo, Robot* robotObjetivo) {
-    detener();  // Detener todo movimiento previo
+    detener();  // Detener cualquier movimiento previo
 
     QVector<QPixmap> framesSalto;
     QPixmap spriteSalto(":/images/Goku_kam1.png");
@@ -258,15 +294,15 @@ void Goku2::iniciarKamehameha(float xObjetivo, Robot* robotObjetivo) {
             animSalto->deleteLater();
             delete index;
 
-            // Continuar caminando hacia el robot
+            // Camina hacia el robot después del salto
             caminarHaciaRobot(xObjetivo, robotObjetivo);
         }
     });
 
-    animSalto->start(100);
+    animSalto->start(100);  // 100 ms por frame
 }
 
-// Versión modificada de caminarHaciaRobot
+// Movimiento de Goku hacia el robot antes del ataque
 void Goku2::caminarHaciaRobot(float xObjetivo, Robot* robotObjetivo) {
     QTimer* avance = new QTimer(this);
 
@@ -278,14 +314,14 @@ void Goku2::caminarHaciaRobot(float xObjetivo, Robot* robotObjetivo) {
         } else {
             avance->stop();
             avance->deleteLater();
-            atacarRobot(robotObjetivo); // <- ahora con el robot
+            atacarRobot(robotObjetivo);  // Comienza ataque una vez cerca
         }
     });
 
     avance->start(60);
 }
 
-// Sin cambios adicionales
+// Animación de ataque Kamehameha
 void Goku2::atacarRobot(Robot* robotObjetivo) {
     QVector<QPixmap> framesAtaque;
     QPixmap spriteAtaque(":/images/Goku_kam2.png");
@@ -309,41 +345,37 @@ void Goku2::atacarRobot(Robot* robotObjetivo) {
             delete index;
 
             if (robotObjetivo) {
-                // Esperar 1 segundo antes de hacer que el robot muera
+                // Llama método de muerte del robot después del ataque
                 QTimer::singleShot(1300, this, [=]() {
                     robotObjetivo->murioRobot();
                 });
             }
 
-
-            // Goku se devuelve hacia la izquierda 300px, pero no menos de x = 0
+            // Goku retrocede después del ataque
             float destino = qMax(0.0, this->x() - 300.0);
             caminarHaciaIzquierda(destino);
-
         }
     });
 
-    animAtaque->start(80);
+    animAtaque->start(80);  // 80 ms por frame
 }
 
+// Regreso de Goku hacia la izquierda después del ataque
 void Goku2::caminarHaciaIzquierda(float xDestino) {
     QTimer* regreso = new QTimer(this);
 
     connect(regreso, &QTimer::timeout, this, [=]() mutable {
         qreal xActual = this->x();
-
         if (xActual - velocidad > xDestino) {
             setX(xActual - velocidad);
-            actualizarSpriteCaminar(false); // animación mirando a la izquierda
+            actualizarSpriteCaminar(false);
         } else {
             regreso->stop();
             regreso->deleteLater();
-            setX(xDestino); // asegurar que llegue exactamente
+            setX(xDestino);
             actualizarSpriteCaminar(false);
-            qDebug() << "Goku se retiró después del Kamehameha";
         }
     });
 
     regreso->start(60);
 }
-

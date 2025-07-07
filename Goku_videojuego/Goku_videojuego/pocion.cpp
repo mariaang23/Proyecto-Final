@@ -1,94 +1,107 @@
 #include "pocion.h"
 #include <QRandomGenerator>
 #include <QGraphicsScene>
+#include <QDebug>
+#include <stdexcept>  // Para lanzar excepciones
 
-// Constante fija para limitar el ancho horizontal
+// Constante que define el límite horizontal máximo del escenario
 const int LimiteAnchoX = 1036;
 
 // Constructor de la clase Pocion
 Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, int columnas, QGraphicsItem* parent)
-    : QGraphicsPixmapItem(parent),                // Establece el elemento gráfico como hijo del item padre
-    indiceFrame(0),                               // Frame inicial para la animación
-    fila(fila), columna(columna),                 // Posición lógica en la grilla - matriz (para organización de pociones)
-    columnasTotales(columnas)                     // Total de columnas en la grilla - matriz                    // Ancho de la vista del nivel
+    : QGraphicsPixmapItem(parent),   // Establece el padre gráfico
+    indiceFrame(0),                  // Comienza en el primer frame
+    fila(fila),                      // Fila lógica en la grilla
+    columna(columna),                // Columna lógica
+    columnasTotales(columnas)        // Total de columnas disponibles
 {
-    //Escalar y almacenar los frames de animación
+    // Validación de entrada: debe haber al menos un frame
+    if (framesOriginales.isEmpty()) {
+        throw std::invalid_argument("Pocion: los frames no pueden estar vacíos.");
+    }
+
+    // Validación de grilla: columnas debe ser positivo
+    if (columnasTotales <= 0) {
+        throw std::invalid_argument("Pocion: el número de columnas debe ser mayor que cero.");
+    }
+
+    // Escala cada imagen de la animación al 80% de su tamaño original
     for (const QPixmap& original : framesOriginales) {
-        // Escala cada frame al 80% de su tamaño original, manteniendo la relación de aspecto
         frames.append(original.scaled(original.width() * 0.8,
                                       original.height() * 0.8,
                                       Qt::KeepAspectRatio,
                                       Qt::SmoothTransformation));
     }
 
-    setPixmap(frames[0]);   // Establece el primer frame visible como imagen inicial
-    setZValue(1);           // Define la prioridad de dibujo (por encima del fondo)
+    setPixmap(frames[0]); // Establece el primer frame como imagen inicial
+    setZValue(1);         // Aparece por encima de otros elementos del fondo
 
-    // Ancho del sprite escalado
+    // Cálculo de posición horizontal aleatoria dentro de su columna
     int anchoSprite = frames[0].width();
+    int espacioX = LimiteAnchoX / columnasTotales;
+    int baseX = columna * espacioX;
+    int minX = std::max(0, baseX - 15);
+    int maxX = std::min(LimiteAnchoX - anchoSprite, baseX + 15);
 
-    // Distruibuir las pociones en columnas con cierta aleatoriedad
-    int espacioX = LimiteAnchoX / columnasTotales;  // Espacio entre columnas
-    int baseX = columna * espacioX;               // Centro de la columna actual
-    int minX = std::max(0, baseX - 15);           // Límite izquierdo con margen
-    int maxX = std::min(LimiteAnchoX - anchoSprite, baseX + 15); // Límite derecho con margen
+    // Validación defensiva del rango
+    if (minX >= maxX) {
+        throw std::runtime_error("Pocion: los márgenes de posicionamiento horizontal son inválidos.");
+    }
 
-    // Posición X aleatoria dentro de los márgenes de su columna
-    int x = QRandomGenerator::global()->bounded(minX, maxX + 1);
+    int x = QRandomGenerator::global()->bounded(minX, maxX + 1);  // Posición X aleatoria
 
-    // Se ubican en diferentes filas con variación vertical aleatoria
-    int espacioY = 300;  // Separación vertical entre filas
-    int offsetY = QRandomGenerator::global()->bounded(-300, 300);  // Aleatoriedad
-    int y = -400 + fila * espacioY + offsetY;  // Posición final en Y (comienza fuera de pantalla)
+    // Posición Y determinada por su fila, con variación aleatoria
+    int espacioY = 300;
+    int offsetY = QRandomGenerator::global()->bounded(-300, 300);
+    int y = -400 + fila * espacioY + offsetY;       // Inicia fuera del área visible
 
-    setPos(x, y); // Establece la posición inicial
+    setPos(x, y);                                   // Posiciona la poción en la escena
 
-    timer = new QTimer(this);  // Temporizador con this como padre
-    connect(timer, &QTimer::timeout, this, &Pocion::moverYAnimar); // Conecta la señal al slot
-    timer->start(100);  // Llama moverYAnimar() cada 100 ms
+    // Crea el temporizador de animación
+    timer = new QTimer(this);                       // Qt se encargará de destruirlo
+    connect(timer, &QTimer::timeout, this, &Pocion::moverYAnimar);
+    timer->start(100);                              // Llama moverYAnimar() cada 100 ms
 }
 
-// Destructor: detiene el timer si aún está activo
+// Destructor: detiene el temporizador antes de que se destruya
 Pocion::~Pocion()
 {
     qDebug() << "Destructor de pocion llamado";
     if (timer)
-        timer->stop();
+        timer->stop();  // Evita que dispare después de destrucción
 }
 
-// Mvto y animación continua
+// Slot llamado periódicamente para mover y animar la poción
 void Pocion::moverYAnimar()
 {
-    // Mueve la poción 3 píxeles hacia abajo en cada llamada
-    moveBy(0, 3);
+    moveBy(0, 3);  // Desplaza hacia abajo
 
-    // Cambia el frame para crear efecto de rotación o animación
+    // Ciclo de animación: cambia el frame
     indiceFrame = (indiceFrame + 1) % frames.size();
     setPixmap(frames[indiceFrame]);
 
-    // Si la poción sale de la pantalla por abajo, la reposiciona arriba
+    // Si ha salido de la pantalla, reaparece arriba
     if (scene() && y() > scene()->height()) {
-        // Recalcula la posición horizontal como al inicio
         int anchoSprite = frames[0].width();
         int espacioX = LimiteAnchoX / columnasTotales;
         int baseX = columna * espacioX;
         int minX = std::max(0, baseX - 15);
         int maxX = std::min(LimiteAnchoX - anchoSprite, baseX + 15);
+
         int x = QRandomGenerator::global()->bounded(minX, maxX + 1);
 
-        // Recalcula posición vertical con menos variación (más controlado)
         int espacioY = 100;
         int offsetY = QRandomGenerator::global()->bounded(-200, 200);
         int yNuevo = -400 + fila * espacioY + offsetY;
 
-        // Reaparece en la parte superior de la escena
-        setPos(x, yNuevo);
+        setPos(x, yNuevo);  // Reaparece desde arriba en escena
     }
 }
 
+// Método público para detener la animación externamente
 void Pocion::detener()
 {
     if (timer) {
-        timer->stop();
+        timer->stop();  // Detiene el movimiento y animación
     }
 }
