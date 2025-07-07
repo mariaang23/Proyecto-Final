@@ -80,11 +80,12 @@ void Goku2::mover() {
         setY(scene->height() - pixmap().height());
 
     // Verificar colisiones con explosiones
-    QList<QGraphicsItem*> colisiones = collidingItems();
-    for (QGraphicsItem* item : colisiones) {
+    const QList<QGraphicsItem*> colisiones = collidingItems();
+    for (int i = 0; i < colisiones.size(); ++i) {
+        QGraphicsItem* item = colisiones[i];
         QString etiqueta = item->data(0).toString();
         if (etiqueta == "explosion" && puedeRecibirDanio) {
-            recibirDanio(20);  // Reducir la vida de Goku
+            recibirDanio(20);           // Reducir la vida de Goku
             puedeRecibirDanio = false;  // Goku no puede recibir daño temporalmente
             timerDanio->start(1000);    // Esperar 1 segundo antes de poder recibir daño de nuevo
         }
@@ -230,5 +231,119 @@ void Goku2::animarMuerte()
     });
 
     timerMuerte->start(50);  // 100 ms por frame
+}
+
+// Nuevo iniciarKamehameha con puntero a robot
+void Goku2::iniciarKamehameha(float xObjetivo, Robot* robotObjetivo) {
+    detener();  // Detener todo movimiento previo
+
+    QVector<QPixmap> framesSalto;
+    QPixmap spriteSalto(":/images/Goku_kam1.png");
+    const int w1 = 200, h1 = 262;
+
+    for (int i = 0; i < 6; ++i)
+        framesSalto.append(spriteSalto.copy(i * w1, 0, w1, h1));
+
+    int* index = new int(0);
+    QTimer* animSalto = new QTimer(this);
+
+    connect(animSalto, &QTimer::timeout, this, [=]() mutable {
+        if (*index < framesSalto.size()) {
+            setPixmap(framesSalto[*index]);
+            setTransform(QTransform());
+            setScale(1.0);
+            (*index)++;
+        } else {
+            animSalto->stop();
+            animSalto->deleteLater();
+            delete index;
+
+            // Continuar caminando hacia el robot
+            caminarHaciaRobot(xObjetivo, robotObjetivo);
+        }
+    });
+
+    animSalto->start(100);
+}
+
+// Versión modificada de caminarHaciaRobot
+void Goku2::caminarHaciaRobot(float xObjetivo, Robot* robotObjetivo) {
+    QTimer* avance = new QTimer(this);
+
+    connect(avance, &QTimer::timeout, this, [=]() mutable {
+        qreal xActual = this->x();
+        if (xActual + velocidad < xObjetivo - 50) {
+            setX(xActual + velocidad);
+            actualizarSpriteCaminar(true);
+        } else {
+            avance->stop();
+            avance->deleteLater();
+            atacarRobot(robotObjetivo); // <- ahora con el robot
+        }
+    });
+
+    avance->start(60);
+}
+
+// Sin cambios adicionales
+void Goku2::atacarRobot(Robot* robotObjetivo) {
+    QVector<QPixmap> framesAtaque;
+    QPixmap spriteAtaque(":/images/Goku_kam2.png");
+    const int w2 = 325, h2 = 347;
+
+    for (int i = 0; i < 8; ++i)
+        framesAtaque.append(spriteAtaque.copy(i * w2, 0, w2, h2));
+
+    int* index = new int(0);
+    QTimer* animAtaque = new QTimer(this);
+
+    connect(animAtaque, &QTimer::timeout, this, [=]() mutable {
+        if (*index < framesAtaque.size()) {
+            setPixmap(framesAtaque[*index]);
+            setTransform(QTransform());
+            setScale(1.0);
+            (*index)++;
+        } else {
+            animAtaque->stop();
+            animAtaque->deleteLater();
+            delete index;
+
+            if (robotObjetivo) {
+                // Esperar 1 segundo antes de hacer que el robot muera
+                QTimer::singleShot(1300, this, [=]() {
+                    robotObjetivo->murioRobot();
+                });
+            }
+
+
+            // Goku se devuelve hacia la izquierda 300px, pero no menos de x = 0
+            float destino = qMax(0.0, this->x() - 300.0);
+            caminarHaciaIzquierda(destino);
+
+        }
+    });
+
+    animAtaque->start(80);
+}
+
+void Goku2::caminarHaciaIzquierda(float xDestino) {
+    QTimer* regreso = new QTimer(this);
+
+    connect(regreso, &QTimer::timeout, this, [=]() mutable {
+        qreal xActual = this->x();
+
+        if (xActual - velocidad > xDestino) {
+            setX(xActual - velocidad);
+            actualizarSpriteCaminar(false); // animación mirando a la izquierda
+        } else {
+            regreso->stop();
+            regreso->deleteLater();
+            setX(xDestino); // asegurar que llegue exactamente
+            actualizarSpriteCaminar(false);
+            qDebug() << "Goku se retiró después del Kamehameha";
+        }
+    });
+
+    regreso->start(60);
 }
 

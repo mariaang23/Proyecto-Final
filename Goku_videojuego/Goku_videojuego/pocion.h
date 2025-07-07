@@ -13,6 +13,8 @@ class Pocion : public QObject, public QGraphicsPixmapItem
 public:
     Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, int columnas, QGraphicsItem* parent = nullptr);
     ~Pocion();
+    void detener();
+
 
 private slots:
     void moverYAnimar();

@@ -248,12 +248,21 @@ void Robot::cargarFramesMuerte()
 
     QPixmap sheet(":/images/murioRobot.png");
     const int numFrames = 7;
-    const int ancho= 200;
+    const int ancho= 120;
     const int alto= 150;
 
     for (int i = 0; i < numFrames; ++i)
         framesMuerte.append(sheet.copy(i * ancho, 0, ancho, alto));
 }
+
+void Robot::detenerAtaques() {
+    if (timerAtaque) {
+        timerAtaque->stop();
+        timerAtaque->deleteLater();
+        timerAtaque = nullptr;
+    }
+}
+
 
 void Robot::murioRobot()
 {
@@ -278,6 +287,7 @@ void Robot::murioRobot()
             //detener timer cuando llega al ultimo frame
             if (frameMuerte >= 7) {
                 timerMuerte->stop();
+                emit robotMurio();
                 return;
             }
             //cambiar el sprite al siguiente

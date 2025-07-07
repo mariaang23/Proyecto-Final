@@ -62,9 +62,6 @@ void Nivel2::iniciarNivel() {
 
     agregarGoku();
     agregarRobot();
-
-    //activar murio robot para ver
-    //robot->murioRobot();
 }
 
 void Nivel2::cargarFondoNivel(const QString &ruta) {
@@ -160,14 +157,25 @@ void Nivel2::actualizarNivel()
         //detener ataques del robot
         if (timerNivel) timerNivel->stop();
 
+        // Detener disparos del robot antes del Kamehameha
+        if (robot) robot->detenerAtaques();
+
         //emite nivel completado si completa las pociones (por ahora)
         QTimer::singleShot(1000, this, [this]() {
-            emit nivelCompletado();
+            Goku2* goku2 = dynamic_cast<Goku2*>(goku);
+            if (goku2 && robot) {
+                // Conectar: cuando el robot termine de morir completar nivel
+                connect(robot, &Robot::robotMurio, this, [this]() {
+                    emit nivelCompletado();
+                });
+
+                // Goku comienza su animación con el robot como objetivo
+                goku2->iniciarKamehameha(robot->getSprite()->x(), robot);
+            }
         });
         return;
     }
 }
-
 
 void Nivel2::agregarRobot()
 {

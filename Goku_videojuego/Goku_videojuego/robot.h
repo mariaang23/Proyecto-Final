@@ -25,12 +25,16 @@ public:
     QGraphicsPixmapItem *getSprite() const   { return sprite; }
     const QVector<QPixmap>& getFramesNivel2() const { return framesRobot2; }
 
-
+    void detenerAtaques();
     void murioRobot();//sprites de robot muerto
 
 private slots:
     void mover();
     void animar();
+
+signals:
+    void robotMurio();  // Para avisar a Nivel2 cuando termine la animación
+
 
 private:
     void cargarImagen(int numeroRobot);

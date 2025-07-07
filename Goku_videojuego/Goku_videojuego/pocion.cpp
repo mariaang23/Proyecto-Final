@@ -85,3 +85,10 @@ void Pocion::moverYAnimar()
         setPos(x, yNuevo);
     }
 }
+
+void Pocion::detener()
+{
+    if (timer) {
+        timer->stop();
+    }
+}
