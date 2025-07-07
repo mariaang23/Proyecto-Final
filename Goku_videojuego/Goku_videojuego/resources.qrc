@@ -21,6 +21,8 @@
         <file>robot.png</file>
         <file>explosion.png</file>
         <file>exito.png</file>
+        <file>Goku_kam1.png</file>
+        <file>Goku_kam2.png</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>

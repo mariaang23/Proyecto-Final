@@ -2,13 +2,15 @@
 #include <QRandomGenerator>
 #include <QGraphicsScene>
 
+// Constante fija para limitar el ancho horizontal
+const int LimiteAnchoX = 1036;
+
 // Constructor de la clase Pocion
-Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int anchoVista, int fila, int columna, int columnas, QGraphicsItem* parent)
+Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, int columnas, QGraphicsItem* parent)
     : QGraphicsPixmapItem(parent),                // Establece el elemento gráfico como hijo del item padre
     indiceFrame(0),                               // Frame inicial para la animación
     fila(fila), columna(columna),                 // Posición lógica en la grilla - matriz (para organización de pociones)
-    columnasTotales(columnas),                    // Total de columnas en la grilla - matriz
-    anchoVista(anchoVista)                        // Ancho de la vista del nivel
+    columnasTotales(columnas)                     // Total de columnas en la grilla - matriz                    // Ancho de la vista del nivel
 {
     //Escalar y almacenar los frames de animación
     for (const QPixmap& original : framesOriginales) {
@@ -26,10 +28,10 @@ Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int anchoVista, int fil
     int anchoSprite = frames[0].width();
 
     // Distruibuir las pociones en columnas con cierta aleatoriedad
-    int espacioX = anchoVista / columnasTotales;  // Espacio entre columnas
+    int espacioX = LimiteAnchoX / columnasTotales;  // Espacio entre columnas
     int baseX = columna * espacioX;               // Centro de la columna actual
     int minX = std::max(0, baseX - 15);           // Límite izquierdo con margen
-    int maxX = std::min(anchoVista - anchoSprite, baseX + 15); // Límite derecho con margen
+    int maxX = std::min(LimiteAnchoX - anchoSprite, baseX + 15); // Límite derecho con margen
 
     // Posición X aleatoria dentro de los márgenes de su columna
     int x = QRandomGenerator::global()->bounded(minX, maxX + 1);
@@ -68,10 +70,10 @@ void Pocion::moverYAnimar()
     if (scene() && y() > scene()->height()) {
         // Recalcula la posición horizontal como al inicio
         int anchoSprite = frames[0].width();
-        int espacioX = anchoVista / columnasTotales;
+        int espacioX = LimiteAnchoX / columnasTotales;
         int baseX = columna * espacioX;
         int minX = std::max(0, baseX - 15);
-        int maxX = std::min(anchoVista - anchoSprite, baseX + 15);
+        int maxX = std::min(LimiteAnchoX - anchoSprite, baseX + 15);
         int x = QRandomGenerator::global()->bounded(minX, maxX + 1);
 
         // Recalcula posición vertical con menos variación (más controlado)
