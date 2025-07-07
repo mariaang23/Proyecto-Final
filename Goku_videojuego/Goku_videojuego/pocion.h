@@ -11,7 +11,7 @@ class Pocion : public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 
 public:
-    Pocion(const QVector<QPixmap>& framesOriginales, int anchoVista, int fila, int columna, int columnas, QGraphicsItem* parent = nullptr);
+    Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, int columnas, QGraphicsItem* parent = nullptr);
     ~Pocion();
 
 private slots:
@@ -25,7 +25,6 @@ private:
     int fila;
     int columna;
     int columnasTotales;
-    int anchoVista;
 };
 
 #endif // POCION_H

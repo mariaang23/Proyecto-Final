@@ -106,8 +106,7 @@ void Nivel2::agregarPociones() {
     }
 
     // Crea una sola poción inicial para que empiece el nivel
-    int anchoVista = vista->width();
-    Pocion* pocion = new Pocion(framesPocion, anchoVista, 0, 0, 1);
+    Pocion* pocion = new Pocion(framesPocion, 0, 0, 1);
     escena->addItem(pocion);
     listaPociones.push_back(pocion);
 }
@@ -124,9 +123,7 @@ void Nivel2::agregarPocionAleatoria() {
 
     int fila = QRandomGenerator::global()->bounded(0, 2);
     int columna = QRandomGenerator::global()->bounded(0, 7);
-    int anchoVista = vista->width();
-
-    Pocion* nuevaPocion = new Pocion(framesPocion, anchoVista, fila, columna, 7);
+    Pocion* nuevaPocion = new Pocion(framesPocion, fila, columna, 7);
     escena->addItem(nuevaPocion);
     listaPociones.push_back(nuevaPocion);
 }
