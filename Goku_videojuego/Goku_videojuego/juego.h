@@ -26,6 +26,7 @@ private slots:
     void iniciarJuego();         // Slot que se activa al presionar el botón de inicio
     void regresarAlMenuTrasDerrota();      // se llama con QTimer
     void mostrarTransicion();  // muestra la imagen de transicion.png y luego pasa a Nivel2
+    void mostrarExito(); //muestra imagen de "ganaste" en el fin del nivel 2 cuando se ha ganado
 
 private:
     Ui::juego *ui;
@@ -35,6 +36,7 @@ private:
     Nivel1 *nivel1;
     Nivel2 *nivel2;
     Nivel *nivelActual;
+    QLabel *exito; //para fin del juego "ganastee"
 
     QTimer *timerEstado;         // Temporizador para revisar el estado del nivel
 

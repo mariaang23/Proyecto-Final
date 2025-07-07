@@ -89,10 +89,7 @@ void Explosion::lanzar()
         for (int i = 0; i < colisiones.size(); ++i) {
             Goku2* goku = dynamic_cast<Goku2*>(colisiones[i]);
             if (goku) {
-                Nivel2* nivel2 = dynamic_cast<Nivel2*>(this->parent());
-                if (nivel2) {
-                    nivel2->restarVidaGoku(20);
-                }
+                goku->recibirDanio(20);
 
                 goku->animarMuerte();  // Llama la animación de muerte
 
