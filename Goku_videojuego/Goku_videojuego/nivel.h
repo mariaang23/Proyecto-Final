@@ -14,63 +14,72 @@
 #include "vida.h"
 #include "progreso.h"
 
+/**
+ * Clase base abstracta para representar un nivel del juego.
+ * Define la estructura común: escena, vista, HUD, personaje principal, nubes, lógica de actualización, etc.
+ * Subclases como Nivel1, Nivel2... deben implementar los métodos virtuales obligatorios.
+ */
 class Nivel : public QWidget
 {
     Q_OBJECT
 
 protected:
-    // Elementos comunes a todos los niveles
-    int numeroNivel;
-    const int margenHUD = 70;
+    int numeroNivel; // Identificación del nivel actual
+    const int margenHUD = 70;  // Espacio reservado arriba para HUD (barra vida, progreso, etc.)
 
+    // Recursos gráficos compartidos
     QPixmap nube;
     QPixmap background;
 
-    QGraphicsView *vista;
-    QGraphicsScene *escena;
+    // Escena principal y vista donde se dibuja
+    QGraphicsView* vista;
+    QGraphicsScene* escena;
 
-    camaraLogica *camara = nullptr;
-    Goku* goku = nullptr;
-    Vida* barraVida = nullptr;
-    Progreso* barraProgreso = nullptr;
+    // Componentes lógicos del nivel
+    camaraLogica* camara = nullptr;     // Cámara virtual (solo nivel1)
+    Goku* goku = nullptr;               // Personaje principal
+    Vida* barraVida = nullptr;          // HUD: barra de vida
+    Progreso* barraProgreso = nullptr;  // HUD: barra de progreso
 
-    QTimer* timerNivel = nullptr;
-    QTimer* timerNubes = nullptr;
+    // Temporizadores de lógica y animación
+    QTimer* timerNivel = nullptr;  // Ejecuta la lógica del juego periódicamente
+    QTimer* timerNubes = nullptr;  // Mueve las nubes del fondo
 
-    std::vector<QGraphicsPixmapItem*> listaFondos;
-    std::vector<QGraphicsPixmapItem*> listaNubes;
+    // Elementos gráficos del fondo
+    std::vector<QGraphicsPixmapItem*> listaFondos; // Fondos del nivel
+    std::vector<QGraphicsPixmapItem*> listaNubes;  // Nubes animadas
 
-    std::vector<obstaculo*> listaObstaculos;
+    std::vector<obstaculo*> listaObstaculos;  // Obstáculos presentes en el nivel
 
-    void generarNubes();
+    QLabel* overlayGameOver = nullptr;        // Overlay de fin de juego
 
-    //final gameover
-    void mostrarGameOver();
-    QLabel* overlayGameOver = nullptr;
+    void generarNubes();                      // Generación de elementos animados del fondo
 
+    void mostrarGameOver();                   // Muestra el mensaje visual de "Game Over"
 
 public:
-    static int contNubes;
-    explicit Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero);
-    virtual ~Nivel();
+    static int contNubes;                     // Contador global de nubes activas
 
-    int getMargenHUD() const;
+    // Constructor del nivel base
+    explicit Nivel(QGraphicsScene* escena, QGraphicsView* view, QWidget* parent, int numero);
 
-    // Métodos virtuales que cada subclase debe implementar
-    virtual void iniciarNivel()=0;
-    virtual void cargarFondoNivel(const QString &ruta) = 0;
+    virtual ~Nivel();                 // Destructor virtual (libera recursos comunes)
+
+    int getMargenHUD() const;         // Acceso a margen superior del HUD
+
+    // Métodos virtuales obligatorios que deben implementar las subclases del nivel
+    virtual void iniciarNivel() = 0;
+    virtual void cargarFondoNivel(const QString& ruta) = 0;
     virtual void agregarGoku() = 0;
     virtual void actualizarNivel() = 0;
 
-    // nivel.h
-    Goku* getGoku() const { return goku; }
-
+    Goku* getGoku() const { return goku; }   // Getter para el personaje principal
 
 protected slots:
-    void moverNubes();
+    void moverNubes();                       // Movimiento automático de las nubes
 
 signals:
-    void gokuMurio();
+    void gokuMurio();                         // Señal emitida cuando Goku muere
 };
 
 #endif // NIVEL_H

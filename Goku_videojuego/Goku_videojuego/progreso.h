@@ -4,10 +4,10 @@
 #include <QWidget>
 #include <QLabel>
 
-// Tipos de progreso disponibles
+// Tipos de progreso
 enum TipoProgreso {
-    Horizontal, // Nivel 1: basado en posición de Goku
-    Pociones    // Nivel 2: basado en cantidad de pociones recolectadas
+    Horizontal,     // Nivel 1: basado en posición de Goku
+    Pociones        // Nivel 2: basado en cantidad de pociones recolectadas
 };
 
 class Progreso : public QWidget
@@ -23,7 +23,7 @@ public:
 
     // Nivel 2: establece el total de pociones a recolectar
     void setTotalPociones(int total);
-    void sumarPocion(); // suma una poción recolectada
+    void sumarPocion();                 // sumar pociones recolectadas
 
     float getPorcentaje() const;
 

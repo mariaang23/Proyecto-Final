@@ -17,6 +17,7 @@ public:
     static const QPointF posicionDisparo;  // por defecto
 
     Explosion(QGraphicsScene* scene, QObject* parent = nullptr);
+    ~Explosion();
 
     void setTipoMovimiento(TipoMovimiento tipo);
     void setPosicionInicial(QPointF pos);

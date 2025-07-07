@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <QProgressBar>
 #include <QLabel>
-#include <QHBoxLayout>
 
 class Vida : public QWidget
 {

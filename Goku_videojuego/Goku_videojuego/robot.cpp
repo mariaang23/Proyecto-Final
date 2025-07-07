@@ -2,83 +2,95 @@
 #include "explosion.h"
 #include "nivel2.h"
 #include <QMessageBox>
+#include <QDebug>
+#include <stdexcept> // Excepciones estándar
 
-Robot::Robot(QGraphicsScene *scene,
-             int velocidad,
-             int numeroRobot,
-             QObject *parent)
-    : QObject(parent),
-    scene(scene),
-    velocidad(velocidad)
+// Constructor principal: crea un robot con animación base y movimiento horizontal
+Robot::Robot(QGraphicsScene *scene, int velocidad, int numeroRobot, QObject *parent)
+    : QObject(parent), scene(scene), velocidad(velocidad)
 {
+    if (!scene)
+        throw std::invalid_argument("Robot: la escena no puede ser nula.");
+
     sprite = new QGraphicsPixmapItem;
     scene->addItem(sprite);
 
-    cargarImagen(numeroRobot);
-    sprite->setScale(5.0);
-    sprite->setData(0, "robot");
+    cargarImagen(numeroRobot); // Carga sprites del robot desde una hoja
 
+    sprite->setScale(5.0);     // Ajuste visual para este tipo
+    sprite->setData(0, "robot"); // Etiqueta de colisión
+
+    // Timer que controla el movimiento horizontal
     timerMovimiento = new QTimer(this);
-    connect(timerMovimiento, &QTimer::timeout,
-            this,             &Robot::mover);
+    connect(timerMovimiento, &QTimer::timeout, this, &Robot::mover);
 
+    // Timer para animar el ciclo de sprites
     timerAnimacion = new QTimer(this);
-    connect(timerAnimacion,  &QTimer::timeout,
-            this,             &Robot::animar);
+    connect(timerAnimacion, &QTimer::timeout, this, &Robot::animar);
 }
 
+// Constructor alternativo: versión para Nivel2 con sprites distintos
 Robot::Robot(QGraphicsScene *scene, QObject *parent)
-    : QObject(parent),
-    scene(scene)
+    : QObject(parent), scene(scene)
 {
+    if (!scene)
+        throw std::invalid_argument("Robot (Nivel2): la escena no puede ser nula.");
+
     sprite = new QGraphicsPixmapItem;
     scene->addItem(sprite);
 
-    cargarRobot2();
-    sprite->setScale(0.5);
+    cargarRobot2();           // Carga frames para el robot de Nivel2
+    sprite->setScale(0.5);    // Escalado diferente
     sprite->setData(0, "robot_nivel2");
 }
 
+// Destructor: detiene y elimina todos los timers y libera recursos gráficos
 Robot::~Robot()
 {
-    qDebug() << "Destructor de robot llamado";
+    qDebug() << "Destructor de Robot llamado";
+
     delete sprite;
+    sprite = nullptr;
 
     if (timerMovimiento) {
         timerMovimiento->stop();
         delete timerMovimiento;
+        timerMovimiento = nullptr;
     }
+
     if (timerAnimacion) {
         timerAnimacion->stop();
         delete timerAnimacion;
+        timerAnimacion = nullptr;
+    }
+
+    if (timerAtaque) {
+        timerAtaque->stop();
+        delete timerAtaque;
+        timerAtaque = nullptr;
+    }
+
+    if (timerMuerte) {
+        timerMuerte->stop();
+        delete timerMuerte;
+        timerMuerte = nullptr;
     }
 }
 
+// Carga animaciones desde spriteSheet según el número del robot
 void Robot::cargarImagen(int numeroRobot)
 {
-    const int ancho = 50;
-    const int alto = 56;
+    const int ancho = 50, alto = 56;
     const int framesPorRobot = 6;
 
     QPixmap spriteSheet(":/images/robots1.png");
     if (spriteSheet.isNull())
         spriteSheet.load("imagenes/robots1.png");
 
-    if (spriteSheet.isNull()) {
-        QMessageBox::critical(nullptr, "Error",
-                              "robots1.png no encontrado. Revisa tu .qrc.");
-        return;
-    }
+    if (spriteSheet.isNull())
+        throw std::runtime_error("Robot::cargarImagen - No se encontró robots1.png.");
 
-    int bloque = 0;
-    switch (numeroRobot) {
-    case 1: bloque = 0; break;
-    case 2: bloque = 1; break;
-    case 3: bloque = 2; break;
-    case 4: bloque = 3; break;
-    default: bloque = 0; break;
-    }
-
+    int bloque = qBound(0, numeroRobot - 1, 3); // Asegura que el índice esté entre 0-3
     const int frameInicial = bloque * framesPorRobot;
 
     frames.clear();
@@ -88,9 +100,10 @@ void Robot::cargarImagen(int numeroRobot)
     }
 
     if (!frames.isEmpty())
-        sprite->setPixmap(frames[0]);
+        sprite->setPixmap(frames[0]); // Primer frame por defecto
 }
 
+// Inicia posición y activa animación y movimiento
 void Robot::iniciar(int x, int y, int xDestino)
 {
     destinoX = xDestino;
@@ -99,6 +112,7 @@ void Robot::iniciar(int x, int y, int xDestino)
     timerAnimacion->start(120);
 }
 
+// Lógica de movimiento hacia la izquierda hasta alcanzar destino
 void Robot::mover()
 {
     sprite->moveBy(-velocidad, 0);
@@ -109,60 +123,56 @@ void Robot::mover()
     }
 }
 
+// Cambia de frame según modo normal o marcha
 void Robot::animar()
 {
     if (frames.isEmpty()) return;
 
-    if (modoMarcha) {
-        frameActual = (frameActual == 4) ? 5 : 4;
-    } else {
-        frameActual = (frameActual + 1) % frames.size();
-    }
+    frameActual = (modoMarcha) ? ((frameActual == 4) ? 5 : 4)
+                               : (frameActual + 1) % frames.size();
     sprite->setPixmap(frames[frameActual]);
 }
 
+// Despliegue visual usando una secuencia específica de frames
 void Robot::desplegarRobot()
 {
     if (desplegado) return;
     desplegado = true;
 
-    static const QVector<int> orden = {0,1,3,2,5,4};
+    static const QVector<int> orden = {0, 1, 3, 2, 5, 4};
     const int delay = 1500;
 
     for (int i = 0; i < orden.size(); ++i) {
         QTimer::singleShot(i * delay, this, [this, i]() {
-            sprite->setPixmap(frames[ orden[i] ]);
+            sprite->setPixmap(frames[orden[i]]);
         });
     }
 }
 
+// Detiene movimiento y activa ciclo de marcha visual
 void Robot::detenerMvtoRobot()
 {
-    if (timerMovimiento->isActive())
+    if (timerMovimiento && timerMovimiento->isActive())
         timerMovimiento->stop();
 
     modoMarcha = true;
     frameActual = 4;
     sprite->setPixmap(frames[frameActual]);
 
-    if (!timerAnimacion->isActive())
+    if (timerAnimacion && !timerAnimacion->isActive())
         timerAnimacion->start(120);
 }
 
+// 🤖 Carga sprites del robot para Nivel2
 void Robot::cargarRobot2()
 {
-    const int anchoFrame = 100;
-    const int altoFrame  = 150;
+    const int anchoFrame = 100, altoFrame = 150;
 
     QPixmap sheet(":/images/robot.png");
+    if (sheet.isNull())
+        throw std::runtime_error("Robot::cargarRobot2 - No se encontró robot.png.");
 
-    if (sheet.isNull()) {
-        QMessageBox::critical(nullptr, "Error",
-                              "No se encontró robot.png en el .qrc ni en /imagenes");
-        return;
-    }
-
-    const int numFrames = sheet.width() / anchoFrame;
+    int numFrames = sheet.width() / anchoFrame;
     framesRobot2.clear();
     for (int i = 0; i < numFrames; ++i)
         framesRobot2.append(sheet.copy(i * anchoFrame, 0, anchoFrame, altoFrame));
@@ -173,126 +183,130 @@ void Robot::cargarRobot2()
     }
 }
 
+// Inicia disparos automáticos con alternancia de tipo de trayectoria
 void Robot::iniciarAtaques()
 {
     timerAtaque = new QTimer(this);
     connect(timerAtaque, &QTimer::timeout, this, [=]() {
-        // 1. Animar el disparo (cambio de frame)
-        static QVector<int> framesDisparo = {0, 1, 2, 3, 4};  // simulación
+        static QVector<int> framesDisparo = {0, 1, 2, 3, 4};
         static int indexFrame = 0;
+
         sprite->setPixmap(framesRobot2[framesDisparo[indexFrame]]);
         indexFrame = (indexFrame + 1) % framesDisparo.size();
 
-        // 2. Solo disparar cuando finaliza la animación (frame final)
         if (indexFrame == 0) {
-            // Crear una nueva explosión
             Explosion* explosion = new Explosion(scene, this);
+            explosion->setTipoMovimiento(usarParabolico ? Explosion::Parabolico : Explosion::MRU);
+            usarParabolico = !usarParabolico;
 
-            // Alternar tipo de movimiento
-            if (usarParabolico)
-                explosion->setTipoMovimiento(Explosion::Parabolico);
-            else
-                explosion->setTipoMovimiento(Explosion::MRU);
-
-            usarParabolico = !usarParabolico; // alternar para el próximo
-
-            // Posicionar la explosión justo en el arma del robot
-            QPointF posArma = sprite->scenePos() + QPointF(sprite->pixmap().width() * -0.35, // ancho para que salga explosion del arma
-                                                           sprite->pixmap().height() * 0.9); // alto para que salga explosion del arma
+            QPointF posArma = sprite->scenePos()
+                              + QPointF(sprite->pixmap().width() * -0.35,
+                                        sprite->pixmap().height() * 0.9);
             explosion->setPosicionInicial(posArma);
             explosion->lanzar();
 
-            // Aquí es donde se registra en Nivel2
             Nivel2* nivel2 = dynamic_cast<Nivel2*>(this->parent());
             if (nivel2)
                 nivel2->agregarExplosion(explosion);
         }
     });
 
-    timerAtaque->start(1000);  // cada 1 s
+    timerAtaque->start(1000);
 }
 
-
+// Secuencia de animación rápida y disparo único
 void Robot::animarYDisparar()
 {
-    // Animar frames para levantar el brazo: 0 → 1 → 2
     if (framesRobot2.size() < 5) return;
 
-    sprite->setPixmap(framesRobot2[0]); // inicio
-    QTimer::singleShot(200, this, [this]() {
-        sprite->setPixmap(framesRobot2[1]); // brazo medio
-    });
-    QTimer::singleShot(400, this, [this]() {
-        sprite->setPixmap(framesRobot2[2]); // brazo arriba
-    });
+    sprite->setPixmap(framesRobot2[0]);
+    QTimer::singleShot(200, this, [this]() { sprite->setPixmap(framesRobot2[1]); });
+    QTimer::singleShot(400, this, [this]() { sprite->setPixmap(framesRobot2[2]); });
     QTimer::singleShot(600, this, [this]() {
-        dispararExplosion(true); // Parabólica. Cambia a false si prefieres MRU.
-        sprite->setPixmap(framesRobot2[4]); // regresa al frame de espera
+        dispararExplosion(true);
+        sprite->setPixmap(framesRobot2[4]);
     });
 }
 
+// Crea una explosión y la lanza desde el robot
 void Robot::dispararExplosion(bool parabolica)
 {
     Explosion* ex = new Explosion(scene, this);
     ex->setTipoMovimiento(parabolica ? Explosion::Parabolico : Explosion::MRU);
 
-    // Posición frente al robot
     QPointF pos = sprite->pos() + QPointF(sprite->boundingRect().width() / 2, 60);
     ex->setPosicionInicial(pos);
     ex->lanzar();
 }
 
+// Carga los 7 frames de la animación de muerte del robot
 void Robot::cargarFramesMuerte()
 {
+    // Si ya están cargados, no repetir
     if (!framesMuerte.isEmpty()) return;
 
+    // Cargar hoja de sprites de muerte
     QPixmap sheet(":/images/murioRobot.png");
-    const int numFrames = 7;
-    const int ancho= 120;
-    const int alto= 150;
+    if (sheet.isNull())
+        throw std::runtime_error("Robot::cargarFramesMuerte - No se encontró murioRobot.png.");
 
+    const int numFrames = 7;
+    const int ancho = 120;
+    const int alto  = 150;
+
+    // Extraer los frames individuales del sprite sheet
     for (int i = 0; i < numFrames; ++i)
         framesMuerte.append(sheet.copy(i * ancho, 0, ancho, alto));
 }
 
-void Robot::detenerAtaques() {
+// Método auxiliar para detener ataques programados y liberar el temporizador
+void Robot::detenerAtaques()
+{
     if (timerAtaque) {
-        timerAtaque->stop();
-        timerAtaque->deleteLater();
+        timerAtaque->stop();           // Detener ciclo
+        timerAtaque->deleteLater();    // Liberación segura en el ciclo de eventos
         timerAtaque = nullptr;
     }
 }
 
-
+// Ejecuta la secuencia visual de muerte del robot
 void Robot::murioRobot()
 {
-    if (estaMuerto) return; //evitar repetir movto si ya murio
+    // Evitar reinicio si ya ha muerto
+    if (estaMuerto) return;
     estaMuerto = true;
 
-    //detener el mvto anterior
+    // Detener cualquier actividad visual o lógica del robot
     if (timerMovimiento) timerMovimiento->stop();
     if (timerAnimacion)  timerAnimacion->stop();
     if (timerAtaque)     timerAtaque->stop();
 
-    //cargar los frames
+    // Cargar frames de muerte (si no lo estaban)
     cargarFramesMuerte();
-    frameMuerte = 0;//frame inicial 0
-    sprite->setPixmap(framesMuerte[frameMuerte]);
+    frameMuerte = 0;  // Reinicio de índice
 
-    // timer de muerte
+    // Asignar primer sprite de muerte
+    if (framesMuerte.size() > 0)
+        sprite->setPixmap(framesMuerte[frameMuerte]);
+
+    // Crear temporizador para avanzar frame por frame de muerte
     if (!timerMuerte) {
         timerMuerte = new QTimer(this);
         connect(timerMuerte, &QTimer::timeout, this, [this]() {
             ++frameMuerte;
-            //detener timer cuando llega al ultimo frame
-            if (frameMuerte >= 7) {
+
+            // Si se alcanza el último frame, detener animación
+            if (frameMuerte >= framesMuerte.size()) {
                 timerMuerte->stop();
-                emit robotMurio();
+                emit robotMurio();  // Señal para que Nivel2 actúe
                 return;
             }
-            //cambiar el sprite al siguiente
+
+            // Actualizar el sprite al siguiente frame de muerte
             sprite->setPixmap(framesMuerte[frameMuerte]);
         });
     }
-    timerMuerte->start(1000); //tiempo entre cada sprite 1s
+
+    timerMuerte->start(500); // 1 segundo por frame
 }
+

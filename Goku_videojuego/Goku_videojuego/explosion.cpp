@@ -1,5 +1,4 @@
 #include "explosion.h"
-#include "nivel2.h"
 #include "goku2.h"
 #include <QMessageBox>
 #include <QTimer>
@@ -7,11 +6,14 @@
 #include <QPixmap>
 #include <QDebug>
 #include <QtMath>
+#include <stdexcept>  // Excepciones estándar
 
+// Posición predeterminada desde donde se lanza la explosión
 const QPointF Explosion::posicionDisparo = QPointF(1000, 330);
 
-Explosion::Explosion(QGraphicsScene *scene, QObject *parent)
-    : obstaculo(scene, obstaculo::Explosion, 6, parent),
+// Constructor: crea una explosión como obstáculo animado
+Explosion::Explosion(QGraphicsScene* scene, QObject* parent)
+    : obstaculo(scene, obstaculo::Explosion, 6, parent),  // Tipo Explosion con 6 frames
     velocidadX(-10),
     velocidadY(-15),
     gravedad(1.2),
@@ -23,57 +25,72 @@ Explosion::Explosion(QGraphicsScene *scene, QObject *parent)
     const int anchoFrame = 100;
     const int altoFrame  = 72;
 
+    // Carga hoja de sprites desde recursos
     QPixmap sheet(":/images/explosion.png");
     if (sheet.isNull()) {
-        QMessageBox::critical(nullptr, "Error", "No se encontró explosion.png");
-        return;
+        throw std::runtime_error("Explosion: No se pudo cargar explosion.png.");
     }
 
     const int numFrames = 6;
     frames.clear();
     for (int i = 0; i < numFrames; ++i)
-        frames.append(sheet.copy(i * anchoFrame, 0, anchoFrame, altoFrame));
+        frames.append(sheet.copy(i * anchoFrame, 0, anchoFrame, altoFrame));  // Extrae cada frame
 
-    if (!frames.isEmpty())
-        sprite->setPixmap(frames[0]);
+    if (frames.isEmpty()) {
+        throw std::runtime_error("Explosion: No se pudieron extraer los frames desde la hoja de sprites.");
+    }
 
-    sprite->setScale(1.8);  // tamaño reducido
-    sprite->setData(0, "explosion");
+    // Frame inicial de la animación
+    sprite->setPixmap(frames[0]);
+    sprite->setScale(1.8);                     // Escala pequeña
+    sprite->setData(0, "explosion");           // Identificador del objeto
 }
 
+Explosion::~Explosion() {
+    qDebug() << "Destructor de Explosion llamado";
+
+    if (timerMovimiento && timerMovimiento->isActive()) {
+        timerMovimiento->stop();
+    }
+    // No necesita delete: Qt lo elimina porque su parent es this
+}
+
+// Establece el tipo de movimiento (parabólico o MRU)
 void Explosion::setTipoMovimiento(TipoMovimiento tipo) {
     tipoMovimiento = tipo;
 }
 
+// Establece la posición inicial desde la cual se lanza la explosión
 void Explosion::setPosicionInicial(QPointF pos) {
     posicionInicial = pos;
 }
 
+// Inicia la animación y el movimiento de la explosión
 void Explosion::lanzar()
 {
-    sprite->setPos(posicionInicial);
+    sprite->setPos(posicionInicial);  // Posición inicial del disparo
     tiempo = 0;
     frameActual = 0;
     sprite->setPixmap(frames[0]);
 
-    // Configurar velocidades
+    // Configura velocidades según tipo de movimiento
     if (tipoMovimiento == Parabolico) {
         velocidadX = -10;
         velocidadY = -15;
         gravedad   = 1.2;
-    } else {  // MRU en diagonal
+    } else {  // Movimiento rectilíneo uniforme (diagonal)
         velocidadX = -12;
         velocidadY = 6;
         gravedad   = 0;
     }
 
-    // Timer de movimiento
+    // Temporizador para animar el movimiento físico
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout, this, [=]() {
         float x = sprite->x();
         float y = sprite->y();
 
-        // Movimiento
+        // Actualiza posición vertical según movimiento
         if (tipoMovimiento == Parabolico) {
             y += velocidadY + gravedad * tiempo;
             tiempo += 0.5;
@@ -82,49 +99,50 @@ void Explosion::lanzar()
         }
 
         x += velocidadX;
-        sprite->setPos(x, y);
+        sprite->setPos(x, y);  // Aplica nueva posición en la escena
 
-        // Colisión con Goku2
+        // Verifica colisiones con Goku
         QList<QGraphicsItem*> colisiones = sprite->collidingItems();
         for (int i = 0; i < colisiones.size(); ++i) {
-            Goku2* goku = dynamic_cast<Goku2*>(colisiones[i]);
+            QGraphicsItem* item = colisiones[i];  // Acceso por índice, evita copia
+            Goku2* goku = dynamic_cast<Goku2*>(item);
             if (goku) {
                 goku->recibirDanio(20);
-
-                goku->animarMuerte();  // Llama la animación de muerte
+                goku->animarMuerte();
 
                 timerMovimiento->stop();
-                sprite->setVisible(false);  // ocultar la explosión
+                sprite->setVisible(false);
                 return;
             }
         }
 
-        // Toca suelo
+        // Verifica si la explosión toca el suelo
         if (sprite->y() >= scene->height() - 50) {
-            sprite->setPixmap(frames.last());
+            sprite->setPixmap(frames.last());  // Muestra frame final
             timerMovimiento->stop();
-            sprite->setVisible(false);  // ocultar pero no eliminar aquí
+            sprite->setVisible(false);
         }
 
-        // Fuera de pantalla
+        // Verifica si sale de la pantalla horizontalmente
         if (sprite->x() < -100 || sprite->x() > scene->width() + 100) {
             timerMovimiento->stop();
-            sprite->setVisible(false);  // ocultar pero no eliminar aquí
+            sprite->setVisible(false);
         }
     });
 
-    timerMovimiento->start(30);  // fluido
+    timerMovimiento->start(30);  // Movimiento fluido
 
-    // Timer de frames (más lento)
+    // Temporizador para animación de frames visuales
     QTimer* timerFrames = new QTimer(this);
     connect(timerFrames, &QTimer::timeout, this, [=]() {
         if (frameActual < frames.size() - 1) {
             frameActual++;
-            sprite->setPixmap(frames[frameActual]);
+            sprite->setPixmap(frames[frameActual]);  // Avanza animación
         } else {
-            timerFrames->stop();
-            timerFrames->deleteLater();
+            timerFrames->stop();         // Finaliza animación
+            timerFrames->deleteLater();  // Se autodestruye
         }
     });
-    timerFrames->start(300);  // animación más lenta
+
+    timerFrames->start(300);  // Cambia frame cada 300 ms
 }
