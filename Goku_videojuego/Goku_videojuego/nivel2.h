@@ -40,7 +40,7 @@ private:
     bool pocionesAgregadas = false;
 
     Progreso* barraProgreso = nullptr;
-    const int totalPociones = 20;
+    const int totalPociones = 5;
 
     QTimer* temporizadorPociones = nullptr;
     void agregarPocionAleatoria();
