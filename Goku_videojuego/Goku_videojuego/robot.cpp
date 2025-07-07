@@ -35,7 +35,7 @@ Robot::Robot(QGraphicsScene *scene, QObject *parent)
     scene->addItem(sprite);
 
     cargarRobot2();
-    sprite->setScale(1.5);
+    sprite->setScale(0.5);
     sprite->setData(0, "robot_nivel2");
 }
 
@@ -151,8 +151,8 @@ void Robot::detenerMvtoRobot()
 
 void Robot::cargarRobot2()
 {
-    const int anchoFrame = 135;
-    const int altoFrame  = 194;
+    const int anchoFrame = 100;
+    const int altoFrame  = 150;
 
     QPixmap sheet(":/images/robot.png");
 
@@ -209,7 +209,7 @@ void Robot::iniciarAtaques()
         }
     });
 
-    timerAtaque->start(1000);  // cada 2.5 s
+    timerAtaque->start(1000);  // cada 1 s
 }
 
 
@@ -240,4 +240,49 @@ void Robot::dispararExplosion(bool parabolica)
     QPointF pos = sprite->pos() + QPointF(sprite->boundingRect().width() / 2, 60);
     ex->setPosicionInicial(pos);
     ex->lanzar();
+}
+
+void Robot::cargarFramesMuerte()
+{
+    if (!framesMuerte.isEmpty()) return;
+
+    QPixmap sheet(":/images/murioRobot.png");
+    const int numFrames = 7;
+    const int ancho= 200;
+    const int alto= 150;
+
+    for (int i = 0; i < numFrames; ++i)
+        framesMuerte.append(sheet.copy(i * ancho, 0, ancho, alto));
+}
+
+void Robot::murioRobot()
+{
+    if (estaMuerto) return; //evitar repetir movto si ya murio
+    estaMuerto = true;
+
+    //detener el mvto anterior
+    if (timerMovimiento) timerMovimiento->stop();
+    if (timerAnimacion)  timerAnimacion->stop();
+    if (timerAtaque)     timerAtaque->stop();
+
+    //cargar los frames
+    cargarFramesMuerte();
+    frameMuerte = 0;//frame inicial 0
+    sprite->setPixmap(framesMuerte[frameMuerte]);
+
+    // timer de muerte
+    if (!timerMuerte) {
+        timerMuerte = new QTimer(this);
+        connect(timerMuerte, &QTimer::timeout, this, [this]() {
+            ++frameMuerte;
+            //detener timer cuando llega al ultimo frame
+            if (frameMuerte >= 7) {
+                timerMuerte->stop();
+                return;
+            }
+            //cambiar el sprite al siguiente
+            sprite->setPixmap(framesMuerte[frameMuerte]);
+        });
+    }
+    timerMuerte->start(1000); //tiempo entre cada sprite 1s
 }

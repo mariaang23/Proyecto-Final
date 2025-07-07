@@ -62,6 +62,9 @@ void Nivel2::iniciarNivel() {
 
     agregarGoku();
     agregarRobot();
+
+    //activar murio robot para ver
+    //robot->murioRobot();
 }
 
 void Nivel2::cargarFondoNivel(const QString &ruta) {

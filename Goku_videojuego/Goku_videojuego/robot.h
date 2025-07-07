@@ -25,6 +25,9 @@ public:
     QGraphicsPixmapItem *getSprite() const   { return sprite; }
     const QVector<QPixmap>& getFramesNivel2() const { return framesRobot2; }
 
+
+    void murioRobot();//sprites de robot muerto
+
 private slots:
     void mover();
     void animar();
@@ -52,6 +55,13 @@ private:
     bool desplegado = false;
     bool modoMarcha = false;
     bool usarParabolico = true;
+
+    //para la muerte del robot cuando goku le lanza el kamehameha
+    void cargarFramesMuerte();// carga la imagen de los 7 frames
+    QVector<QPixmap> framesMuerte;// frames de la muerte
+    QTimer *timerMuerte = nullptr;// temporizador para avanzar frames
+    int frameMuerte; // indice del frame actual
+    bool estaMuerto = false;// evita reiniciar la muerte
 };
 
 #endif // ROBOT_H
