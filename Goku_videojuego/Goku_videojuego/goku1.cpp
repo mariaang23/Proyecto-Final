@@ -54,7 +54,9 @@ void Goku1::iniciar(int x, int y) {
 }
 
 // Movimiento automático hacia la derecha y detección de colisiones
-void Goku1::mover() {
+void Goku1::mover()
+{
+    // 1. Movimiento horizontal y vertical
     int movimientoVertical = 0;
     if (mvtoArriba) movimientoVertical = -velocidad;
     else if (mvtoAbajo) movimientoVertical = velocidad;
@@ -62,19 +64,20 @@ void Goku1::mover() {
     qreal nuevaX = x() + velocidad;
     qreal limiteX = scene->width() - pixmap().width();
 
+    // 2. Aplicar movimiento
     if (nuevaX <= limiteX) {
         moveBy(velocidad, movimientoVertical);
     } else {
         setX(limiteX);
     }
 
-    // Limitar en Y
+    // 3. Limitar posición vertical
     QPointF posicionActual = this->pos();
     qreal nuevaY = qBound<qreal>(70.0, posicionActual.y(), scene->height() - pixmap().height() + 80);
     posicionActual.setY(nuevaY);
     setPos(posicionActual);
 
-    // Verificar colisiones
+    // 5. Detección de colisiones
     tocoCarro = false;
     tocoObstaculo = false;
 
@@ -89,7 +92,7 @@ void Goku1::mover() {
         }
     }
 
-
+    // 6. Manejo de daños
     if (tocoCarro) {
         yaRecibioDanio = false;
     } else if (tocoObstaculo && puedeRecibirDanio) {
@@ -98,6 +101,7 @@ void Goku1::mover() {
         timerDanio->start(1000); // espera 1s antes de volver a recibir daño
     }
 
+    // 7. Actualizar sprite según estado
     mientrasTocaObstaculo();
 }
 

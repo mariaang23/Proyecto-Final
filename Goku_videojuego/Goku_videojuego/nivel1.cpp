@@ -7,7 +7,7 @@
 
 // Constructor
 Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
-    : Nivel(escena, vista, parent, 1), gokuYaPateo(false), robotsCreados(false)
+    : Nivel(escena, vista, parent, 1)
 {
     nivelTerminado = false;
     perdioGoku = false;
@@ -18,12 +18,35 @@ Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
 Nivel1::~Nivel1()
 {
     qDebug() << "Destructor de Nivel1 llamado";
-    delete r1;
-    delete r2;
-    delete r3;
 
+    // Limpiar la cámara
+    if (camara) {
+        camara->detenerMovimiento();
+        delete camara;
+    }
+
+    if (timerNivel) {
+        timerNivel->stop();
+        disconnect(timerNivel, nullptr, this, nullptr);
+    }
+
+    // Eliminar carro (usando getSprite())
+    if (carroFinal) {
+        escena->removeItem(carroFinal->getSprite());
+        delete carroFinal;
+    }
+
+    // Eliminar robots (usando getSprite())
+    if (r1) { escena->removeItem(r1->getSprite()); delete r1; }
+    if (r2) { escena->removeItem(r2->getSprite()); delete r2; }
+    if (r3) { escena->removeItem(r3->getSprite()); delete r3; }
+
+    // Eliminar obstáculos (usando getSprite())
     for (auto* obs : listaObstaculos) {
-        delete obs;
+        if (obs) {
+            escena->removeItem(obs->getSprite());
+            delete obs;
+        }
     }
     listaObstaculos.clear();
 }
@@ -38,9 +61,11 @@ void Nivel1::iniciarNivel()
     agregarCarroFinal();
     agregarObstaculos();
 
-    camara = new camaraLogica(vista, 6, this);
+    camara = new camaraLogica(vista, this);
+    camara->seguirAGoku(goku);
     camara->iniciarMovimiento();
 
+    // 4) Arrancamos el timer del nivel como antes
     timerNivel = new QTimer(this);
     connect(timerNivel, &QTimer::timeout, this, &Nivel1::actualizarNivel);
     timerNivel->start(20);
@@ -61,7 +86,6 @@ void Nivel1::cargarFondoNivel(const QString &ruta)
     }
 }
 
-// Agrega a Goku al nivel
 // Agrega a Goku al nivel
 void Nivel1::agregarGoku()
 {
@@ -216,10 +240,12 @@ void Nivel1::quitarCarroVista()
 
 void Nivel1::gameOver()
 {
-    if (timerNivel) timerNivel->stop();
-
-    mostrarGameOver();          //  heredado de Nivel
-    emit gokuMurio();           // seguirá avisando al objeto juego
+    if (timerNivel) {
+        timerNivel->stop();
+        disconnect(timerNivel, nullptr, this, nullptr);  //desconexión explícita
+    }
+    mostrarGameOver();
+    emit gokuMurio();
 }
 
 //indica goku muere

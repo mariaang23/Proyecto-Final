@@ -11,9 +11,9 @@ class camaraLogica : public QObject
     Q_OBJECT
 
 public:
-    static int contCamara ;
-    camaraLogica(QGraphicsView *vista, int velocidad, QObject *parent = nullptr);
+    camaraLogica(QGraphicsView *vista, QObject *parent = nullptr);
     ~camaraLogica();
+
     void iniciarMovimiento();
     void detenerMovimiento();
     void seguirAGoku(Goku* goku);
@@ -24,8 +24,7 @@ private slots:
 private:
     QGraphicsView *view;
     QTimer *timer;
-    int velocidad;
-
+    Goku *objetivo = nullptr;
 };
 
 #endif // CAMARALOGICA_H
