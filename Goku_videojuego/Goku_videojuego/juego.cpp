@@ -4,6 +4,7 @@
 #include <QScreen>
 #include <QGuiApplication>
 #include <QCloseEvent>
+#include <QPointer>
 
 juego::juego(QWidget *parent)
     : QMainWindow(parent)
@@ -39,14 +40,13 @@ juego::~juego()
 
     // Eliminar vista y escena si existen
     if (view) {
-        view->close();
-        delete view;
-        view = nullptr;
-    }
-
-    if (scene) {
-        delete scene;
+        view->setScene(nullptr);  // Desvincula la escena de la vista.
+        delete scene;             // Libera la escena manualmente.
+        qDebug() << "Destruyendo view...";
+        delete view;              // Libera la vista.
+        qDebug() << "View destruido. Scene aún existe?" << (scene != nullptr);
         scene = nullptr;
+        view = nullptr;
     }
 
     // Eliminar interfaz
@@ -163,29 +163,25 @@ void juego::cambiarNivel(int numero)
     }
 }
 
-void juego::cerrarNivel(bool mostrarMenu)
-{
+void juego::cerrarNivel(bool mostrarMenu) {
     qDebug() << "Cerrando nivel actual";
 
-    // Desconectar señales primero
-    if (nivelActual) {
-        disconnect(nivelActual, nullptr, this, nullptr);
-    }
+    // 1. Romper referencia a nivelActual primero
+    nivelActual = nullptr;
 
-    // Limpiar niveles específicos
+    // 2. Limpiar niveles específicos
     if (nivel1) {
+        disconnect(nivel1, nullptr, this, nullptr);
         delete nivel1;
         nivel1 = nullptr;
     }
-
     if (nivel2) {
+        disconnect(nivel2, nullptr, this, nullptr);
         delete nivel2;
         nivel2 = nullptr;
     }
 
-    nivelActual = nullptr;
-
-    // Limpiar escena
+    // 3. Limpiar escena (no es necesario si view la libera)
     if (scene) {
         scene->clear();
     }
@@ -220,9 +216,11 @@ void juego::mostrarTransicion()
     transicion->setAttribute(Qt::WA_DeleteOnClose);
     transicion->show();
 
-    QTimer::singleShot(2000, this, [this, transicion]() {
+    QPointer<juego> self(this);
+    QTimer::singleShot(2000, this, [self, transicion]() {
+        if (!self) return;  // Si el juego ya fue destruido, no hacer nada
         transicion->close();
-        cambiarNivel(2); // Cambiar al siguiente nivel
+        self->cambiarNivel(2);
     });
 }
 
@@ -239,7 +237,9 @@ void juego::mostrarExito()
     exito->setAttribute(Qt::WA_DeleteOnClose);
     exito->show();
 
-    QTimer::singleShot(4000, this, [this]() {
+    QPointer<Nivel2> safeNivel2 = nivel2;
+    QTimer::singleShot(4000, this, [this, safeNivel2]() {
+        if (!safeNivel2) return;  // Si nivel2 ya fue destruido, no hacer nada
         if (view) view->close();
         mostrarPantallaInicio();
     });

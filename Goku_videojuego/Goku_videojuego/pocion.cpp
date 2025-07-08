@@ -64,37 +64,39 @@ Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, 
 }
 
 // Destructor: detiene el temporizador antes de que se destruya
-Pocion::~Pocion()
-{
-    qDebug() << "Destructor de pocion llamado";
-    if (timer)
-        timer->stop();  // Evita que dispare después de destrucción
+Pocion::~Pocion(){
+    qDebug() << "Destructor de Pocion llamado";
+    if (timer) {
+        disconnect(timer, nullptr, this, nullptr);
+        timer->stop();
+        delete timer;
+        timer = nullptr;
+    }
 }
 
 // Slot llamado periódicamente para mover y animar la poción
-void Pocion::moverYAnimar()
-{
-    moveBy(0, 3);  // Desplaza hacia abajo
+void Pocion::moverYAnimar() {
+    if (!scene() || frames.isEmpty()) return;  // Verificación crítica.
 
-    // Ciclo de animación: cambia el frame
+    moveBy(0, 3);  // Desplaza hacia abajo.
+
+    // Animación cíclica.
     indiceFrame = (indiceFrame + 1) % frames.size();
     setPixmap(frames[indiceFrame]);
 
-    // Si ha salido de la pantalla, reaparece arriba
-    if (scene() && y() > scene()->height()) {
+    // Reaparecer si sale de la pantalla.
+    if (y() > scene()->height()) {
         int anchoSprite = frames[0].width();
         int espacioX = LimiteAnchoX / columnasTotales;
         int baseX = columna * espacioX;
         int minX = std::max(0, baseX - 15);
         int maxX = std::min(LimiteAnchoX - anchoSprite, baseX + 15);
 
-        int x = QRandomGenerator::global()->bounded(minX, maxX + 1);
-
-        int espacioY = 100;
-        int offsetY = QRandomGenerator::global()->bounded(-200, 200);
-        int yNuevo = -400 + fila * espacioY + offsetY;
-
-        setPos(x, yNuevo);  // Reaparece desde arriba en escena
+        if (minX < maxX) {  // Validación adicional.
+            int x = QRandomGenerator::global()->bounded(minX, maxX + 1);
+            int yNuevo = -400 + fila * 100 + QRandomGenerator::global()->bounded(-200, 200);
+            setPos(x, yNuevo);
+        }
     }
 }
 

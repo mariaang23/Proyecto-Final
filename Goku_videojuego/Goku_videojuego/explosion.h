@@ -21,10 +21,11 @@ public:
 
     void setTipoMovimiento(TipoMovimiento tipo);
     void setPosicionInicial(QPointF pos);
-    void lanzar();  // inicia la animación y movimiento
+    void lanzar();
 
 private:
     QTimer* timerMovimiento;
+    QTimer* timerFrames;
     float velocidadX;
     float velocidadY;
     float gravedad;

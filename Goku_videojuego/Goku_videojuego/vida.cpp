@@ -3,22 +3,15 @@
 #include <QFont>
 #include <QHBoxLayout>
 #include <QDebug>
-#include <stdexcept>  // Para lanzar excepciones
+#include <stdexcept>
 
 // Constructor de la clase Vida
 Vida::Vida(QWidget *parent)
     : QWidget(parent), vidaActual(vidaMaxima) // Se inicia con la vida completa
 {
-    // Validación crítica: asegurar de que el puntero parent es válido
-    if (parent == nullptr) {
-        qWarning() << "Vida: se ha creado sin un QWidget padre explícito.";
-    }
-
     texto = new QLabel("HEALTH", this);       // Crear y configurar la etiqueta "HEALTH"
-
     QFont fuente("Arial", 20, QFont::Bold);   // Fuente grande y en negrita
     texto->setFont(fuente);
-
     texto->setStyleSheet("color: #FF3333;");  // Color rojo brillante para destacar sobre fondo azul
 
     // Sombra negra debajo del texto para mejorar contraste
@@ -68,9 +61,11 @@ Vida::Vida(QWidget *parent)
     setAttribute(Qt::WA_TranslucentBackground);  // Hace que el fondo del widget sea transparente
 }
 
-// Destructor: los hijos (texto, barra, layout) se destruyen automáticamente por Qt
-Vida::~Vida() {
-    qDebug() << "Destructor de vida llamado";
+// Destructor
+Vida::~Vida()
+{
+    qDebug() << "Destructor de Vida llamado";
+    // Qt destruye los hijos automáticamente
 }
 
 // Método para reducir la vida
