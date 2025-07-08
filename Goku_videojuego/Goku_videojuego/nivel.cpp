@@ -2,99 +2,141 @@
 #include <QRandomGenerator>
 #include <QGraphicsPixmapItem>
 #include <stdexcept>  // Para lanzar excepciones estándar
+#include <QDebug>
 
 // Inicialización del contador de nubes compartido entre niveles
+
 int Nivel::contNubes = 0;
 
-
 // Constructor base del nivel abstracto
+// Valida escena y vista antes de usarlas
 Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero)
-    : QWidget(parent), numeroNivel(numero), vista(view), escena(escena)
+    : QWidget(parent), vista(view), escena(escena), numeroNivel(numero)
 {
-    // Validación de parámetros críticos
+    // Validación de parámetros críticos (¡Ahora más robusta!)
     if (!escena || !view) {
+        qCritical() << "Nivel: La escena o la vista son nulas. Nivel:" << numero;
         throw std::invalid_argument("Nivel: La escena o la vista no pueden ser nulas.");
     }
 
     // Inicializa el temporizador principal del nivel (actualiza la lógica cada 20 ms)
+    // Timer ahora se desconecta explícitamente en destructor
     timerNivel = new QTimer(this);
     connect(timerNivel, &QTimer::timeout, this, [=]() {
         this->actualizarNivel();  // Llama al método virtual (definido por subclases)
     });
     timerNivel->start(20);
+
+    qDebug() << "Nivel" << numero << "creado correctamente";
 }
 
 // Destructor del nivel base
+// Limpia en orden inverso y es más seguro
 Nivel::~Nivel()
 {
-    delete camara;
-    camara = nullptr;
+    qDebug() << "Destructor de Nivel" << numeroNivel << "llamado";
 
-    delete goku;
-    goku = nullptr;
+    // 1. Detener todos los timers primero (¡CRÍTICO!)
+    if (timerNivel) {
+        timerNivel->stop();
+        disconnect(timerNivel, nullptr, this, nullptr);
+    }
 
-    // Vida: hereda de QWidget
+    if (timerNubes) {
+        timerNubes->stop();
+        disconnect(timerNubes, nullptr, this, nullptr);
+    }
+
+    // 2. Limpieza directa de items gráficos (sin llamada virtual)
+    if (goku && escena) {
+        escena->removeItem(goku);
+        delete goku;
+        goku = nullptr;
+    }
+
+    for (auto* nube : listaNubes) {
+        if (nube && escena) escena->removeItem(nube);
+        delete nube;
+    }
+    listaNubes.clear();
+
+    for (auto* fondo : listaFondos) {
+        if (fondo && escena) escena->removeItem(fondo);
+        delete fondo;
+    }
+    listaFondos.clear();
+
+    // 3. Eliminar otros objetos (orden inverso al de creación)
+
     if (barraVida && barraVida->parent() == this) {
         delete barraVida;
         barraVida = nullptr;
     }
 
-    // Progreso: hereda de QWidget
-    if (barraProgreso && barraProgreso->parent() == this) {
+    if (barraProgreso) {
+        barraProgreso->setParent(nullptr);  // Desvincula de la vista
+        barraProgreso->hide();              // Evita que quede visible si tarda en destruirse
         delete barraProgreso;
         barraProgreso = nullptr;
     }
 
-    // Temporizadores: QObject con parent asignado => se eliminan solos
-    // Pero por seguridad, los detenemos antes
-    if (timerNivel) {
-        timerNivel->stop();
-    }
-    if (timerNubes) {
-        timerNubes->stop();
-    }
-
-    // Aunque tienen parent, por claridad se eliminan explícitamente
     delete timerNivel;
     timerNivel = nullptr;
 
     delete timerNubes;
     timerNubes = nullptr;
 
-    // Libera nubes gráficas y ajusta contador global
+    if (overlayGameOver) {
+        overlayGameOver->deleteLater();
+        overlayGameOver = nullptr;
+    }
+
+    qDebug() << "Nivel" << numeroNivel << "destruido correctamente";
+}
+
+// Mantenemos limpiarEscena() para uso durante el juego (no en destructor)
+void Nivel::limpiarEscena()
+{
+    // Implementación idéntica a lo que estaba en el destructor
+    if (goku && escena) {
+        escena->removeItem(goku);
+        delete goku;
+        goku = nullptr;
+    }
+
     for (auto* nube : listaNubes) {
-        contNubes -= 1;
+        if (nube && escena) escena->removeItem(nube);
         delete nube;
     }
     listaNubes.clear();
 
-    // Libera elementos del fondo
-    for (auto* fondo : listaFondos)
+    for (auto* fondo : listaFondos) {
+        if (fondo && escena) escena->removeItem(fondo);
         delete fondo;
+    }
     listaFondos.clear();
 
-    // Limpieza segura del overlay GameOver si Qt no lo destruye
-    if (overlayGameOver && overlayGameOver->parent() == this) {
-        delete overlayGameOver;
-        overlayGameOver = nullptr;
+    if (overlayGameOver) {
+        overlayGameOver->hide();
+        overlayGameOver->deleteLater();
     }
 }
-
 
 // Devuelve el espacio reservado para el HUD (barra de vida, progreso, etc.)
 int Nivel::getMargenHUD() const {
     return margenHUD;
 }
 
-
 // Genera múltiples nubes en la escena, con escalas y posiciones aleatorias
+// Valida la carga de imagen
 void Nivel::generarNubes()
 {
     // Carga la imagen de la nube desde recursos
     nube = QPixmap(":/images/nube.png");
 
-    // Verifica si la imagen se cargó correctamente
+    // Validación más explícita
     if (nube.isNull()) {
+        qCritical() << "Error: No se pudo cargar imagen de nube en nivel" << numeroNivel;
         throw std::runtime_error("Nivel: No se pudo cargar la imagen de la nube.");
     }
 
@@ -102,21 +144,15 @@ void Nivel::generarNubes()
     for (int i = 0; i < 35; i++) {
         for (int j = 3; j > 0; --j) {
             float escala = j * 0.05f;
-
-            // Calcula dimensiones escaladas
             int ancho = nube.width() * escala;
             int alto  = nube.height() * escala;
 
             QPixmap nubeEscalada = nube.scaled(ancho, alto, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-            // Posición aleatoria dentro de la escena
             int x = i * 250 + QRandomGenerator::global()->bounded(-60, 100);
             int y = QRandomGenerator::global()->bounded(0, 80);
 
             if (x + nubeEscalada.width() <= escena->width()) {
                 contNubes += 1;
-
-                // Crea y posiciona la nube en la escena
                 QGraphicsPixmapItem *_nube = new QGraphicsPixmapItem(nubeEscalada);
                 _nube->setPos(x, y);
                 escena->addItem(_nube);
@@ -125,53 +161,49 @@ void Nivel::generarNubes()
         }
     }
 
-    // Crea el temporizador que moverá las nubes de forma periódica
+    // Timer ahora se desconecta en destructor
     timerNubes = new QTimer(this);
     connect(timerNubes, &QTimer::timeout, this, &Nivel::moverNubes);
     timerNubes->start(45);
 }
 
-
 // Mueve todas las nubes hacia la izquierda y las reposiciona si salen de la escena
+// Valida punteros
 void Nivel::moverNubes()
 {
-    const int velocidadNube = 2; // Velocidad con la que se desplazan las nubes
+    const int velocidadNube = 2;
 
     for (auto *nubeItem : listaNubes) {
-        if (!nubeItem) continue;  // Validación defensiva en caso de puntero nulo
+        if (!nubeItem || !escena) continue;  // Validación defensiva
 
-        // Desplaza la nube hacia la izquierda en el eje X
         nubeItem->setPos(nubeItem->x() - velocidadNube, nubeItem->y());
 
-        // Si la nube ha salido completamente por la izquierda de la escena
         if (nubeItem->x() + nubeItem->pixmap().width() < 0) {
-            // La reposicionamos al borde derecho con una nueva altura aleatoria
-            int nuevaX = escena->width();  // La pone justo al final del ancho visible
-            int nuevaY = QRandomGenerator::global()->bounded(0, 100);  // Altura aleatoria
+            int nuevaX = escena->width();
+            int nuevaY = QRandomGenerator::global()->bounded(0, 100);
             nubeItem->setPos(nuevaX, nuevaY);
         }
     }
 }
 
-
 // Muestra una imagen de "Game Over" sobre la vista del nivel actual
+// Verifica vista y evita duplicados
 void Nivel::mostrarGameOver()
 {
-    // No crear el overlay si ya fue mostrado antes
-    if (overlayGameOver) return;
+    if (overlayGameOver || !vista) return;  // Evita recrear si ya existe
 
-    // Validación crítica: vista no puede ser nula
-    if (!vista) {
-        throw std::runtime_error("Nivel: No se puede mostrar 'Game Over' porque la vista es nula.");
+    try {
+        overlayGameOver = new QLabel(vista);
+        QPixmap gameOverImg(":/images/gameOver.png");
+        if (gameOverImg.isNull()) throw std::runtime_error("Imagen no encontrada");
+
+        overlayGameOver->setPixmap(gameOverImg.scaled(vista->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        overlayGameOver->setAlignment(Qt::AlignCenter);
+        overlayGameOver->setAttribute(Qt::WA_TransparentForMouseEvents);
+        overlayGameOver->setAttribute(Qt::WA_DeleteOnClose);
+        overlayGameOver->show();
+
+    } catch (const std::exception& e) {
+        qCritical() << "Error al mostrar Game Over:" << e.what();
     }
-
-    // Crea un QLabel superpuesto a la vista del juego
-    overlayGameOver = new QLabel(vista);
-    overlayGameOver->setPixmap(
-        QPixmap(":/images/gameOver.png")
-            .scaled(vista->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    overlayGameOver->setAlignment(Qt::AlignCenter);
-    overlayGameOver->setAttribute(Qt::WA_TransparentForMouseEvents);  // Ignora clics
-    overlayGameOver->setAttribute(Qt::WA_DeleteOnClose);              // Se eliminará al cerrarse
-    overlayGameOver->show();
 }
