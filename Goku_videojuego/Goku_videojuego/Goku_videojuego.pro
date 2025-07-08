@@ -48,3 +48,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
+QMAKE_LFLAGS_USE_RESPONSE_FILE =
+

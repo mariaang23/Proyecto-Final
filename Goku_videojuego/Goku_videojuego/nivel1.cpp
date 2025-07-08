@@ -238,12 +238,20 @@ void Nivel1::quitarCarroVista()
     }
 }
 
-void Nivel1::gameOver()
-{
-    if (timerNivel) {
-        timerNivel->stop();
-        disconnect(timerNivel, nullptr, this, nullptr);  //desconexión explícita
+void Nivel1::gameOver() {
+    if (timerNivel) timerNivel->stop();
+
+    // Limpiar robots
+    if (r1) { escena->removeItem(r1->getSprite()); delete r1; r1 = nullptr; }
+    if (r2) { escena->removeItem(r2->getSprite()); delete r2; r2 = nullptr; }
+    if (r3) { escena->removeItem(r3->getSprite()); delete r3; r3 = nullptr; }
+
+    // Limpiar obstáculos
+    for (auto* obs : listaObstaculos) {
+        if (obs) { escena->removeItem(obs->getSprite()); delete obs; }
     }
+    listaObstaculos.clear();
+
     mostrarGameOver();
     emit gokuMurio();
 }

@@ -34,6 +34,7 @@ private:
     Nivel2 *nivel2;
     Nivel *nivelActual;
     QLabel *exito;
+    bool enDestruccion = false;
 
     void cambiarNivel(int numero);
     void mostrarPantallaInicio();

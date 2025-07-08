@@ -3,8 +3,6 @@
 
 #include "goku.h"
 #include <QTimer>
-#include <QVector>
-#include <QPixmap>
 #include <QString>
 
 class Goku1 : public Goku {
