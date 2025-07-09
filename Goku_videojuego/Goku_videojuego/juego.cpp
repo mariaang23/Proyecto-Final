@@ -5,6 +5,9 @@
 #include <QGuiApplication>
 #include <QCloseEvent>
 
+// Inicialización del contador
+int juego::contador = 0;
+
 juego::juego(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::juego)
@@ -14,6 +17,7 @@ juego::juego(QWidget *parent)
     , nivel2(nullptr)
     , nivelActual(nullptr)
     , exito(nullptr)
+    , timerFoco(new QTimer(this))
 {
     ui->setupUi(this);
 
@@ -28,6 +32,15 @@ juego::juego(QWidget *parent)
 
     // Mostrar solo la pantalla de bienvenida inicialmente
     mostrarPantallaInicio();
+
+    //una sola vez
+    timerFoco->setSingleShot(true);
+    connect(timerFoco, &QTimer::timeout, this, [this]() {
+        //qDebug()<<"timer foco en juego llamado  "<<contador++;
+        if (nivelActual && nivelActual->getGoku())
+            nivelActual->getGoku()->setFocus();
+    });
+
 }
 
 juego::~juego()
@@ -51,6 +64,8 @@ juego::~juego()
 
     // Eliminar interfaz
     delete ui;
+
+    qDebug() << "cerrando juego ";
 }
 
 void juego::iniciarJuego()
@@ -126,6 +141,8 @@ void juego::cambiarNivel(int numero)
 
             connect(nivel1, &Nivel1::gokuMurio, this, [this]() {
                 QTimer::singleShot(3000, this, [this]() {
+
+                    //qDebug() << "timer singleshot nivel1 en juego llamado"<<contador++;
                     if (view) view->close();
                     mostrarPantallaInicio();
                 });
@@ -139,6 +156,8 @@ void juego::cambiarNivel(int numero)
 
             connect(nivel2, &Nivel2::gokuMurio, this, [this]() {
                 QTimer::singleShot(3000, this, [this]() {
+
+                    //qDebug() << "timer single nivel2 en juego llamado  "<<contador++;
                     if (view) view->close();
                     mostrarPantallaInicio();
                 });
@@ -149,12 +168,15 @@ void juego::cambiarNivel(int numero)
 
         nivelActual->iniciarNivel();
 
+        timerFoco->start(100); //actualiza el foco cuando se cambia nivel, no crea uno nuevo
+        /*
         // Asegurar foco en el personaje principal
         QTimer::singleShot(100, this, [this]() {
             if (nivelActual && nivelActual->getGoku()) {
+                qDebug() << "timer nivelactual en juego llamado";
                 nivelActual->getGoku()->setFocus();
             }
-        });
+        });*/
 
     } catch (const std::exception& e) {
         qCritical() << "Error al crear nivel:" << e.what();
@@ -165,10 +187,15 @@ void juego::cambiarNivel(int numero)
 
 void juego::cerrarNivel(bool mostrarMenu)
 {
-    qDebug() << "Cerrando nivel actual";
+    qDebug() << "PASO 1: cerrando nivel actual";
 
     // Desconectar señales primero
     if (nivelActual) {
+        if(nivelActual == nivel1){
+            qDebug() << "entro a cerrar nivel 1";
+        }else{
+            qDebug() << "entro a cerrar nivel 2";
+        }
         disconnect(nivelActual, nullptr, this, nullptr);
     }
 
@@ -189,6 +216,18 @@ void juego::cerrarNivel(bool mostrarMenu)
     if (scene) {
         scene->clear();
     }
+
+    //detenemos el timer foco goku
+    if (timerFoco && timerFoco->isActive())
+        timerFoco->stop();
+
+    // Cancela cualquier singleShot pendiente generado por gokuMurio
+    for (auto *t : findChildren<QTimer*>()){
+        if (t->isSingleShot() && t->isActive()){
+            t->stop();
+        }
+    }
+
 
     if (mostrarMenu) {
         mostrarPantallaInicio();
@@ -220,7 +259,8 @@ void juego::mostrarTransicion()
     transicion->setAttribute(Qt::WA_DeleteOnClose);
     transicion->show();
 
-    QTimer::singleShot(2000, this, [this, transicion]() {
+    QTimer::singleShot(4000, this, [this, transicion]() {
+        qDebug() << "timer transicion en juego  llamado  "<<contador++;
         transicion->close();
         cambiarNivel(2); // Cambiar al siguiente nivel
     });
@@ -240,6 +280,8 @@ void juego::mostrarExito()
     exito->show();
 
     QTimer::singleShot(4000, this, [this]() {
+
+        //qDebug() << "timer mostrar pantalla de inicio en juego llamado  "<<contador++;
         if (view) view->close();
         mostrarPantallaInicio();
     });
@@ -264,9 +306,11 @@ void juego::regresarAlMenuTrasDerrota()
 
 void juego::closeEvent(QCloseEvent *event)
 {
-    // Cerrar la ventana del juego si está abierta
+    // Cerrar la ventana del juego si esta abierta
     if (view) {
         view->close();
+        view->deleteLater();
+        view = nullptr;
     }
 
     // Asegurar limpieza

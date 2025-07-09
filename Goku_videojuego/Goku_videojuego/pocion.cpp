@@ -4,6 +4,9 @@
 #include <QDebug>
 #include <stdexcept>  // Para lanzar excepciones
 
+// Inicialización del contador
+int Pocion::contador = 0;
+
 // Constante que define el límite horizontal máximo del escenario
 const int LimiteAnchoX = 1036;
 
@@ -74,6 +77,8 @@ Pocion::~Pocion()
 // Slot llamado periódicamente para mover y animar la poción
 void Pocion::moverYAnimar()
 {
+
+    //qDebug() << "timer animar en pocion llamado  "<<contador++;
     moveBy(0, 3);  // Desplaza hacia abajo
 
     // Ciclo de animación: cambia el frame

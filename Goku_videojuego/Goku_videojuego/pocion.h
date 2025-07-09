@@ -15,6 +15,8 @@ class Pocion : public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 
 public:
+    static int contador;
+
     Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, int columnas, QGraphicsItem* parent = nullptr);
     ~Pocion();
     void detener();

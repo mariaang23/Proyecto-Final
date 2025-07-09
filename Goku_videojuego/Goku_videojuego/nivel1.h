@@ -11,6 +11,8 @@ class Nivel1 : public Nivel
     Q_OBJECT
 
 public:
+    static int contador;
+
     explicit Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent = nullptr);
     ~Nivel1() override;
 
@@ -45,6 +47,7 @@ private:
     bool robotsCreados = false;
     bool nivelTerminado = false;
     bool perdioGoku = false;
+    bool gameOverProcesado = false; // para solo llamar una vez el game over
 };
 
 #endif // NIVEL1_H

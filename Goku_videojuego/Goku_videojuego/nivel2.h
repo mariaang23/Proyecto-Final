@@ -12,6 +12,8 @@ class Nivel2 : public Nivel
     Q_OBJECT
 
 public:
+    static int contador;
+
     explicit Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent = nullptr);
     ~Nivel2() override;
 

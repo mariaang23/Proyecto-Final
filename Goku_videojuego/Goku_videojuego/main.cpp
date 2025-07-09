@@ -11,14 +11,14 @@ void* operator new(size_t size){
     liberar +=1;
     //void * p = malloc(size); will also work fine
 
-    qDebug() << "a liberar "<<liberar;
+    //qDebug() << "a liberar "<<liberar;
     return p;
 }
 
 void operator delete(void* p, std::size_t){
     liberar-=1;
 
-    qDebug() << "memoria restante "<<liberar;
+    //qDebug() << "memoria restante "<<liberar;
     free(p);
 }
 

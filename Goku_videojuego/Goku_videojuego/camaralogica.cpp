@@ -1,5 +1,8 @@
 #include "camaralogica.h"
 
+// Inicialización del contador
+int camaraLogica::contador = 0;
+
 camaraLogica::camaraLogica(QGraphicsView *vista, QObject *parent)
     : QObject(parent), view(vista)
 {
@@ -31,6 +34,7 @@ void camaraLogica::seguirAGoku(Goku *goku)
 
 void camaraLogica::moverVista()
 {
+    //qDebug() << "timer camaralogica llamado  "<<contador++;
     if (!objetivo || !view) return;
 
     // Obtener la posición de Goku
@@ -42,6 +46,8 @@ void camaraLogica::moverVista()
     qreal desplazamiento = view->viewport()->width() / 2.0;
 
     view->centerOn(xGoku + desplazamiento, yCentro);
+
+
 }
 
 

@@ -11,6 +11,8 @@ class Goku2 : public Goku {
     Q_OBJECT
 
 public:
+    static int contador;
+
     Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeight, Nivel2* nivel, QObject* parent = nullptr);
     ~Goku2();
 
@@ -39,6 +41,11 @@ private:
     QTimer* timerMovimiento;
     QTimer* timerSalto;
     QTimer* timerDanio;
+    QTimer* timerMuerte;
+    QTimer* animSalto;
+    QTimer* avance;
+    QTimer* animAtaque;
+    QTimer* regreso;
 
     bool mvtoIzquierda;
     bool mvtoDerecha;

@@ -1,6 +1,9 @@
 #include "carro.h"
 
+// Inicialización del contador
+int Carro::contador = 0;
 int Carro::contCarro=0;
+
 Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
     : obstaculo(scene, obstaculo::Roca, velocidad, parent), anguloActual(0), girando(false)
 {
@@ -70,6 +73,7 @@ void Carro::iniciarMovimientoEspiral(float _posXpatada)
 
 void Carro::actualizarMovimiento()
 {
+    //qDebug() << "timer carro actualizar mvto llamado timerEspiral "<<contador++;
     float dt = 0.020f;  // 20 milisegundos
     tiempo += dt;
 

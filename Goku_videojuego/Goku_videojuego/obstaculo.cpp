@@ -3,7 +3,8 @@
 #include "qtimer.h"
 #include <QRandomGenerator>
 
-
+// Inicialización del contador
+int obstaculo::contador = 0;
 int obstaculo::contObsta=0;
 
 // Constructor del obstáculo
@@ -130,6 +131,8 @@ obstaculo::~obstaculo()
 // Función que mueve el obstáculo hacia la izquierda
 void obstaculo::mover()
 {
+
+    //qDebug() << "timer mvto en obstaculo llamado  "<<contador++;
     sprite->moveBy(-velocidad, 0);  // Desplazar el sprite a la izquierda
 
     // Si ya salió de la pantalla, detener timers y ocultar el sprite
@@ -146,6 +149,8 @@ void obstaculo::mover()
 // Función que cambia el frame del ave para animarla
 void obstaculo::actualizar()
 {
+
+    //qDebug() << "timer animacion ave obstaculo llamado   "<<contador++;
     if (frames.isEmpty()) return;
 
     frameActual = (frameActual + 1) % frames.size();  // Avanzar al siguiente frame

@@ -8,6 +8,9 @@
 #include <QtMath>
 #include <stdexcept>  // Excepciones estándar
 
+// Inicialización del contador
+int Explosion::contador = 0;
+
 // Posición predeterminada desde donde se lanza la explosión
 const QPointF Explosion::posicionDisparo = QPointF(1000, 330);
 
@@ -87,6 +90,8 @@ void Explosion::lanzar()
     // Temporizador para animar el movimiento físico
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout, this, [=]() {
+
+        //qDebug() << "timer mvto explosion llamado  "<<contador++;
         float x = sprite->x();
         float y = sprite->y();
 
@@ -135,6 +140,8 @@ void Explosion::lanzar()
     // Temporizador para animación de frames visuales
     QTimer* timerFrames = new QTimer(this);
     connect(timerFrames, &QTimer::timeout, this, [=]() {
+
+        //qDebug() << "timer frames explosion llamado  "<<contador++;
         if (frameActual < frames.size() - 1) {
             frameActual++;
             sprite->setPixmap(frames[frameActual]);  // Avanza animación

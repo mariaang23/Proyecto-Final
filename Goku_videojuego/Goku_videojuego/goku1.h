@@ -11,6 +11,8 @@ class Goku1 : public Goku {
     Q_OBJECT
 
 public:
+    static int contador;
+
     Goku1(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeight, QObject* parent = nullptr);
     ~Goku1();
 

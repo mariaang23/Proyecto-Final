@@ -5,8 +5,9 @@
 #include <QDebug>
 
 // Inicialización del contador de nubes compartido entre niveles
-
 int Nivel::contNubes = 0;
+// Inicialización del contador
+int Nivel::contador = 0;
 
 // Constructor base del nivel abstracto
 // Valida escena y vista antes de usarlas
@@ -23,6 +24,8 @@ Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int n
     // Timer ahora se desconecta explícitamente en destructor
     timerNivel = new QTimer(this);
     connect(timerNivel, &QTimer::timeout, this, [=]() {
+
+        //qDebug() << "timer nivel en nivel  llamado  "<<contador++;
         this->actualizarNivel();  // Llama al método virtual (definido por subclases)
     });
     timerNivel->start(20);
@@ -171,6 +174,8 @@ void Nivel::generarNubes()
 // Valida punteros
 void Nivel::moverNubes()
 {
+
+    //qDebug() << "timermover nubes en nivel llamado  "<<contador++;
     const int velocidadNube = 2;
 
     for (auto *nubeItem : listaNubes) {

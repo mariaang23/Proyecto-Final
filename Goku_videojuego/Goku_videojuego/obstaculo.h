@@ -11,6 +11,8 @@ class obstaculo : public QObject
 {
     Q_OBJECT
 public:
+    static int contador;
+
     static int contObsta;
     enum Tipo {Ave, Montania, Roca, Explosion};
     obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *parent = nullptr);

@@ -8,6 +8,9 @@
 #include <QDebug>
 #include <stdexcept>
 
+// Inicialización del contador
+int Nivel2::contador = 0;
+
 Nivel2::Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     : Nivel(escena, vista, parent, 2)  // Miembros inicializados en el .h
 {
@@ -144,6 +147,8 @@ void Nivel2::agregarPociones()
 
 void Nivel2::agregarPocionAleatoria()
 {
+
+    //qDebug() << "timer pociones nivel2 llamado  "<<contador++;
     if (!barraProgreso || barraProgreso->getPorcentaje() >= 1.0f) {
         temporizadorPociones->stop();
         return;
@@ -181,6 +186,8 @@ void Nivel2::actualizarNivel()
         if (robot) robot->detenerAtaques();
 
         QTimer::singleShot(1000, this, [this]() {
+            int contador=0;
+            qDebug() << "timer antes iniciar kameja en nivel2 llamado  "<<contador++;
             Goku2* goku2 = static_cast<Goku2*>(goku);
             if (goku2 && robot) {
                 connect(robot, &Robot::robotMurio, this, &Nivel2::nivelCompletado);

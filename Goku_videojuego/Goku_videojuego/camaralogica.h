@@ -11,6 +11,8 @@ class camaraLogica : public QObject
     Q_OBJECT
 
 public:
+    static int contador;
+
     camaraLogica(QGraphicsView *vista, QObject *parent = nullptr);
     ~camaraLogica();
 
@@ -25,6 +27,8 @@ private:
     QGraphicsView *view;
     QTimer *timer;
     Goku *objetivo = nullptr;
+
+
 };
 
 #endif // CAMARALOGICA_H

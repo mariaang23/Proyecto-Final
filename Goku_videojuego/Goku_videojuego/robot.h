@@ -12,6 +12,8 @@ class Robot : public QObject
 {
     Q_OBJECT
 public:
+    static int contador;
+
     explicit Robot(QGraphicsScene *scene, int velocidad, int numeroRobot, QObject *parent = nullptr);
     Robot(QGraphicsScene *scene, QObject *parent);
     ~Robot();

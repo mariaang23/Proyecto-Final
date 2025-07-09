@@ -9,6 +9,8 @@ class Explosion : public obstaculo
 {
     Q_OBJECT
 public:
+    static int contador;
+
     enum TipoMovimiento {
         Parabolico,
         MRU
