@@ -20,7 +20,7 @@ Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
 // Destructor
 Nivel1::~Nivel1()
 {
-    qDebug() << "Destructor de Nivel1 llamado";
+    //qDebug() << "Destructor de Nivel1 llamado";
 
     // Limpiar la cámara
     if (camara) {

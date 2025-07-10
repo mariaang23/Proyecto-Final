@@ -27,6 +27,7 @@ public:
     QGraphicsPixmapItem *sprite;
     QGraphicsScene *scene;
     QVector<QPixmap> frames;  // Para almacenar los fotogramas del sprite del ave
+    QTimer *timerAnimacion;
 
 private slots:
     void mover();
@@ -35,7 +36,6 @@ private slots:
 private:
 
     QTimer *timerMovimiento;
-    QTimer *timerAnimacion;
     int frameActual;
     int velocidad;
     int coordX;

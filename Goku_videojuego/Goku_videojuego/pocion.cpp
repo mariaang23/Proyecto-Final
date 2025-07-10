@@ -63,18 +63,24 @@ Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, 
     // Crea el temporizador de animación
     timer = new QTimer(this);                       // Qt se encargará de destruirlo
     connect(timer, &QTimer::timeout, this, &Pocion::moverYAnimar);
-    timer->start(100);                              // Llama moverYAnimar() cada 100 ms
+    timer->start(100);    // Llama moverYAnimar() cada 100 ms
+
+    //contador+=1;
+    //qDebug() << "Pociones creadas  "<<contador;
 }
 
 // Destructor: detiene el temporizador antes de que se destruya
 Pocion::~Pocion(){
-    qDebug() << "Destructor de Pocion llamado";
+    //qDebug() << "Destructor de Pocion llamado";
     if (timer) {
         disconnect(timer, nullptr, this, nullptr);
         timer->stop();
         delete timer;
         timer = nullptr;
     }
+
+    //contador-=1;
+    //qDebug() << "Pociones eliminadas  "<<contador;
 }
 
 // Slot llamado periódicamente para mover y animar la poción

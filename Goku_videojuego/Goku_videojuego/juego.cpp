@@ -242,17 +242,17 @@ void juego::mostrarTransicion()
 
     nivelActual->setEnabled(false); // Pausar el nivel
 
-    QLabel *transicion = new QLabel(view);
+    transicion = new QLabel(view);
     transicion->setPixmap(QPixmap(":/images/transicion.png")
                               .scaled(view->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     transicion->setAlignment(Qt::AlignCenter);
     transicion->setAttribute(Qt::WA_DeleteOnClose);
     transicion->show();
   
-    QTimer::singleShot(4000, this, [this, transicion]() {
-        qDebug() << "timer transicion en juego  llamado  "<<contador++;
-
+    QTimer::singleShot(4000, this, [this]() {
+        //qDebug() << "timer transicion en juego  llamado  "<<contador++;
         transicion->close();
+        delete transicion;
         cambiarNivel(2);
     });
 }

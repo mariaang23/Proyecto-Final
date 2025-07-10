@@ -85,6 +85,18 @@ Robot::~Robot()
         delete sprite;
         sprite = nullptr;
     }
+
+    //liberar explosiones en robot
+    for (Explosion* e : ListaExplosiones) {
+        if (e) {
+            e->disconnect();  // Previene que lambdas pendientes intenten usar el objeto destruido
+            //qDebug() << "Entro a desconectar explosion robot y lo logro";
+            delete e;
+            //qDebug() << "Entro a liberar explosion desde robot y lo logro";
+        }
+    }
+    ListaExplosiones.clear();
+
 }
 // Carga animaciones desde spriteSheet según el número del robot
 void Robot::cargarImagen(int numeroRobot)
@@ -212,6 +224,7 @@ void Robot::iniciarAtaques()
 
         if (indexFrame == 0) {
             Explosion* explosion = new Explosion(scene, this);
+            ListaExplosiones.append(explosion);
             explosion->setTipoMovimiento(usarParabolico ? Explosion::Parabolico : Explosion::MRU);
             usarParabolico = !usarParabolico;
 
@@ -221,9 +234,6 @@ void Robot::iniciarAtaques()
             explosion->setPosicionInicial(posArma);
             explosion->lanzar();
 
-            Nivel2* nivel2 = dynamic_cast<Nivel2*>(this->parent());
-            if (nivel2)
-                nivel2->agregarExplosion(explosion);
         }
     });
 
@@ -256,12 +266,14 @@ void Robot::animarYDisparar()
 void Robot::dispararExplosion(bool parabolica)
 {
     Explosion* ex = new Explosion(scene, this);
+    ListaExplosiones.append(ex);  //agregar a la lista
     ex->setTipoMovimiento(parabolica ? Explosion::Parabolico : Explosion::MRU);
 
     QPointF pos = sprite->pos() + QPointF(sprite->boundingRect().width() / 2, 60);
     ex->setPosicionInicial(pos);
     ex->lanzar();
 }
+
 
 // Carga los 7 frames de la animación de muerte del robot
 void Robot::cargarFramesMuerte()

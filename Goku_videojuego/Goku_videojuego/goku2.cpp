@@ -132,8 +132,7 @@ void Goku2::mover() {
 
 // Física del salto con gravedad
 void Goku2::actualizarSalto() {
-    int contador=0;
-    qDebug() << "timersalto goku2 llamado  "<<contador++;
+    //qDebug() << "timersalto goku2 llamado  "<<contador++;
     velocidadVertical += gravedad;
     qreal nuevaY = y() + velocidadVertical;
 

@@ -42,6 +42,8 @@ private:
     void animarYDisparar();
     void dispararExplosion(bool parabolica);
     void cargarFramesMuerte();
+    void eliminarExplosiones();
+
 
     QGraphicsScene *scene = nullptr;
     QGraphicsPixmapItem *sprite = nullptr;
@@ -61,6 +63,10 @@ private:
     QTimer *timerAtaque = nullptr;
     QTimer *timerMuerte = nullptr;
     int frameMuerte = 0;
+
+    //explosiones
+    QList<Explosion*> ListaExplosiones;
+
 };
 
 #endif // ROBOT_H

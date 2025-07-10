@@ -9,12 +9,11 @@
 #include <QPointer>
 #include <stdexcept>  // Excepciones estándar
 
-// Inicialización del contador
-int Explosion::contador = 0;
-
 // Posición predeterminada desde donde se lanza la explosión
 const QPointF Explosion::posicionDisparo = QPointF(1000, 330);
 
+//contador
+int Explosion::contador=0;
 // Constructor: crea una explosión como obstáculo animado
 Explosion::Explosion(QGraphicsScene* scene, QObject* parent)
     : obstaculo(scene, obstaculo::Explosion, 6, parent),  // Tipo Explosion con 6 frames
@@ -48,10 +47,13 @@ Explosion::Explosion(QGraphicsScene* scene, QObject* parent)
     sprite->setPixmap(frames[0]);
     sprite->setScale(1.8);                     // Escala pequeña
     sprite->setData(0, "explosion");           // Identificador del objeto
+
+    //contador+=1;
+    //qDebug() << "Explosiones creadas "<<contador;
 }
 
 Explosion::~Explosion() {
-    qDebug() << "Destructor de Explosion llamado";
+    //qDebug() << "Destructor de Explosion llamado";
 
     // 1. Detener y liberar temporizadores
     if (timerMovimiento) {
@@ -61,12 +63,15 @@ Explosion::~Explosion() {
         timerMovimiento = nullptr;
     }
 
-    if (timerFrames) {  // ¡Nuevo!
-        disconnect(timerFrames, nullptr, this, nullptr);
-        timerFrames->stop();
-        delete timerFrames;
-        timerFrames = nullptr;
+    if (timerAnimacion) {
+        disconnect(timerAnimacion, nullptr, this, nullptr);
+        timerAnimacion->stop();
+        delete timerAnimacion;
+        timerAnimacion = nullptr;
     }
+
+    //contador-=1;
+    //qDebug() << "Explosiones eliminadas  "<<contador;
 }
 
 // Establece el tipo de movimiento (parabólico o MRU)
@@ -78,6 +83,22 @@ void Explosion::setTipoMovimiento(TipoMovimiento tipo) {
 void Explosion::setPosicionInicial(QPointF pos) {
     posicionInicial = pos;
 }
+
+void Explosion::avanzarFrameAnimacion() {
+    if (!sprite) return;
+
+    if (frameActual < frames.size() - 1) {
+        frameActual++;
+        sprite->setPixmap(frames[frameActual]);
+    } else {
+        if (timerAnimacion) {
+            timerAnimacion->stop();
+            timerAnimacion->deleteLater();
+            timerAnimacion = nullptr;
+        }
+    }
+}
+
 
 // Inicia la animación y el movimiento de la explosión
 void Explosion::lanzar() {
@@ -101,12 +122,12 @@ void Explosion::lanzar() {
     // Temporizador de MOVIMIENTO FÍSICO
     timerMovimiento = new QTimer(this);
     connect(timerMovimiento, &QTimer::timeout, this, [this]() {
+        if (!sprite || !scene) return;  // Validación directa
 
-        //qDebug() << "timer mvto explosion llamado  "<<contador++;
-        float x = sprite->x();
+        // Actualizar posición
+        float x = sprite->x() + velocidadX;
         float y = sprite->y();
 
-        // Actualiza posición vertical según movimiento
         if (tipoMovimiento == Parabolico) {
             y += velocidadY + gravedad * tiempo;
             tiempo += 0.5;
@@ -119,7 +140,7 @@ void Explosion::lanzar() {
         // Detección de COLISIONES
         QList<QGraphicsItem*> colisiones = sprite->collidingItems();
         for (int i = 0; i < colisiones.size(); ++i) {
-            QGraphicsItem* item = colisiones.at(i);  // Acceso seguro por índice
+            QGraphicsItem* item = colisiones.at(i);
             if (Goku2* goku = dynamic_cast<Goku2*>(item)) {
                 goku->recibirDanio(20);
                 goku->animarMuerte();
@@ -130,29 +151,20 @@ void Explosion::lanzar() {
         }
 
         // Límites de la pantalla
-        if (sprite->y() >= scene->height() - 50 ||  // Toca el suelo
-            sprite->x() < -100 ||                          // Sale por izquierda
-            sprite->x() > scene->width() + 100) {    // Sale por derecha
+        if (sprite->y() >= scene->height() - 50 ||
+            sprite->x() < -100 ||
+            sprite->x() > scene->width() + 100) {
             timerMovimiento->stop();
             sprite->hide();
         }
     });
 
+
     timerMovimiento->start(30);  // Ejecuta cada 30ms
 
     // Temporizador de ANIMACIÓN VISUAL
-    QTimer* timerFrames = new QTimer(this);
-    connect(timerFrames, &QTimer::timeout, this, [=]() {
+    timerAnimacion = new QTimer(this);
+    connect(timerAnimacion, &QTimer::timeout, this, &Explosion::avanzarFrameAnimacion);
 
-        //qDebug() << "timer frames explosion llamado  "<<contador++;
-        if (frameActual < frames.size() - 1) {
-            frameActual++;
-            sprite->setPixmap(frames[frameActual]);  // Avanza animación
-        } else {
-            timerFrames->stop();
-            timerFrames->deleteLater();
-        }
-    });
-
-    timerFrames->start(300);  // Cambia frame cada 300ms
+    timerAnimacion->start(300);  // Cambia frame cada 300ms
 }

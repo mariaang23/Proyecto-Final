@@ -36,6 +36,7 @@ private:
     Nivel *nivelActual;
     QLabel *exito;
     QTimer *timerFoco = nullptr;//foco en goku
+    QLabel *transicion;
 
     static int contador;
 

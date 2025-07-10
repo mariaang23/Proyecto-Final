@@ -46,19 +46,7 @@ Nivel2::~Nivel2()
     }
     listaPociones.clear();
 
-    // 3. Limpieza de explosiones
-    for (auto* explosion : listaExplosiones) {
-        if (explosion) {
-            disconnect(explosion, nullptr, this, nullptr);
-            if (escena && explosion->getSprite()) {
-                escena->removeItem(explosion->getSprite());
-            }
-            delete explosion;
-        }
-    }
-    listaExplosiones.clear();
-
-    // 4. Limpieza del robot (con desconexión de señales)
+    // 3. Limpieza del robot (con desconexión de señales)
     if (robot) {
         disconnect(robot, nullptr, this, nullptr); // Desconecta todas sus señales
         if (escena && robot->getSprite()) {
@@ -215,13 +203,6 @@ void Nivel2::agregarRobot()
     int y = 784 - (frame0.height() * escala) - 10;
     robot->getSprite()->setPos(x, y);
     robot->iniciarAtaques();
-}
-
-void Nivel2::agregarExplosion(Explosion* e)
-{
-    if (e) {
-        listaExplosiones.push_back(e);
-    }
 }
 
 void Nivel2::gameOver() {

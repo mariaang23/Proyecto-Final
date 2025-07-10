@@ -25,9 +25,11 @@ public:
     void setPosicionInicial(QPointF pos);
     void lanzar();
 
+private slots:
+    void avanzarFrameAnimacion();
+
 private:
     QTimer* timerMovimiento;
-    QTimer* timerFrames;
     float velocidadX;
     float velocidadY;
     float gravedad;
