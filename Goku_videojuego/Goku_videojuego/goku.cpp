@@ -68,7 +68,7 @@ void Goku::recibirDanio(int cantidad) {
 
 // Destructor base: deja punteros en nullptr y detiene posibles timers
 Goku::~Goku() {
-    qDebug() << "Destructor de Goku base llamado";
+    //qDebug() << "Destructor de Goku base llamado";
 
     if (timerMovimiento && timerMovimiento->isActive()) {
         timerMovimiento->stop();

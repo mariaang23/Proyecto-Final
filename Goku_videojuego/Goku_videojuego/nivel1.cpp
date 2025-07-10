@@ -184,7 +184,7 @@ void Nivel1::actualizarNivel()
         goku1->patadaGokuNivel1();
 
         float posXpatada = goku1->x();
-        qDebug() << "posición de Goku en x = " << posXpatada;
+        //qDebug() << "posición de Goku en x = " << posXpatada;
         carroFinal->iniciarMovimientoEspiral(posXpatada);
     }
 

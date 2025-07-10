@@ -30,14 +30,14 @@ Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int n
     });
     timerNivel->start(20);
 
-    qDebug() << "Nivel" << numero << "creado correctamente";
+    qDebug() << "Nivel" << numero << "creado correctamente en nivel Padre";
 }
 
 // Destructor del nivel base
 // Limpia en orden inverso y es más seguro
 Nivel::~Nivel()
 {
-    qDebug() << "Destructor de Nivel" << numeroNivel << "llamado";
+    qDebug() << "Destructor de Nivel padre llamado para destruir el nivel" << numeroNivel;
 
     // 1. Detener todos los timers primero (¡CRÍTICO!)
     if (timerNivel) {
@@ -94,7 +94,7 @@ Nivel::~Nivel()
         overlayGameOver = nullptr;
     }
 
-    qDebug() << "Nivel" << numeroNivel << "destruido correctamente";
+    qDebug() << "Nivel" << numeroNivel << "destruido correctamente desde padre nivel";
 }
 
 // Mantenemos limpiarEscena() para uso durante el juego (no en destructor)

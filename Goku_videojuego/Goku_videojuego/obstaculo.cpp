@@ -42,7 +42,7 @@ obstaculo::obstaculo(QGraphicsScene *scene, Tipo tipo, int velocidad, QObject *p
 
     contObsta +=1;
 
-    qDebug() << "obstaculos existentes" << contObsta;
+    //qDebug() << "obstaculos existentes" << contObsta;
 }
 
 // Inicializa la posición del obstáculo y activa los timers
@@ -105,7 +105,7 @@ void obstaculo::cargarImagenes()
 // Destructor del obstáculo
 obstaculo::~obstaculo()
 {
-    qDebug() << "Destructor de obs llamado";
+    //qDebug() << "Destructor de obs llamado";
     delete sprite;
     sprite = nullptr;
 
@@ -125,7 +125,7 @@ obstaculo::~obstaculo()
 
     contObsta -=1;
 
-    qDebug() << "obstaculos restantes" << contObsta;
+    //qDebug() << "obstaculos restantes" << contObsta;
 }
 
 // Función que mueve el obstáculo hacia la izquierda

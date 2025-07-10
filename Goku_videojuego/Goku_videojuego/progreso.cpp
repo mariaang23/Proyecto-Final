@@ -34,7 +34,7 @@ Progreso::Progreso(TipoProgreso tipo, const QString& rutaIcono, QWidget *parent)
 // Destructor
 Progreso::~Progreso()
 {
-    qDebug() << "Destructor de progreso llamado";
+    //qDebug() << "Destructor de progreso llamado";
     // No se necesita delete explícito: QLabel tiene parent (this)
 }
 

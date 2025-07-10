@@ -41,6 +41,7 @@ juego::juego(QWidget *parent)
             nivelActual->getGoku()->setFocus();
     });
 
+    qDebug()<<"Creando juego ";
 }
 
 juego::~juego()
@@ -65,7 +66,7 @@ juego::~juego()
     // Eliminar interfaz
     delete ui;
 
-    qDebug() << "cerrando juego ";
+    qDebug() << "Cerrando juego exitoso!!";
 }
 
 void juego::iniciarJuego()
@@ -120,11 +121,8 @@ void juego::cambiarNivel(int numero)
 {
     qDebug() << "Cambiando a nivel" << numero;
 
-    // Limpiar nivel actual si existe
-    if (nivelActual) {
-        delete nivelActual;
-        nivelActual = nullptr;
-    }
+    // antes de crear un nuevo nivel, cerramos correctamente el actual
+    cerrarNivel(false);   // esto hara delete nivel1/nivel2 si estaban vivos
 
     // Configurar tamaño de escena según el nivel
     int sceneWidth = (numero == 1) ? 1536 * 4 : 1536; // Nivel 1 es más ancho
@@ -187,30 +185,25 @@ void juego::cambiarNivel(int numero)
 
 void juego::cerrarNivel(bool mostrarMenu)
 {
-    qDebug() << "PASO 1: cerrando nivel actual";
+    qDebug() << "Cerrando nivel actual";
 
     // Desconectar señales primero
     if (nivelActual) {
-        if(nivelActual == nivel1){
-            qDebug() << "entro a cerrar nivel 1";
-        }else{
-            qDebug() << "entro a cerrar nivel 2";
-        }
         disconnect(nivelActual, nullptr, this, nullptr);
     }
 
-    // Limpiar niveles específicos
+    //Eliminar niveles
     if (nivel1) {
         delete nivel1;
         nivel1 = nullptr;
     }
-
     if (nivel2) {
         delete nivel2;
         nivel2 = nullptr;
     }
 
     nivelActual = nullptr;
+
 
     // Limpiar escena
     if (scene) {
