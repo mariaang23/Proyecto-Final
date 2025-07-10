@@ -52,34 +52,40 @@ Robot::~Robot()
 {
     qDebug() << "Destructor de Robot llamado";
 
-    delete sprite;
-    sprite = nullptr;
-
     if (timerMovimiento) {
         timerMovimiento->stop();
+        disconnect(timerMovimiento, nullptr, this, nullptr);
         delete timerMovimiento;
         timerMovimiento = nullptr;
     }
 
     if (timerAnimacion) {
         timerAnimacion->stop();
+        disconnect(timerAnimacion, nullptr, this, nullptr);
         delete timerAnimacion;
         timerAnimacion = nullptr;
     }
 
     if (timerAtaque) {
         timerAtaque->stop();
+        disconnect(timerAtaque, nullptr, this, nullptr);
         delete timerAtaque;
         timerAtaque = nullptr;
     }
 
     if (timerMuerte) {
         timerMuerte->stop();
+        disconnect(timerMuerte, nullptr, this, nullptr);
         delete timerMuerte;
         timerMuerte = nullptr;
     }
-}
 
+    if (sprite) {
+        scene->removeItem(sprite);
+        delete sprite;
+        sprite = nullptr;
+    }
+}
 // Carga animaciones desde spriteSheet según el número del robot
 void Robot::cargarImagen(int numeroRobot)
 {

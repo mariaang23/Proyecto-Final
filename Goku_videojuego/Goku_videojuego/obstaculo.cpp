@@ -109,22 +109,29 @@ obstaculo::~obstaculo()
     delete sprite;
     sprite = nullptr;
 
-    // Detener y liberar temporizador de movimiento
+    // 1. Detener y desconectar timers
     if (timerMovimiento) {
+        disconnect(timerMovimiento, nullptr, this, nullptr);
         timerMovimiento->stop();
         delete timerMovimiento;
         timerMovimiento = nullptr;
     }
 
-    // Detener y liberar temporizador de animación si es ave
-    if (tipo==Ave) {
+    if (timerAnimacion) {
+        disconnect(timerAnimacion, nullptr, this, nullptr);
         timerAnimacion->stop();
         delete timerAnimacion;
         timerAnimacion = nullptr;
     }
 
-    contObsta -=1;
+    // 2. Remover sprite de la escena si ambos existen
+    if (scene && sprite) {
+        scene->removeItem(sprite);
+        delete sprite;
+        sprite = nullptr;
+    }
 
+    contObsta -= 1;
     //qDebug() << "obstaculos restantes" << contObsta;
 }
 

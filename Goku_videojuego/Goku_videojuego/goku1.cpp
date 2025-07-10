@@ -1,6 +1,5 @@
 #include "goku1.h"
 #include <QKeyEvent>
-#include <QTimer>
 #include <QCoreApplication>
 #include <QThread>
 #include <QDebug>
@@ -186,7 +185,21 @@ bool Goku1::haTocadoCarro() const { return tocoCarro; }
 bool Goku1::haTocadoObstaculo() const { return tocoObstaculo; }
 
 // Destructor
-Goku1::~Goku1() {
-    delete timerMovimiento;
-    delete timerDanio;
+Goku1::~Goku1()
+{
+    qDebug() << "Destructor de Goku1 llamado";
+
+    if (timerMovimiento) {
+        timerMovimiento->stop();
+        disconnect(timerMovimiento, nullptr, this, nullptr);
+        delete timerMovimiento;
+        timerMovimiento = nullptr;
+    }
+
+    if (timerDanio) {
+        timerDanio->stop();
+        disconnect(timerDanio, nullptr, this, nullptr);
+        delete timerDanio;
+        timerDanio = nullptr;
+    }
 }
