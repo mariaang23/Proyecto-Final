@@ -71,7 +71,7 @@ Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, 
 
 // Destructor: detiene el temporizador antes de que se destruya
 Pocion::~Pocion(){
-    //qDebug() << "Destructor de Pocion llamado";
+    qDebug() << "Destructor de Pocion llamado";
     if (timer) {
         disconnect(timer, nullptr, this, nullptr);
         timer->stop();

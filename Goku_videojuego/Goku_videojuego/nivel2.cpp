@@ -36,15 +36,19 @@ Nivel2::~Nivel2()
         delete temporizadorPociones;
         temporizadorPociones = nullptr;
     }
+    //qDebug() << "Destructor nivel 2 destruyo el temporizador pociones correctamente";
 
     // 2. Limpieza de pociones
     for (auto* pocion : listaPociones) {
         if (pocion && escena) {
+            //qDebug() << "entra en pocion y escena ";
             escena->removeItem(pocion);
             delete pocion;
         }
     }
     listaPociones.clear();
+
+    //qDebug() << "Destructor nivel 2 destruyo pociones correctamente";
 
     // 3. Limpieza del robot (con desconexión de señales)
     if (robot) {

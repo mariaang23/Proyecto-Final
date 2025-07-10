@@ -100,7 +100,7 @@ void juego::iniciarJuego()
     });
 
     // Iniciar el primer nivel
-    cambiarNivel(1);
+    cambiarNivel(2);
 
     // Mostrar la ventana del juego
     view->show();
@@ -272,6 +272,8 @@ void juego::mostrarExito()
     QTimer::singleShot(4000, this, [this]() {
 
         //qDebug() << "timer mostrar pantalla de inicio en juego llamado  "<<contador++;
+        exito->close();
+        delete exito;
         if (view) view->close();
         mostrarPantallaInicio();
     });
