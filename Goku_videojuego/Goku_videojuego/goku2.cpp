@@ -45,24 +45,30 @@ Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
 }
 
 // Destructor: detiene y libera timers
-Goku2::~Goku2() {
+Goku2::~Goku2()
+{
     qDebug() << "Destructor de Goku2 llamado";
 
     if (timerMovimiento) {
         timerMovimiento->stop();
+        disconnect(timerMovimiento, nullptr, this, nullptr);
         delete timerMovimiento;
         timerMovimiento = nullptr;
     }
 
-    if (timerSalto && timerSalto->isActive()) {
+    if (timerSalto) {
         timerSalto->stop();
+        disconnect(timerSalto, nullptr, this, nullptr);
+        delete timerSalto;
+        timerSalto = nullptr;
     }
-    timerSalto = nullptr;
 
-    if (timerDanio && timerDanio->isActive()) {
+    if (timerDanio) {
         timerDanio->stop();
+        disconnect(timerDanio, nullptr, this, nullptr);
+        delete timerDanio;
+        timerDanio = nullptr;
     }
-    timerDanio = nullptr;
 }
 
 // Carga sprite inicial desde recursos

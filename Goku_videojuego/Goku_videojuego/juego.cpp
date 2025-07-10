@@ -4,6 +4,7 @@
 #include <QScreen>
 #include <QGuiApplication>
 #include <QCloseEvent>
+#include <QPointer>
 
 // Inicialización del contador
 int juego::contador = 0;
@@ -52,14 +53,13 @@ juego::~juego()
 
     // Eliminar vista y escena si existen
     if (view) {
-        view->close();
-        delete view;
-        view = nullptr;
-    }
-
-    if (scene) {
-        delete scene;
+        view->setScene(nullptr);  // Desvincula la escena de la vista.
+        delete scene;             // Libera la escena manualmente.
+        qDebug() << "Destruyendo view...";
+        delete view;              // Libera la vista.
+        qDebug() << "View destruido. Scene aún existe?" << (scene != nullptr);
         scene = nullptr;
+        view = nullptr;
     }
 
     // Eliminar interfaz
@@ -199,20 +199,19 @@ void juego::cerrarNivel(bool mostrarMenu)
         disconnect(nivelActual, nullptr, this, nullptr);
     }
 
-    // Limpiar niveles específicos
+    // 2. Limpiar niveles específicos
     if (nivel1) {
+        disconnect(nivel1, nullptr, this, nullptr);
         delete nivel1;
         nivel1 = nullptr;
     }
-
     if (nivel2) {
+        disconnect(nivel2, nullptr, this, nullptr);
         delete nivel2;
         nivel2 = nullptr;
     }
 
-    nivelActual = nullptr;
-
-    // Limpiar escena
+    // 3. Limpiar escena (no es necesario si view la libera)
     if (scene) {
         scene->clear();
     }
@@ -258,11 +257,12 @@ void juego::mostrarTransicion()
     transicion->setAlignment(Qt::AlignCenter);
     transicion->setAttribute(Qt::WA_DeleteOnClose);
     transicion->show();
-
+  
     QTimer::singleShot(4000, this, [this, transicion]() {
         qDebug() << "timer transicion en juego  llamado  "<<contador++;
+
         transicion->close();
-        cambiarNivel(2); // Cambiar al siguiente nivel
+        self->cambiarNivel(2);
     });
 }
 
@@ -278,7 +278,6 @@ void juego::mostrarExito()
     exito->setAlignment(Qt::AlignCenter);
     exito->setAttribute(Qt::WA_DeleteOnClose);
     exito->show();
-
     QTimer::singleShot(4000, this, [this]() {
 
         //qDebug() << "timer mostrar pantalla de inicio en juego llamado  "<<contador++;

@@ -7,61 +7,68 @@
 #include <QTimer>
 #include <QDebug>
 #include <stdexcept>
+#include <QPointer>
 
 // Inicialización del contador
 int Nivel2::contador = 0;
 
 Nivel2::Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
-    : Nivel(escena, vista, parent, 2)  // Miembros inicializados en el .h
+    : Nivel(escena, vista, parent, 2),
+    robot(nullptr),
+    barraProgreso(nullptr),
+    temporizadorPociones(nullptr),
+    robotInicialCreado(false),
+    pocionesAgregadas(false),
+    perdioGoku(false)
 {
     // Constructor vacío (inicialización en lista de inicialización)
 }
+
 
 Nivel2::~Nivel2()
 {
     qDebug() << "Destructor de Nivel2 llamado";
 
-    // 1. Detener timers primero
+    // 1. Detener y desconectar timers primero
     if (temporizadorPociones) {
         temporizadorPociones->stop();
         disconnect(temporizadorPociones, nullptr, this, nullptr);
         delete temporizadorPociones;
+        temporizadorPociones = nullptr;
     }
 
-    // 2. Limpieza de pociones (Pocion hereda de QGraphicsPixmapItem)
+    // 2. Limpieza de pociones
     for (auto* pocion : listaPociones) {
-        if (pocion) {
-            if (escena) escena->removeItem(pocion); // Pocion ES QGraphicsPixmapItem
+        if (pocion && escena) {
+            escena->removeItem(pocion);
             delete pocion;
         }
     }
     listaPociones.clear();
 
-    // 3. Limpieza de explosiones (Explosion hereda de obstaculo)
+    // 3. Limpieza de explosiones
     for (auto* explosion : listaExplosiones) {
         if (explosion) {
-            if (escena) {
-                // Accedemos al sprite que es el QGraphicsPixmapItem
-                QGraphicsPixmapItem* sprite = explosion->getSprite();
-                if (sprite) {
-                    escena->removeItem(sprite); // sprite ES QGraphicsPixmapItem que hereda de QGraphicsItem
-                }
+            disconnect(explosion, nullptr, this, nullptr);
+            if (escena && explosion->getSprite()) {
+                escena->removeItem(explosion->getSprite());
             }
             delete explosion;
         }
     }
     listaExplosiones.clear();
 
-    // 4. Limpieza del robot
+    // 4. Limpieza del robot (con desconexión de señales)
     if (robot) {
-        if (escena && robot->getSprite()) escena->removeItem(robot->getSprite());
+        disconnect(robot, nullptr, this, nullptr); // Desconecta todas sus señales
+        if (escena && robot->getSprite()) {
+            escena->removeItem(robot->getSprite());
+        }
         delete robot;
         robot = nullptr;
     }
 
-    // 5. Limpieza de la barra de progreso (QWidget)
-    delete barraProgreso;
-    barraProgreso = nullptr;
+    // NOTA: goku, barraVida y barraProgreso son liberados por la clase base Nivel
 }
 
 void Nivel2::iniciarNivel()
@@ -69,7 +76,7 @@ void Nivel2::iniciarNivel()
     cargarFondoNivel(":/images/background2.png");
     generarNubes();
 
-    // Configuración del HUD
+    // Configuración del HUD (la liberación lo hace la clase base)
     barraVida = new Vida(vista);
     barraVida->move(20, 20);
     barraVida->show();
@@ -79,7 +86,7 @@ void Nivel2::iniciarNivel()
     barraProgreso->setTotalPociones(totalPociones);
     barraProgreso->show();
 
-    // Temporizador de pociones
+    // Temporizador de pociones (con parent QObject para auto-liberación)
     temporizadorPociones = new QTimer(this);
     connect(temporizadorPociones, &QTimer::timeout, this, &Nivel2::agregarPocionAleatoria);
     temporizadorPociones->start(2500);
@@ -179,15 +186,14 @@ void Nivel2::actualizarNivel()
         return;
     }
 
-    // Verificar victoria
+    // Verificar victoria (con QPointer para seguridad)
     if (barraProgreso && barraProgreso->getPorcentaje() >= 1.0f) {
         temporizadorPociones->stop();
         if (timerNivel) timerNivel->stop();
         if (robot) robot->detenerAtaques();
 
         QTimer::singleShot(1000, this, [this]() {
-            int contador=0;
-            qDebug() << "timer antes iniciar kameja en nivel2 llamado  "<<contador++;
+            //qDebug() << "timer antes iniciar kameja en nivel2 llamado  "<<contador++;
             Goku2* goku2 = static_cast<Goku2*>(goku);
             if (goku2 && robot) {
                 connect(robot, &Robot::robotMurio, this, &Nivel2::nivelCompletado);
@@ -197,6 +203,7 @@ void Nivel2::actualizarNivel()
     }
 }
 
+
 void Nivel2::agregarRobot()
 {
     const float escala = 3.0;
@@ -204,8 +211,8 @@ void Nivel2::agregarRobot()
     robot->getSprite()->setScale(escala);
 
     QPixmap frame0 = robot->getSprite()->pixmap();
-    int x = 1530 - (frame0.width() * escala) - 30; // margen derecho
-    int y = 784 - (frame0.height() * escala) - 10; // margen inferior
+    int x = 1530 - (frame0.width() * escala) - 30;
+    int y = 784 - (frame0.height() * escala) - 10;
     robot->getSprite()->setPos(x, y);
     robot->iniciarAtaques();
 }
@@ -217,12 +224,9 @@ void Nivel2::agregarExplosion(Explosion* e)
     }
 }
 
-void Nivel2::gameOver()
-{
-    if (timerNivel) {
-        timerNivel->stop();
-        disconnect(timerNivel, nullptr, this, nullptr);
-    }
+void Nivel2::gameOver() {
+    if (timerNivel) timerNivel->stop();
+    if (temporizadorPociones) temporizadorPociones->stop();
     mostrarGameOver();
     emit gokuMurio();
 }
