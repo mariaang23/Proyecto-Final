@@ -5,6 +5,9 @@
 #include <QRandomGenerator>
 #include <QMessageBox>
 
+// Inicialización del contador
+int Nivel1::contador = 0;
+
 // Constructor
 Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     : Nivel(escena, vista, parent, 1)
@@ -17,7 +20,7 @@ Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
 // Destructor
 Nivel1::~Nivel1()
 {
-    qDebug() << "Destructor de Nivel1 llamado";
+    //qDebug() << "Destructor de Nivel1 llamado";
 
     // Limpiar la cámara
     if (camara) {
@@ -112,6 +115,7 @@ void Nivel1::agregarGoku()
     // Timer para actualizar el progreso de avance
     QTimer* timerProgreso = new QTimer(this);
     connect(timerProgreso, &QTimer::timeout, this, [=]() {
+        //qDebug() << "timer progreso en nivel1 llamado  "<<contador++;
         if (goku && carroFinal && barraProgreso) {
             float inicio = 0;
             float fin = carroFinal->getSprite()->x();
@@ -164,6 +168,7 @@ void Nivel1::agregarObstaculos()
 // Lógica de actualización del nivel en cada ciclo
 void Nivel1::actualizarNivel()
 {
+    //qDebug() << "timeractualizar nivel en nivel1 llamado  "<<contador++;
     if (!goku || !carroFinal) return;
 
     // Si se acabó la vida de Goku
@@ -179,7 +184,7 @@ void Nivel1::actualizarNivel()
         goku1->patadaGokuNivel1();
 
         float posXpatada = goku1->x();
-        qDebug() << "posición de Goku en x = " << posXpatada;
+        //qDebug() << "posición de Goku en x = " << posXpatada;
         carroFinal->iniciarMovimientoEspiral(posXpatada);
     }
 
@@ -189,6 +194,8 @@ void Nivel1::actualizarNivel()
 
         // Espera 5 segundos antes de emitir la señal
         QTimer::singleShot(5000, this, [this]() {
+
+            //qDebug() << "timer single shot mostrar nivelcompletado en nivel 1 llamado  " <<contador++;
             emit nivelCompletado();
         });
     }
@@ -212,16 +219,22 @@ void Nivel1::agregarRobots()
     r1->desplegarRobot();
 
     QTimer::singleShot(600, this, [=]() {
+
+        //qDebug() << "timer singles  robots 1 nivel1 llamado  "<<contador++;
         r2->iniciar(5300, ySuelo, 5600);
         r2->desplegarRobot();
     });
 
     QTimer::singleShot(1200, this, [=]() {
+
+        //qDebug() << "timer singles  robots 2 nivel1 llamado  "<<contador++;
         r3->iniciar(5600, ySuelo, 5900);
         r3->desplegarRobot();
     });
 
     QTimer::singleShot(1800, this, [=]() {
+
+        //qDebug() << "timer singles  robots 3 nivel1 llamado  "<<contador++;
         r1->detenerMvtoRobot();
         r2->detenerMvtoRobot();
         r3->detenerMvtoRobot();
@@ -238,20 +251,17 @@ void Nivel1::quitarCarroVista()
     }
 }
 
-void Nivel1::gameOver() {
-    if (timerNivel) timerNivel->stop();
+void Nivel1::gameOver()
+{
+    if (gameOverProcesado) return;//si ya se llamo (v), no se llame mas
 
-    // Limpiar robots
-    if (r1) { escena->removeItem(r1->getSprite()); delete r1; r1 = nullptr; }
-    if (r2) { escena->removeItem(r2->getSprite()); delete r2; r2 = nullptr; }
-    if (r3) { escena->removeItem(r3->getSprite()); delete r3; r3 = nullptr; }
+    //pasamos a estado verdadero si ya se llamo
+    gameOverProcesado = true;
 
-    // Limpiar obstáculos
-    for (auto* obs : listaObstaculos) {
-        if (obs) { escena->removeItem(obs->getSprite()); delete obs; }
+    if (timerNivel) {
+        timerNivel->stop();
+        disconnect(timerNivel, nullptr, this, nullptr);  //desconexión explícita
     }
-    listaObstaculos.clear();
-
     mostrarGameOver();
     emit gokuMurio();
 }

@@ -4,7 +4,6 @@
 #include "nivel.h"
 #include "pocion.h"
 #include "robot.h"
-#include "explosion.h"
 #include <QVector>
 
 class Nivel2 : public Nivel
@@ -12,6 +11,8 @@ class Nivel2 : public Nivel
     Q_OBJECT
 
 public:
+    static int contador;
+
     explicit Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent = nullptr);
     ~Nivel2() override;
 
@@ -26,7 +27,6 @@ public:
 
     // Métodos específicos del nivel 2
     void pocionRecolectada();
-    void agregarExplosion(Explosion* e);
 
 private slots:
     void agregarPocionAleatoria();  // Genera nuevas pociones durante el juego
@@ -38,7 +38,6 @@ private:
     // Elementos gráficos
     QVector<QPixmap> framesPocion;
     QVector<Pocion*> listaPociones;
-    QVector<Explosion*> listaExplosiones;
     Robot* robot = nullptr;
     Progreso* barraProgreso = nullptr;
 

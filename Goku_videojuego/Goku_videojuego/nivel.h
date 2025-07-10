@@ -22,6 +22,10 @@ class Nivel : public QWidget
     Q_OBJECT
 
 public:
+    // Miembro estático
+    static int contNubes; // Contador global de nubes activas
+    static int contador;
+
     explicit Nivel(QGraphicsScene* escena, QGraphicsView* view, QWidget* parent, int numero);
     virtual ~Nivel() override;
 
@@ -40,8 +44,7 @@ public:
     // Gestión de recursos
     virtual void limpiarEscena();
 
-    // Miembro estático
-    static int contNubes; // Contador global de nubes activas
+
 
 signals:
     void gokuMurio();     // Señal emitida cuando el jugador pierde

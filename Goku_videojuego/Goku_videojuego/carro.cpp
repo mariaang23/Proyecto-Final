@@ -1,6 +1,9 @@
 #include "carro.h"
 
+// Inicialización del contador
+int Carro::contador = 0;
 int Carro::contCarro=0;
+
 Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
     : obstaculo(scene, obstaculo::Roca, velocidad, parent), anguloActual(0), girando(false)
 {
@@ -21,14 +24,14 @@ Carro::Carro(QGraphicsScene *scene, int velocidad, QObject *parent)
     timerEspiral = new QTimer(this);
     connect(timerEspiral, &QTimer::timeout, this, &Carro::actualizarMovimiento);
     contCarro+=1;
-    qDebug()<<"creo carro constructor "<<contCarro;
+    //qDebug()<<"creo carro constructor "<<contCarro;
 
 }
 
 Carro::~Carro() {
     //qDebug() << "Destructor de carro llamado";
     contCarro-=1;
-    qDebug()<<"libero carro desstructor "<<contCarro;
+    //qDebug()<<"libero carro desstructor "<<contCarro;
     timerEspiral->stop();
     delete timerEspiral; // Eliminar el temporizador creado con new
 }
@@ -70,6 +73,7 @@ void Carro::iniciarMovimientoEspiral(float _posXpatada)
 
 void Carro::actualizarMovimiento()
 {
+    //qDebug() << "timer carro actualizar mvto llamado timerEspiral "<<contador++;
     float dt = 0.020f;  // 20 milisegundos
     tiempo += dt;
 

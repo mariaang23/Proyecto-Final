@@ -8,6 +8,9 @@
 #include <QDebug>
 #include <stdexcept>  // Excepciones estándar
 
+// Inicialización del contador
+int Goku2::contador = 0;
+
 // Constructor: inicializa Goku2 y sus timers
 Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeight, Nivel2* nivel, QObject* parent)
     : Goku(scene, velocidad, fotogWidth, fotogHeight, parent),
@@ -35,6 +38,8 @@ Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
     // Timer que controla inmunidad temporal tras recibir daño
     timerDanio = new QTimer(this);
     connect(timerDanio, &QTimer::timeout, this, [=]() {
+
+        //qDebug() << "timer danio goku2 llamado  "<<contador++;
         puedeRecibirDanio = true;
     });
 }
@@ -92,6 +97,8 @@ void Goku2::iniciar(int x, int y) {
 
 // Mueve a Goku según teclas presionadas y detecta daño
 void Goku2::mover() {
+
+    //qDebug() << "timer mvto goku2 llamado  "<<contador++;
     qreal nuevaX = x();
 
     if (mvtoDerecha) nuevaX += velocidad;
@@ -125,6 +132,7 @@ void Goku2::mover() {
 
 // Física del salto con gravedad
 void Goku2::actualizarSalto() {
+    //qDebug() << "timersalto goku2 llamado  "<<contador++;
     velocidadVertical += gravedad;
     qreal nuevaY = y() + velocidadVertical;
 
@@ -256,9 +264,11 @@ void Goku2::animarMuerte() {
     detener();  // Detener movimiento mientras muere
 
     int* index = new int(0);  // Índice dinámico para animación
-    QTimer* timerMuerte = new QTimer(this);  // Se destruye automáticamente
+    timerMuerte = new QTimer(this);  // Se destruye automáticamente
 
     connect(timerMuerte, &QTimer::timeout, this, [=]() mutable {
+
+        //qDebug() << "timer muerte goku2 llamado  " <<contador++;
         if (*index < framesMuerte.size()) {
             this->setPixmap(framesMuerte[*index]);
             (*index)++;
@@ -287,9 +297,11 @@ void Goku2::iniciarKamehameha(float xObjetivo, Robot* robotObjetivo) {
         framesSalto.append(spriteSalto.copy(i * w1, 0, w1, h1));
 
     int* index = new int(0);
-    QTimer* animSalto = new QTimer(this);
+    animSalto = new QTimer(this);
 
     connect(animSalto, &QTimer::timeout, this, [=]() mutable {
+
+        //qDebug() << "timer animsalto goku2 llamado  "<<contador++;
         if (*index < framesSalto.size()) {
             setPixmap(framesSalto[*index]);
             setTransform(QTransform());
@@ -310,9 +322,11 @@ void Goku2::iniciarKamehameha(float xObjetivo, Robot* robotObjetivo) {
 
 // Movimiento de Goku hacia el robot antes del ataque
 void Goku2::caminarHaciaRobot(float xObjetivo, Robot* robotObjetivo) {
-    QTimer* avance = new QTimer(this);
+    avance = new QTimer(this);
 
     connect(avance, &QTimer::timeout, this, [=]() mutable {
+
+        //qDebug() << "timer avance goku2 llamado  "<<contador++;
         qreal xActual = this->x();
         if (xActual + velocidad < xObjetivo - 50) {
             setX(xActual + velocidad);
@@ -337,9 +351,11 @@ void Goku2::atacarRobot(Robot* robotObjetivo) {
         framesAtaque.append(spriteAtaque.copy(i * w2, 0, w2, h2));
 
     int* index = new int(0);
-    QTimer* animAtaque = new QTimer(this);
+    animAtaque = new QTimer(this);
 
     connect(animAtaque, &QTimer::timeout, this, [=]() mutable {
+
+        //qDebug() << "timerataque goku2  llamado  "<<contador++;
         if (*index < framesAtaque.size()) {
             setPixmap(framesAtaque[*index]);
             setTransform(QTransform());
@@ -368,9 +384,11 @@ void Goku2::atacarRobot(Robot* robotObjetivo) {
 
 // Regreso de Goku hacia la izquierda después del ataque
 void Goku2::caminarHaciaIzquierda(float xDestino) {
-    QTimer* regreso = new QTimer(this);
+    regreso = new QTimer(this);
 
     connect(regreso, &QTimer::timeout, this, [=]() mutable {
+
+        //qDebug() << "timer regreso goku2  llamado  "<<contador++;
         qreal xActual = this->x();
         if (xActual - velocidad > xDestino) {
             setX(xActual - velocidad);

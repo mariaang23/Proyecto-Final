@@ -19,6 +19,8 @@ class Goku : public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 
 public:
+    static int contador;
+
     Goku(QGraphicsScene *scene, int velocidad, int fotogWidth, int fotogHeight, QObject *parent = nullptr);
     virtual ~Goku();
 

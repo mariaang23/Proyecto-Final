@@ -34,8 +34,8 @@ Progreso::Progreso(TipoProgreso tipo, const QString& rutaIcono, QWidget *parent)
 // Destructor
 Progreso::~Progreso()
 {
-    qDebug() << "Destructor de progreso llamado";
-    // QLabel se destruye automáticamente por parentesco
+    //qDebug() << "Destructor de progreso llamado";
+    // No se necesita delete explícito: QLabel tiene parent (this)
 }
 
 // Actualiza el porcentaje de progreso basado en la posición de Goku

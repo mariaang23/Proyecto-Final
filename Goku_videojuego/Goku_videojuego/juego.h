@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QTimer>
 #include "nivel1.h"
 #include "nivel2.h"
 #include "ui_juego.h"
@@ -34,7 +35,10 @@ private:
     Nivel2 *nivel2;
     Nivel *nivelActual;
     QLabel *exito;
-    bool enDestruccion = false;
+    QTimer *timerFoco = nullptr;//foco en goku
+    QLabel *transicion;
+
+    static int contador;
 
     void cambiarNivel(int numero);
     void mostrarPantallaInicio();

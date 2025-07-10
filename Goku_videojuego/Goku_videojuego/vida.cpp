@@ -61,11 +61,9 @@ Vida::Vida(QWidget *parent)
     setAttribute(Qt::WA_TranslucentBackground);  // Hace que el fondo del widget sea transparente
 }
 
-// Destructor
-Vida::~Vida()
-{
-    qDebug() << "Destructor de Vida llamado";
-    // Qt destruye los hijos automáticamente
+// Destructor: los hijos (texto, barra, layout) se destruyen automáticamente por Qt
+Vida::~Vida() {
+    //qDebug() << "Destructor de vida llamado";
 }
 
 // Método para reducir la vida

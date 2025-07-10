@@ -4,6 +4,9 @@
 #include <QDebug>
 #include <stdexcept>  // Para lanzar excepciones
 
+// Inicialización del contador
+int Pocion::contador = 0;
+
 // Constante que define el límite horizontal máximo del escenario
 const int LimiteAnchoX = 1036;
 
@@ -60,23 +63,30 @@ Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, 
     // Crea el temporizador de animación
     timer = new QTimer(this);                       // Qt se encargará de destruirlo
     connect(timer, &QTimer::timeout, this, &Pocion::moverYAnimar);
-    timer->start(100);                              // Llama moverYAnimar() cada 100 ms
+    timer->start(100);    // Llama moverYAnimar() cada 100 ms
+
+    //contador+=1;
+    //qDebug() << "Pociones creadas  "<<contador;
 }
 
 // Destructor: detiene el temporizador antes de que se destruya
 Pocion::~Pocion(){
-    qDebug() << "Destructor de Pocion llamado";
+    //qDebug() << "Destructor de Pocion llamado";
     if (timer) {
         disconnect(timer, nullptr, this, nullptr);
         timer->stop();
         delete timer;
         timer = nullptr;
     }
+
+    //contador-=1;
+    //qDebug() << "Pociones eliminadas  "<<contador;
 }
 
 // Slot llamado periódicamente para mover y animar la poción
-void Pocion::moverYAnimar() {
-    if (!scene() || frames.isEmpty()) return;  // Verificación crítica.
+void Pocion::moverYAnimar()
+{
+    //qDebug() << "timer animar en pocion llamado  "<<contador++;
 
     moveBy(0, 3);  // Desplaza hacia abajo.
 

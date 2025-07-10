@@ -4,6 +4,9 @@
 #include <QThread>
 #include <QDebug>
 
+// Inicialización del contador
+int Goku1::contador = 0;
+
 // Constructor de Goku1
 Goku1::Goku1(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeight, QObject* parent)
     : Goku(scene, velocidad, fotogWidth, fotogHeight, parent),
@@ -24,6 +27,8 @@ Goku1::Goku1(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
     timerDanio = new QTimer(this);
     timerDanio->setSingleShot(true);
     connect(timerDanio, &QTimer::timeout, this, [=]() {
+
+        //qDebug() << "timer danio goku1 llamado  "<<contador++;
         puedeRecibirDanio = true;
     });
 }
@@ -55,6 +60,8 @@ void Goku1::iniciar(int x, int y) {
 // Movimiento automático hacia la derecha y detección de colisiones
 void Goku1::mover()
 {
+
+    //qDebug() << "timer mvto goku1 llamado  "<<contador++;
     // 1. Movimiento horizontal y vertical
     int movimientoVertical = 0;
     if (mvtoArriba) movimientoVertical = -velocidad;

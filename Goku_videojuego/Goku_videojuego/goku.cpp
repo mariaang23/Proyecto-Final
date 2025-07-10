@@ -2,6 +2,9 @@
 #include <QDebug>
 #include <stdexcept>  // Para lanzar excepciones estándar
 
+// Inicialización del contador
+int Goku::contador = 0;
+
 // Constructor base de Goku (clase abstracta)
 Goku::Goku(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeight, QObject* parent)
     : QObject(parent),
@@ -58,14 +61,14 @@ void Goku::recibirDanio(int cantidad) {
     vidaHUD->restar(cantidad);  // Resta la vida en el HUD
 
     if (vidaHUD->obtenerVida() <= 0) {
-        qDebug() << "Goku ha perdido toda la vida";  // Punto crítico: posible game over
+        //qDebug() << "Goku ha perdido toda la vida";  // Punto crítico: posible game over
         // Se podría emitir una señal aquí si se desea
     }
 }
 
 // Destructor base: deja punteros en nullptr y detiene posibles timers
 Goku::~Goku() {
-    qDebug() << "Destructor de Goku base llamado";
+    //qDebug() << "Destructor de Goku base llamado";
 
     if (timerMovimiento && timerMovimiento->isActive()) {
         timerMovimiento->stop();

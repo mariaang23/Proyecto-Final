@@ -5,8 +5,9 @@
 #include <QDebug>
 
 // Inicialización del contador de nubes compartido entre niveles
-
 int Nivel::contNubes = 0;
+// Inicialización del contador
+int Nivel::contador = 0;
 
 // Constructor base del nivel abstracto
 // Valida escena y vista antes de usarlas
@@ -23,18 +24,20 @@ Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int n
     // Timer ahora se desconecta explícitamente en destructor
     timerNivel = new QTimer(this);
     connect(timerNivel, &QTimer::timeout, this, [=]() {
+
+        //qDebug() << "timer nivel en nivel  llamado  "<<contador++;
         this->actualizarNivel();  // Llama al método virtual (definido por subclases)
     });
     timerNivel->start(20);
 
-    qDebug() << "Nivel" << numero << "creado correctamente";
+    qDebug() << "Nivel" << numero << "creado correctamente en nivel Padre";
 }
 
 // Destructor del nivel base
 // Limpia en orden inverso y es más seguro
 Nivel::~Nivel()
 {
-    qDebug() << "Destructor de Nivel" << numeroNivel << "llamado";
+    qDebug() << "Destructor de Nivel padre llamado para destruir el nivel" << numeroNivel;
 
     // 1. Detener todos los timers primero (¡CRÍTICO!)
     if (timerNivel) {
@@ -91,7 +94,7 @@ Nivel::~Nivel()
         overlayGameOver = nullptr;
     }
 
-    qDebug() << "Nivel" << numeroNivel << "destruido correctamente";
+    qDebug() << "Nivel" << numeroNivel << "destruido correctamente desde padre nivel";
 }
 
 // Mantenemos limpiarEscena() para uso durante el juego (no en destructor)
@@ -171,6 +174,8 @@ void Nivel::generarNubes()
 // Valida punteros
 void Nivel::moverNubes()
 {
+
+    //qDebug() << "timermover nubes en nivel llamado  "<<contador++;
     const int velocidadNube = 2;
 
     for (auto *nubeItem : listaNubes) {

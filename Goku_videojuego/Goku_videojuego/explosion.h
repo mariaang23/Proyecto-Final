@@ -9,6 +9,8 @@ class Explosion : public obstaculo
 {
     Q_OBJECT
 public:
+    static int contador;
+
     enum TipoMovimiento {
         Parabolico,
         MRU
@@ -23,9 +25,11 @@ public:
     void setPosicionInicial(QPointF pos);
     void lanzar();
 
+private slots:
+    void avanzarFrameAnimacion();
+
 private:
     QTimer* timerMovimiento;
-    QTimer* timerFrames;
     float velocidadX;
     float velocidadY;
     float gravedad;

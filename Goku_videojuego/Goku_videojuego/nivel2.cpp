@@ -9,6 +9,9 @@
 #include <stdexcept>
 #include <QPointer>
 
+// Inicialización del contador
+int Nivel2::contador = 0;
+
 Nivel2::Nivel2(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     : Nivel(escena, vista, parent, 2),
     robot(nullptr),
@@ -43,19 +46,7 @@ Nivel2::~Nivel2()
     }
     listaPociones.clear();
 
-    // 3. Limpieza de explosiones
-    for (auto* explosion : listaExplosiones) {
-        if (explosion) {
-            disconnect(explosion, nullptr, this, nullptr);
-            if (escena && explosion->getSprite()) {
-                escena->removeItem(explosion->getSprite());
-            }
-            delete explosion;
-        }
-    }
-    listaExplosiones.clear();
-
-    // 4. Limpieza del robot (con desconexión de señales)
+    // 3. Limpieza del robot (con desconexión de señales)
     if (robot) {
         disconnect(robot, nullptr, this, nullptr); // Desconecta todas sus señales
         if (escena && robot->getSprite()) {
@@ -151,6 +142,8 @@ void Nivel2::agregarPociones()
 
 void Nivel2::agregarPocionAleatoria()
 {
+
+    //qDebug() << "timer pociones nivel2 llamado  "<<contador++;
     if (!barraProgreso || barraProgreso->getPorcentaje() >= 1.0f) {
         temporizadorPociones->stop();
         return;
@@ -187,12 +180,10 @@ void Nivel2::actualizarNivel()
         if (timerNivel) timerNivel->stop();
         if (robot) robot->detenerAtaques();
 
-        QPointer<Nivel2> self(this);
-        QTimer::singleShot(1000, this, [this, self]() {
-            if (!self) return; // Si Nivel2 ya fue destruido, no hacer nada
-
-            Goku2* goku2 = qobject_cast<Goku2*>(goku);
-            if (goku2 && robot && robot->getSprite()) {
+        QTimer::singleShot(1000, this, [this]() {
+            //qDebug() << "timer antes iniciar kameja en nivel2 llamado  "<<contador++;
+            Goku2* goku2 = static_cast<Goku2*>(goku);
+            if (goku2 && robot) {
                 connect(robot, &Robot::robotMurio, this, &Nivel2::nivelCompletado);
                 goku2->iniciarKamehameha(robot->getSprite()->x(), robot);
             }
@@ -212,13 +203,6 @@ void Nivel2::agregarRobot()
     int y = 784 - (frame0.height() * escala) - 10;
     robot->getSprite()->setPos(x, y);
     robot->iniciarAtaques();
-}
-
-void Nivel2::agregarExplosion(Explosion* e)
-{
-    if (e) {
-        listaExplosiones.push_back(e);
-    }
 }
 
 void Nivel2::gameOver() {

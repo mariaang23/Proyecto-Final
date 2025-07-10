@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <stdexcept> // Excepciones estándar
 
+// Inicialización del contador
+int Robot::contador = 0;
+
 // Constructor principal: crea un robot con animación base y movimiento horizontal
 Robot::Robot(QGraphicsScene *scene, int velocidad, int numeroRobot, QObject *parent)
     : QObject(parent), scene(scene), velocidad(velocidad)
@@ -82,6 +85,18 @@ Robot::~Robot()
         delete sprite;
         sprite = nullptr;
     }
+
+    //liberar explosiones en robot
+    for (Explosion* e : ListaExplosiones) {
+        if (e) {
+            e->disconnect();  // Previene que lambdas pendientes intenten usar el objeto destruido
+            //qDebug() << "Entro a desconectar explosion robot y lo logro";
+            delete e;
+            //qDebug() << "Entro a liberar explosion desde robot y lo logro";
+        }
+    }
+    ListaExplosiones.clear();
+
 }
 // Carga animaciones desde spriteSheet según el número del robot
 void Robot::cargarImagen(int numeroRobot)
@@ -121,6 +136,7 @@ void Robot::iniciar(int x, int y, int xDestino)
 // Lógica de movimiento hacia la izquierda hasta alcanzar destino
 void Robot::mover()
 {
+    //qDebug() << "timer mover en robot llamado  "<<contador++;
     sprite->moveBy(-velocidad, 0);
 
     if (destinoX >= 0 && sprite->x() <= destinoX) {
@@ -132,6 +148,8 @@ void Robot::mover()
 // Cambia de frame según modo normal o marcha
 void Robot::animar()
 {
+
+    //qDebug() << "timer animar en robot  llamado  "<<contador++;
     if (frames.isEmpty()) return;
 
     frameActual = (modoMarcha) ? ((frameActual == 4) ? 5 : 4)
@@ -150,6 +168,8 @@ void Robot::desplegarRobot()
 
     for (int i = 0; i < orden.size(); ++i) {
         QTimer::singleShot(i * delay, this, [this, i]() {
+
+            //qDebug() << "timer single shot de mostrar robot en robot llamado  "<<contador++;
             sprite->setPixmap(frames[orden[i]]);
         });
     }
@@ -194,6 +214,8 @@ void Robot::iniciarAtaques()
 {
     timerAtaque = new QTimer(this);
     connect(timerAtaque, &QTimer::timeout, this, [=]() {
+
+        //qDebug() << "timer ataque de robot en robot llamado  "<<contador++;
         static QVector<int> framesDisparo = {0, 1, 2, 3, 4};
         static int indexFrame = 0;
 
@@ -202,6 +224,7 @@ void Robot::iniciarAtaques()
 
         if (indexFrame == 0) {
             Explosion* explosion = new Explosion(scene, this);
+            ListaExplosiones.append(explosion);
             explosion->setTipoMovimiento(usarParabolico ? Explosion::Parabolico : Explosion::MRU);
             usarParabolico = !usarParabolico;
 
@@ -211,9 +234,6 @@ void Robot::iniciarAtaques()
             explosion->setPosicionInicial(posArma);
             explosion->lanzar();
 
-            Nivel2* nivel2 = dynamic_cast<Nivel2*>(this->parent());
-            if (nivel2)
-                nivel2->agregarExplosion(explosion);
         }
     });
 
@@ -226,9 +246,17 @@ void Robot::animarYDisparar()
     if (framesRobot2.size() < 5) return;
 
     sprite->setPixmap(framesRobot2[0]);
-    QTimer::singleShot(200, this, [this]() { sprite->setPixmap(framesRobot2[1]); });
-    QTimer::singleShot(400, this, [this]() { sprite->setPixmap(framesRobot2[2]); });
+    QTimer::singleShot(200, this, [this]() {
+
+        //qDebug() << "timer 1 single shot en robot llamado  "<<contador++;
+        sprite->setPixmap(framesRobot2[1]); });
+    QTimer::singleShot(400, this, [this]() {
+
+        //qDebug() << "timer 2 single shot en robot llamado  "<<contador++;
+        sprite->setPixmap(framesRobot2[2]); });
     QTimer::singleShot(600, this, [this]() {
+
+        //qDebug() << "timer 3 single shot en robot llamado  "<<contador++;
         dispararExplosion(true);
         sprite->setPixmap(framesRobot2[4]);
     });
@@ -238,12 +266,14 @@ void Robot::animarYDisparar()
 void Robot::dispararExplosion(bool parabolica)
 {
     Explosion* ex = new Explosion(scene, this);
+    ListaExplosiones.append(ex);  //agregar a la lista
     ex->setTipoMovimiento(parabolica ? Explosion::Parabolico : Explosion::MRU);
 
     QPointF pos = sprite->pos() + QPointF(sprite->boundingRect().width() / 2, 60);
     ex->setPosicionInicial(pos);
     ex->lanzar();
 }
+
 
 // Carga los 7 frames de la animación de muerte del robot
 void Robot::cargarFramesMuerte()
@@ -299,6 +329,8 @@ void Robot::murioRobot()
     if (!timerMuerte) {
         timerMuerte = new QTimer(this);
         connect(timerMuerte, &QTimer::timeout, this, [this]() {
+
+            //qDebug() << "timer muerte en robot llamado  "<<contador++;
             ++frameMuerte;
 
             // Si se alcanza el último frame, detener animación
