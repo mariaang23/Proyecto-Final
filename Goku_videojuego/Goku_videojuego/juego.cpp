@@ -5,6 +5,8 @@
 #include <QGuiApplication>
 #include <QCloseEvent>
 #include <QPointer>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 
 // Inicialización del contador
 int juego::contador = 0;

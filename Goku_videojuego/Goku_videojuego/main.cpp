@@ -9,7 +9,6 @@ int liberar = 0;
 void* operator new(size_t size){
     void * p = malloc(size);
     liberar +=1;
-    //void * p = malloc(size); will also work fine
 
     //qDebug() << "a liberar "<<liberar;
     return p;

@@ -3,6 +3,8 @@
 
 #include "goku.h"
 #include <QTimer>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 
 class Nivel2;
 class Robot;
@@ -59,6 +61,10 @@ private:
     float velocidadVertical;
 
     Nivel2* nivel2;
+
+    //Efectos de sonido
+    QMediaPlayer *salto;
+    QAudioOutput *salidaSalto;
 };
 
 #endif // GOKU2_H

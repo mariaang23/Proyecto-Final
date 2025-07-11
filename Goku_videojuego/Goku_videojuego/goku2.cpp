@@ -42,6 +42,13 @@ Goku2::Goku2(QGraphicsScene* scene, int velocidad, int fotogWidth, int fotogHeig
         //qDebug() << "timer danio goku2 llamado  "<<contador++;
         puedeRecibirDanio = true;
     });
+
+    //Para sonido
+    salto = new QMediaPlayer;
+    salidaSalto = new QAudioOutput;
+
+    salto->setAudioOutput(salidaSalto);
+    salto->setSource(QUrl("qrc:/images/salto2.mp3"));
 }
 
 // Destructor: detiene y libera timers
@@ -69,6 +76,11 @@ Goku2::~Goku2()
         delete timerDanio;
         timerDanio = nullptr;
     }
+
+    //liberar sonido
+    salto->stop();
+    delete salto;
+    delete salidaSalto;
 }
 
 // Carga sprite inicial desde recursos
@@ -183,6 +195,9 @@ void Goku2::keyPressEvent(QKeyEvent* event) {
 
         timerSalto->start(16);
         actualizarSpriteSalto();
+
+        salto->stop();
+        salto->play();
     } else if (event->key() == Qt::Key_D) {
         mvtoDerecha = true;
     } else if (event->key() == Qt::Key_A) {
