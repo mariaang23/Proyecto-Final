@@ -156,8 +156,11 @@ void Goku2::detectarPocion() {
     for (int i = 0; i < colisiones.size(); ++i) {
         Pocion* pocion = dynamic_cast<Pocion*>(colisiones[i]);
         if (pocion) {
-            scene->removeItem(pocion);
-            delete pocion;
+            // Solo ocultarla de la escena
+            pocion->detener();// Detiene su animacion
+            pocion->setVisible(false);// No se ve
+            pocion->setEnabled(false);// No colisiona
+            pocion->setZValue(-100);// ocultado de todo
 
             if (!nivel2) {
                 throw std::runtime_error("Goku2::detectarPocion - nivel2 no está inicializado.");
@@ -166,6 +169,7 @@ void Goku2::detectarPocion() {
         }
     }
 }
+
 
 // Interacción con teclas (WASD)
 void Goku2::keyPressEvent(QKeyEvent* event) {
