@@ -24,6 +24,7 @@
         <file>Goku_kam1.png</file>
         <file>Goku_kam2.png</file>
         <file>transicion.png</file>
+        <file>salto2.mp3</file>
     </qresource>
     <qresource prefix="/music"/>
 </RCC>
