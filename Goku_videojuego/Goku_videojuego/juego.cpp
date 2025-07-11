@@ -49,7 +49,7 @@ juego::juego(QWidget *parent)
 
 juego::~juego()
 {
-    qDebug() << "Destructor de juego llamado";
+    //qDebug() << "Destructor de juego llamado";
 
     // Limpiar en orden seguro
     cerrarNivel(false);  // Cierra el nivel sin mostrar menú
