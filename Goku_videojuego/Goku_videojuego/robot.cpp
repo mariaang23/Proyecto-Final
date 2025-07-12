@@ -1,6 +1,5 @@
 #include "robot.h"
 #include "explosion.h"
-#include "nivel2.h"
 #include <QMessageBox>
 #include <QDebug>
 #include <stdexcept> // Excepciones estándar
