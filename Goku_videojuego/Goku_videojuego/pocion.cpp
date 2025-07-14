@@ -10,7 +10,27 @@ int Pocion::contador = 0;
 // Constante que define el límite horizontal máximo del escenario
 const int LimiteAnchoX = 1036;
 
-// Constructor de la clase Pocion
+/**
+@brief Constructor de la clase Pocion.
+
+Crea y posiciona una poción animada en una grilla específica del escenario. La animación consta de múltiples frames escalados al 80% del tamaño original.
+
+@param framesOriginales Vector con los frames originales para la animación de la poción.
+@param fila Fila lógica donde se posiciona la poción dentro de la grilla.
+@param columna Columna lógica dentro de la grilla donde aparecerá la poción.
+@param columnas Cantidad total de columnas en la grilla del escenario.
+@param parent Objeto padre gráfico (generalmente la escena o ítem gráfico contenedor).
+
+@details
+
+Verifica que los parámetros sean válidos, lanzando excepciones si no se cumplen condiciones básicas (frames disponibles y columnas positivas).
+
+Posiciona la poción horizontalmente de forma aleatoria dentro de su columna asignada, y verticalmente según la fila y un desplazamiento adicional aleatorio.
+
+Inicia un temporizador interno que controla la animación y desplazamiento vertical de la poción cada 100 ms.
+
+Aplica un valor Z (profundidad gráfica) que asegura que la poción esté visualmente sobre otros elementos del fondo.
+*/
 Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, int columnas, QGraphicsItem* parent)
     : QGraphicsPixmapItem(parent),   // Establece el padre gráfico
     indiceFrame(0),                  // Comienza en el primer frame
@@ -69,7 +89,17 @@ Pocion::Pocion(const QVector<QPixmap>& framesOriginales, int fila, int columna, 
     //qDebug() << "Pociones creadas  "<<contador;
 }
 
-// Destructor: detiene el temporizador antes de que se destruya
+/**
+@brief Destructor de la clase Pocion.
+
+Libera los recursos utilizados por la poción, principalmente el temporizador encargado de la animación y el movimiento vertical del objeto gráfico.
+
+@details
+
+Detiene y desconecta de forma segura el temporizador interno si está activo.
+
+Libera la memoria utilizada por dicho temporizador, garantizando la correcta gestión de recursos.
+*/
 Pocion::~Pocion(){
     //qDebug() << "Destructor de Pocion llamado";
     if (timer) {
@@ -83,7 +113,19 @@ Pocion::~Pocion(){
     //qDebug() << "Pociones eliminadas  "<<contador;
 }
 
-// Slot llamado periódicamente para mover y animar la poción
+/**
+@brief Desplaza verticalmente y anima la poción en la escena.
+
+Este método se ejecuta periódicamente mediante un temporizador interno para producir el movimiento descendente y la animación cíclica del sprite. Además, reposiciona la poción cuando esta desaparece por la parte inferior del área visible.
+
+@details
+
+Mueve la poción hacia abajo 3 píxeles en cada llamada.
+
+Cambia cíclicamente el frame de animación del sprite.
+
+Si la poción sale del límite inferior de la pantalla, reaparece en una posición horizontal aleatoria dentro de su columna asignada y con una nueva posición vertical superior, proporcionando así un comportamiento continuo.
+*/
 void Pocion::moverYAnimar()
 {
     //qDebug() << "timer animar en pocion llamado  "<<contador++;
@@ -110,7 +152,11 @@ void Pocion::moverYAnimar()
     }
 }
 
-// Método público para detener la animación externamente
+/**
+@brief Detiene la animación y el movimiento de la poción.
+
+Este método detiene el temporizador interno que controla el desplazamiento y la animación de la poción, congelando su estado visual y posicional.
+*/
 void Pocion::detener()
 {
     if (timer) {

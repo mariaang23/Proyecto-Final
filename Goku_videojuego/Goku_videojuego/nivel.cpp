@@ -9,8 +9,22 @@ int Nivel::contNubes = 0;
 // Inicialización del contador
 int Nivel::contador = 0;
 
-// Constructor base del nivel abstracto
-// Valida escena y vista antes de usarlas
+/**
+@brief Constructor de la clase base `Nivel`, utilizada para representar un nivel del juego.
+
+Inicializa los recursos comunes a todos los niveles, como la escena, vista y temporizador principal del juego.
+
+- Valida que `escena` y `view` no sean nulos.
+- Inicializa un temporizador (`timerNivel`) que llama al método virtual `actualizarNivel()` cada 20 ms, permitiendo la ejecución periódica de lógica personalizada en subclases (`Nivel1`, `Nivel2`).
+- Almacena el número del nivel (`numeroNivel`) para identificar el nivel cargado.
+
+@param escena Puntero a la escena gráfica donde se dibujan los objetos del juego.
+@param view Puntero a la vista (`QGraphicsView`) que muestra la escena.
+@param parent Widget padre opcional.
+@param numero Número que identifica el nivel (1, 2, etc.).
+
+@throw std::invalid_argument Si `escena` o `view` son nulos.
+*/
 Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int numero)
     : QWidget(parent), vista(view), escena(escena), numeroNivel(numero)
 {
@@ -33,8 +47,20 @@ Nivel::Nivel(QGraphicsScene *escena, QGraphicsView *view, QWidget *parent, int n
     qDebug() << "Nivel" << numero << "creado correctamente en nivel Padre";
 }
 
-// Destructor del nivel base
-// Limpia en orden inverso y es más seguro
+/**
+@brief Destructor de la clase base `Nivel`, responsable de liberar recursos comunes a todos los niveles.
+
+Este método garantiza una limpieza segura y ordenada al destruir un nivel, ejecutando las siguientes acciones:
+
+1. Detiene y desconecta todos los temporizadores (`timerNivel`, `timerNubes`).
+2. Elimina objetos gráficos directamente relacionados, como `goku`, `nubes`, y fondos (`listaNubes`, `listaFondos`).
+3. Libera la barra de vida y la barra de progreso si existen, y las desvincula de sus vistas correspondientes.
+4. Libera la memoria de los temporizadores y de la superposición de “Game Over” si está activa.
+
+Este destructor debe ser invocado automáticamente al eliminar un objeto `Nivel`, o de forma indirecta al eliminar `Nivel1` o `Nivel2`.
+
+@see Nivel::limpiarEscena
+*/
 Nivel::~Nivel()
 {
     qDebug() << "Destructor de Nivel padre llamado para destruir el nivel" << numeroNivel;
@@ -97,7 +123,19 @@ Nivel::~Nivel()
     qDebug() << "Nivel" << numeroNivel << "destruido correctamente desde padre nivel";
 }
 
-// Mantenemos limpiarEscena() para uso durante el juego (no en destructor)
+/**
+@brief Limpia visualmente la escena del nivel eliminando personajes, fondos y efectos gráficos.
+
+Este método borra todos los elementos gráficos agregados por el nivel a la escena, sin destruir el objeto `Nivel` en sí.
+Está diseñado para usarse durante el transcurso del juego cuando se requiere un reinicio visual sin invocar el destructor.
+
+- Elimina a `goku`, las nubes (`listaNubes`), y los fondos (`listaFondos`) de la escena.
+- Oculta y programa la eliminación de la superposición de "Game Over" si está activa.
+
+@note Este método es útil para reiniciar o recargar un nivel mientras el objeto `Nivel` sigue existiendo.
+
+@see Nivel::~Nivel
+*/
 void Nivel::limpiarEscena()
 {
     // Implementación idéntica a lo que estaba en el destructor
@@ -125,13 +163,32 @@ void Nivel::limpiarEscena()
     }
 }
 
-// Devuelve el espacio reservado para el HUD (barra de vida, progreso, etc.)
+/**
+@brief Devuelve el margen vertical superior reservado para la interfaz HUD del nivel.
+
+Este margen se utiliza para evitar que los elementos del juego (como personajes o enemigos) se superpongan
+con la barra de vida, barra de progreso u otros indicadores visuales del HUD.
+
+@return Entero que representa el espacio en píxeles reservado en la parte superior de la escena.
+*/
 int Nivel::getMargenHUD() const {
     return margenHUD;
 }
 
-// Genera múltiples nubes en la escena, con escalas y posiciones aleatorias
-// Valida la carga de imagen
+/**
+@brief Genera y anima múltiples nubes en la escena del nivel como fondo dinámico.
+
+Este método carga una imagen de nube desde los recursos y genera instancias escaladas horizontalmente distribuidas
+a lo largo de la escena. Las nubes se colocan en distintas posiciones y tamaños para crear un efecto visual de profundidad.
+
+- Se generan 35 columnas de nubes, cada una con 3 nubes de distinta escala.
+- Las nubes se agregan a la escena y se almacenan en `listaNubes`.
+- Se inicia un temporizador (`timerNubes`) que las moverá lateralmente mediante `moverNubes()`.
+
+@throw std::runtime_error Si no se puede cargar la imagen de la nube.
+
+@see Nivel::moverNubes
+*/
 void Nivel::generarNubes()
 {
     // Carga la imagen de la nube desde recursos
@@ -170,8 +227,18 @@ void Nivel::generarNubes()
     timerNubes->start(45);
 }
 
-// Mueve todas las nubes hacia la izquierda y las reposiciona si salen de la escena
-// Valida punteros
+/**
+@brief Mueve todas las nubes del fondo hacia la izquierda y las reposiciona cuando salen de la escena.
+
+Este método es llamado periódicamente por el temporizador `timerNubes` y da la ilusión de movimiento continuo en el cielo del nivel.
+
+- Desplaza cada nube `velocidadNube` píxeles hacia la izquierda.
+- Si una nube sale completamente del borde izquierdo, se reposiciona al borde derecho con una nueva altura aleatoria.
+
+@note Este efecto mejora la ambientación visual del juego sin afectar la jugabilidad.
+
+@see Nivel::generarNubes
+*/
 void Nivel::moverNubes()
 {
 
@@ -191,8 +258,19 @@ void Nivel::moverNubes()
     }
 }
 
-// Muestra una imagen de "Game Over" sobre la vista del nivel actual
-// Verifica vista y evita duplicados
+/**
+@brief Muestra una superposición de "Game Over" sobre la vista actual del nivel.
+
+Este método crea un `QLabel` centrado sobre la vista (`vista`) con la imagen `gameOver.png` escalada al tamaño completo de la ventana.
+
+- La imagen se alinea al centro y se muestra de forma no interactiva.
+- Si ya existe una superposición activa (`overlayGameOver`), no se crea otra.
+- La superposición se destruye automáticamente al cerrarse (`WA_DeleteOnClose`).
+
+@note Si la imagen no se encuentra, se registra un error crítico en la consola.
+
+@see Nivel::limpiarEscena
+*/
 void Nivel::mostrarGameOver()
 {
     if (overlayGameOver || !vista) return;  // Evita recrear si ya existe

@@ -5,7 +5,31 @@
 #include <QDebug>
 #include <stdexcept>
 
-// Constructor de la clase Vida
+/**
+@brief Constructor de la clase Vida.
+
+Inicializa un widget que muestra el estado de vida con una etiqueta y una barra gráfica.
+
+@param parent Puntero al widget padre.
+
+@details
+
+Crea y configura una etiqueta con el texto "HEALTH" en fuente Arial, tamaño 20 y negrita, con color rojo brillante.
+
+Aplica una sombra negra al texto para mejorar el contraste visual.
+
+Crea una barra de progreso que representa la vida, con rango de 0 a 100 y valor inicial al máximo.
+
+Configura la barra para que no muestre el porcentaje numérico y le aplica un estilo visual con borde negro, fondo gris y barra verde.
+
+Añade una sombra negra también a la barra de vida.
+
+Organiza horizontalmente el texto y la barra dentro del widget sin márgenes y con separación entre ellos.
+
+Establece el fondo del widget como transparente.
+
+Lanza una excepción si no se puede crear la barra.
+*/
 Vida::Vida(QWidget *parent)
     : QWidget(parent), vidaActual(vidaMaxima) // Se inicia con la vida completa
 {
@@ -61,12 +85,31 @@ Vida::Vida(QWidget *parent)
     setAttribute(Qt::WA_TranslucentBackground);  // Hace que el fondo del widget sea transparente
 }
 
-// Destructor: los hijos (texto, barra, layout) se destruyen automáticamente por Qt
+/**
+@brief Destructor de la clase Vida.
+
+Gestiona la destrucción del widget y sus componentes hijos.
+No requiere acciones explícitas adicionales ya que Qt libera automáticamente los objetos hijos.
+*/
 Vida::~Vida() {
     //qDebug() << "Destructor de vida llamado";
 }
 
-// Método para reducir la vida
+/**
+@brief Reduce la cantidad actual de vida en el valor especificado.
+
+@param cantidad Entero positivo que indica cuánto se debe restar de la vida actual.
+
+@details
+
+Lanza una excepción si se intenta restar una cantidad negativa.
+
+Actualiza el valor interno de vida, asegurando que no sea menor que cero.
+
+Refleja el nuevo valor en la barra gráfica.
+
+Cambia el color de la barra según el nivel de vida actual para indicar estados críticos.
+*/
 void Vida::restar(int cantidad)
 {
     if (cantidad < 0)
@@ -80,7 +123,17 @@ void Vida::restar(int cantidad)
     actualizarColor();                        // Cambia color según el nivel de vida
 }
 
-// Método para reiniciar la vida a su valor máximo
+/**
+@brief Restablece la vida al valor máximo.
+
+@details
+
+Restaura el valor interno de vida a su máximo permitido.
+
+Actualiza visualmente la barra para reflejar la vida completa.
+
+Actualiza el color de la barra para indicar estado saludable.
+*/
 void Vida::reiniciar()
 {
     vidaActual = vidaMaxima;                  // Restaura vida completa
@@ -88,13 +141,29 @@ void Vida::reiniciar()
     actualizarColor();                        // Restablece el color verde
 }
 
-// Obtener la cantidad actual de vida
+/**
+@brief Obtiene la cantidad actual de vida.
+
+@return Valor entero que representa la vida actual.
+*/
 int Vida::obtenerVida() const
 {
     return vidaActual;
 }
 
-// Actualiza el color de la barra según el nivel de vida
+/**
+@brief Actualiza el color de la barra de vida según el nivel actual de vida.
+
+@details
+
+Si la vida es menor a 40, el color cambia a rojo intenso (indica peligro).
+
+Si la vida está entre 40 y 70, el color cambia a amarillo (advertencia).
+
+Si la vida es mayor o igual a 70, el color es verde (estado saludable).
+
+Aplica el estilo visual correspondiente al widget de la barra con el color dinámico.
+*/
 void Vida::actualizarColor()
 {
     QString color;
