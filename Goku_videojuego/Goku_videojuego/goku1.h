@@ -29,8 +29,8 @@ protected:
     void keyReleaseEvent(QKeyEvent* event) override;
 
 private:
-    void actualizarFrame(int i);
-    void mientrasTocaObstaculo();
+    void actualizarFrame(int i);     //Slots
+    void mientrasTocaObstaculo();    //Slots privados
 
     QVector<QPixmap> frames;        // Frames del sprite
     QTimer* timerMovimiento;        // Timer para mover a Goku

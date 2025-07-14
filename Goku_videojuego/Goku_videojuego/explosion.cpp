@@ -14,7 +14,20 @@ const QPointF Explosion::posicionDisparo = QPointF(1000, 330);
 
 //contador
 int Explosion::contador=0;
-// Constructor: crea una explosión como obstáculo animado
+
+/**
+@brief Constructor de la clase Explosion.
+Crea un proyectil animado que representa una explosión en movimiento. Extrae seis
+frames desde la hoja de sprites “:/images/explosion.png”, configura el primero como
+imagen inicial y escala el sprite para un tamaño reducido. Establece el tipo de
+obstáculo como Explosion, registra la etiqueta “explosion” para detección de colisión
+y prepara los parámetros físicos iniciales (trayectoria parabólica por defecto).
+Si la imagen no se puede cargar o no contiene frames válidos, lanza una excepción
+para evitar un estado inconsistente.
+@param scene Escena gráfica donde se insertará la explosión. No puede ser nula.
+@param parent Objeto padre en la jerarquía de Qt. Si no se especifica, se asume nullptr.
+@throw std::runtime_error Si no se logra cargar la imagen o extraer los frames.
+*/
 Explosion::Explosion(QGraphicsScene* scene, QObject* parent)
     : obstaculo(scene, obstaculo::Explosion, 6, parent),  // Tipo Explosion con 6 frames
     velocidadX(-10),
@@ -52,6 +65,14 @@ Explosion::Explosion(QGraphicsScene* scene, QObject* parent)
     //qDebug() << "Explosiones creadas "<<contador;
 }
 
+/**
+@brief Destructor de la clase Explosion.
+Finaliza y libera todos los recursos asociados a la explosión: detiene y desconecta
+los temporizadores de movimiento y animación, destruye sus instancias y pone a
+nullptr los punteros correspondientes para evitar accesos posteriores. Este proceso
+garantiza una limpieza segura y completa cuando el objeto se elimina o se reinicia
+el nivel. El sprite es gestionado por la clase base obstáculo.
+*/
 Explosion::~Explosion() {
     //qDebug() << "Destructor de Explosion llamado";
 
@@ -74,16 +95,39 @@ Explosion::~Explosion() {
     //qDebug() << "Explosiones eliminadas  "<<contador;
 }
 
-// Establece el tipo de movimiento (parabólico o MRU)
+/**
+@brief Establece el tipo de trayectoria que seguirá la explosión.
+Permite cambiar dinámicamente entre desplazamiento parabólico (con gravedad) o
+movimiento rectilíneo uniforme (MRU) antes de lanzar la explosión. Este ajuste
+modifica el comportamiento interno sin necesidad de crear una nueva instancia,
+facilitando que los enemigos (por ejemplo, el robot) alternen tipos de disparo.
+@param tipo Enumerador que indica si la trayectoria será Parabolico o MRU.
+*/
 void Explosion::setTipoMovimiento(TipoMovimiento tipo) {
     tipoMovimiento = tipo;
 }
 
-// Establece la posición inicial desde la cual se lanza la explosión
+/**
+@brief Define el punto desde el cual se lanzará la explosión.
+Actualiza la coordenada inicial (posicionInicial) que el método lanzar() empleará
+para situar el sprite justo antes de iniciar su trayectoria. De esta forma, la explosión
+puede originarse en cualquier lugar de la escena (boca del robot, cañón, etc.) sin
+necesidad de crear un nuevo objeto.
+@param pos Coordenadas absolutas dentro de la escena donde comenzará el disparo.
+*/
 void Explosion::setPosicionInicial(QPointF pos) {
     posicionInicial = pos;
 }
 
+/**
+@brief Avanza un paso en la secuencia de frames de la explosión.
+Incrementa el índice de frame actual y actualiza el sprite con la imagen correspondiente,
+generando la animación de estallido. Cuando se alcanza el último frame, detiene y libera
+el temporizador de animación para evitar ciclos innecesarios, marcando así el fin
+visual de la explosión.
+@note El método verifica que el sprite exista antes de actuar, garantizando estabilidad
+  si la explosión se destruye durante la animación.
+*/
 void Explosion::avanzarFrameAnimacion() {
     if (!sprite) return;
 
@@ -99,8 +143,24 @@ void Explosion::avanzarFrameAnimacion() {
     }
 }
 
+/**
+ @brief Inicia el lanzamiento de la explosión, activando su movimiento físico y su animación visual.
 
-// Inicia la animación y el movimiento de la explosión
+ Este método coloca el sprite de la explosión en su posición inicial (`posicionInicial`) y configura su trayectoria
+ dependiendo del tipo de movimiento especificado (parabólico o movimiento rectilíneo uniforme). Luego crea dos temporizadores:
+
+1. **`timerMovimiento`**: se encarga de actualizar la posición del sprite cada 30ms, aplicando una física simple.
+    - Si el movimiento es parabólico, se aplica una aceleración simulando la gravedad.
+    - Si colisiona con un objeto `Goku2`, se le aplica daño y se oculta la explosión.
+    - Si la explosión sale de los límites de la pantalla, también se detiene y se oculta.
+
+2. **`timerAnimacion`**: cambia el frame del sprite cada 300ms para mostrar la animación de la explosión.
+   - La animación se detiene automáticamente al llegar al último frame.
+Este método es llamado una vez por cada instancia de explosión que se desea animar/lanzar en la escena.
+
+@see Explosion::setTipoMovimiento() para definir el tipo de trayectoria antes de lanzar.
+@see Explosion::setPosicionInicial() para definir desde dónde inicia el lanzamiento.
+ */
 void Explosion::lanzar() {
     // Configuración inicial
     sprite->setPos(posicionInicial);

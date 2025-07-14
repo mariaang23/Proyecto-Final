@@ -8,7 +8,18 @@
 // Inicialización del contador
 int Nivel1::contador = 0;
 
-// Constructor
+/**
+@brief Constructor del nivel 1 del juego.
+
+Inicializa el estado lógico del primer nivel (`Nivel1`), heredando configuración común desde la clase base `Nivel`.
+
+- Establece los flags `nivelTerminado` y `perdioGoku` en `false`.
+- No realiza más acciones aquí para evitar invocar métodos virtuales durante la construcción, lo cual podría ser inseguro.
+
+@param escena Puntero a la escena donde se desarrollará el nivel.
+@param vista Puntero a la vista gráfica (`QGraphicsView`) que contiene la escena.
+@param parent Widget padre opcional.
+*/
 Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     : Nivel(escena, vista, parent, 1)
 {
@@ -17,7 +28,19 @@ Nivel1::Nivel1(QGraphicsScene* escena, QGraphicsView* vista, QWidget* parent)
     // No se hace nada más aquí para evitar errores con funciones virtuales
 }
 
-// Destructor
+/**
+@brief Destructor de la clase `Nivel1`, responsable de liberar recursos específicos del primer nivel.
+
+Este método complementa al destructor de la clase base `Nivel` y realiza las siguientes tareas adicionales:
+
+- Detiene y elimina la cámara (`camara`) si fue creada.
+- Detiene y desconecta el temporizador de nivel (`timerNivel`) si sigue activo.
+- Elimina el carro final, los tres robots (`r1`, `r2`, `r3`) y todos los obstáculos agregados a la escena mediante `getSprite()`.
+
+@note Este destructor garantiza que todos los elementos visuales y lógicos específicos del Nivel 1 se liberen correctamente.
+
+@see Nivel::~Nivel
+*/
 Nivel1::~Nivel1()
 {
     //qDebug() << "Destructor de Nivel1 llamado";
@@ -54,7 +77,21 @@ Nivel1::~Nivel1()
     listaObstaculos.clear();
 }
 
-// Método separado para iniciar el nivel
+/**
+@brief Inicia y configura todos los elementos visuales y lógicos del Nivel 1.
+
+Este método prepara el entorno de juego para el primer nivel realizando los siguientes pasos:
+
+- Carga el fondo del nivel (`cargarFondoNivel()`).
+- Genera nubes en movimiento y agrega al personaje principal (`Goku`), el carro final y los obstáculos.
+- Crea una cámara lógica (`camaraLogica`) que sigue al personaje mientras avanza.
+- Inicializa y activa un temporizador (`timerNivel`) que ejecuta periódicamente `actualizarNivel()` para controlar la lógica del nivel.
+
+@see Nivel1::actualizarNivel
+@see Nivel1::agregarGoku
+@see Nivel1::agregarObstaculos
+@see camaraLogica
+*/
 void Nivel1::iniciarNivel()
 {
     cargarFondoNivel(":/images/background1.png");
@@ -74,7 +111,17 @@ void Nivel1::iniciarNivel()
     timerNivel->start(20);
 }
 
-// Carga el fondo repetido horizontalmente
+/**
+@brief Carga y posiciona múltiples copias del fondo para crear un escenario horizontal extendido.
+
+Este método utiliza la imagen especificada en `ruta` para crear un fondo repetido que cubre un área amplia del nivel.
+
+- Inserta 5 instancias del fondo (`cantidad = 5`) una al lado de la otra.
+- Cada fondo se coloca con `setZValue(-10)` para asegurar que permanezca detrás de los elementos del juego.
+- Los objetos creados se almacenan en `listaFondos` para su posterior gestión y limpieza.
+
+@param ruta Ruta al recurso gráfico del fondo (por ejemplo, `:/images/background1.png`).
+*/
 void Nivel1::cargarFondoNivel(const QString &ruta)
 {
     QPixmap fondo(ruta);
@@ -89,7 +136,21 @@ void Nivel1::cargarFondoNivel(const QString &ruta)
     }
 }
 
-// Agrega a Goku al nivel
+/**
+@brief Agrega al personaje Goku y las barras de vida y progreso al Nivel 1.
+
+Este método crea e inicializa los componentes principales del jugador para el Nivel 1:
+
+- Coloca la barra de vida en la parte superior izquierda de la vista.
+- Agrega una barra de progreso que representa el avance hacia el carro final.
+- Crea una instancia de `Goku1`, carga su imagen, asocia la barra de vida y lo posiciona en la escena.
+- Inicia un temporizador que actualiza visualmente la barra de progreso a medida que Goku avanza.
+
+@note La barra de progreso usa el ícono del carro (`:/images/icono_carro.png`) y se actualiza cada 50 ms.
+
+@see Goku1::iniciar
+@see Progreso::actualizarProgreso
+*/
 void Nivel1::agregarGoku()
 {
     int posX = 100;
@@ -125,14 +186,38 @@ void Nivel1::agregarGoku()
     timerProgreso->start(50);
 }
 
-// Agrega el carro final al nivel
+/**
+@brief Agrega el carro final al Nivel 1 en una posición fija de la escena.
+
+Este método crea una instancia del objeto `Carro`, lo posiciona en las coordenadas `(4900, 550)` dentro de la escena
+y lo inicializa llamando a su método `iniciar()`.
+
+- El carro es el objetivo final del personaje en este nivel.
+- La posición fija corresponde al final del recorrido de Goku.
+
+@see Carro::iniciar
+*/
 void Nivel1::agregarCarroFinal()
 {
     carroFinal = new Carro(escena, 0, this);
     carroFinal->iniciar(4900, 550);
 }
 
-// Agrega obstáculos de varios tipos
+/**
+@brief Agrega múltiples obstáculos al Nivel 1 de forma aleatoria y escalonada.
+
+Este método genera 18 obstáculos a lo largo del recorrido del personaje, con posiciones iniciales a partir de `x = 1500`.
+Cada obstáculo puede ser de uno de los siguientes tipos seleccionados aleatoriamente:
+
+- `Ave`: se posiciona en una altura aleatoria entre 100 y 150.
+- `Montania`: se coloca en la base de la escena y se escala en altura.
+- `Roca`: se ubica entre 350 y 550 píxeles de altura.
+
+Cada obstáculo es inicializado con una velocidad fija de desplazamiento y espaciado horizontal variable para dar variedad al nivel.
+
+@see obstaculo::iniciar
+@see obstaculo::cargarImagenes
+*/
 void Nivel1::agregarObstaculos()
 {
     int x = 1500;
@@ -165,7 +250,21 @@ void Nivel1::agregarObstaculos()
     }
 }
 
-// Lógica de actualización del nivel en cada ciclo
+/**
+@brief Lógica principal de actualización del Nivel 1, ejecutada periódicamente por un temporizador.
+
+Este método gestiona el avance del nivel verificando el estado del personaje, las colisiones y la progresión de los eventos:
+
+- Si Goku pierde toda la vida, se marca el nivel como perdido (`perdioGoku`) y se llama a `gameOver()`.
+- Si Goku alcanza el carro y no ha ejecutado aún la patada, se reproduce la animación de ataque y se inicia el movimiento en espiral del carro.
+- Una vez que el carro termina su caída (espiral completada y llega al suelo), se agregan los robots enemigos y se elimina el carro.
+- Después de 5 segundos, se emite la señal `nivelCompletado()` para continuar el flujo del juego.
+
+@see Goku1::haTocadoCarro
+@see Carro::iniciarMovimientoEspiral
+@see Nivel1::agregarRobots
+@see Nivel1::quitarCarroVista
+*/
 void Nivel1::actualizarNivel()
 {
     //qDebug() << "timeractualizar nivel en nivel1 llamado  "<<contador++;
@@ -201,7 +300,22 @@ void Nivel1::actualizarNivel()
     }
 }
 
-// Agrega los tres robots cuando el carro cae
+/**
+@brief Agrega y despliega tres robots enemigos en el Nivel 1 después de que el carro cae al suelo.
+
+Este método crea tres instancias de `Robot` con velocidades y posiciones específicas,
+y las introduce de forma escalonada usando temporizadores para crear una secuencia de aparición dinámica.
+
+- Los robots se despliegan con un retardo de 0 ms, 600 ms y 1200 ms respectivamente.
+- Después de 1800 ms, se detiene el movimiento de los tres robots con `detenerMvtoRobot()`.
+- Solo se ejecuta una vez por nivel gracias a la bandera `robotsCreados`.
+
+@note Este método se llama desde `actualizarNivel()` tras detectar que el carro final ha llegado al suelo.
+
+@see Robot::iniciar
+@see Robot::desplegarRobot
+@see Robot::detenerMvtoRobot
+*/
 void Nivel1::agregarRobots()
 {
     if (robotsCreados || !carroFinal || !carroFinal->haLlegadoAlSuelo())
@@ -241,7 +355,16 @@ void Nivel1::agregarRobots()
     });
 }
 
-// Elimina el carro de la escena
+/**
+@brief Elimina el carro final de la escena una vez que ha cumplido su función.
+
+Este método remueve el sprite del objeto `carroFinal` de la escena y libera su memoria.
+Se utiliza después de que el carro ha realizado su movimiento en espiral y ha llegado al suelo.
+
+@note Este método se llama típicamente tras `carroFinal->haLlegadoAlSuelo()` en el flujo de `actualizarNivel()`.
+
+@see Nivel1::actualizarNivel
+*/
 void Nivel1::quitarCarroVista()
 {
     if (carroFinal && escena) {
@@ -251,6 +374,21 @@ void Nivel1::quitarCarroVista()
     }
 }
 
+/**
+@brief Maneja el evento de "Game Over" en el Nivel 1 cuando Goku pierde toda su vida.
+
+Este método asegura que el proceso de derrota solo se ejecute una vez mediante la bandera `gameOverProcesado`.
+Realiza las siguientes acciones:
+
+- Detiene y desconecta el temporizador principal del nivel (`timerNivel`).
+- Llama a `mostrarGameOver()` para mostrar visualmente la pantalla de derrota.
+- Emite la señal `gokuMurio()` para notificar al juego que Goku ha sido derrotado.
+
+@note Esta función es invocada desde `actualizarNivel()` cuando la vida de Goku llega a cero.
+
+@see Nivel1::mostrarGameOver
+@see Nivel1::actualizarNivel
+*/
 void Nivel1::gameOver()
 {
     if (gameOverProcesado) return;//si ya se llamo (v), no se llame mas
@@ -266,18 +404,32 @@ void Nivel1::gameOver()
     emit gokuMurio();
 }
 
-//indica goku muere
+/**
+@brief Indica si Goku fue derrotado en el Nivel 1.
+
+@return `true` si Goku perdió toda su vida y se activó el estado de "Game Over", `false` en caso contrario.
+*/
 bool Nivel1::getPerdioGoku() const{
     return perdioGoku;
 }
 
-// Indica si el nivel ha terminado exitosamente
+/**
+@brief Verifica si el Nivel 1 ha finalizado exitosamente.
+
+@return `true` si se completó el nivel y se activó la condición de victoria, `false` en caso contrario.
+*/
 bool Nivel1::haTerminado() const
 {
     return nivelTerminado;
 }
 
-// Devuelve el puntero al Goku del nivel
+/**
+@brief Devuelve el puntero al objeto Goku utilizado en el Nivel 1.
+
+Este método permite acceder al personaje principal (`Goku`) desde otras clases, como el sistema de cámara o la lógica del juego.
+
+@return Puntero a `Goku` si ha sido creado, o `nullptr` si aún no ha sido inicializado.
+*/
 Goku* Nivel1::getGoku() const
 {
     return goku;

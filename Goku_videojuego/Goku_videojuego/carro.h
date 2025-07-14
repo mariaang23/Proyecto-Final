@@ -18,7 +18,7 @@ public:
     void rotar();                          // Rotacion
     bool estaGirando() const;             //Esta girando?
     void iniciarMovimientoEspiral(float _posXpatada);  // se llama cuando toca Goku
-    void actualizarMovimiento();      // se llama cada 20 ms
+    void actualizarMovimiento();      // se llama cada 20 ms SLOT
 
     bool espiralHecha = false; //determina que ya se realizo la espiral(evitar que se haga mas de una)
     bool haLlegadoAlSuelo() const; //esta haciendo la espiral?
